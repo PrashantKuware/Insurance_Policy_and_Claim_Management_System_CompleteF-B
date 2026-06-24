@@ -140,6 +140,20 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.productName.trim()) {
+      return toast.error("Product Name is required");
+    }
+
+    if (!formData.productType) {
+      return toast.error("Please select Product Type");
+    }
+
+    if (!formData.description.trim()) {
+      return toast.error("Description is required");
+    }
+
+    const loading = toast.loading("Adding Product...");
+
     try {
       await addNewProduct(
         formData.productName,
@@ -147,10 +161,24 @@ const AddProduct = () => {
         formData.description
       );
 
-      toast.success("Product Added Successfully ✅");
+      toast.update(loading, {
+        render: "Product Added Successfully ✅",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+      });
+
       navigate("/admindashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed To Add Product ❌");
+      toast.update(loading, {
+        render:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed To Add Product ❌",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
     }
   };
 
@@ -174,6 +202,7 @@ const AddProduct = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
 
           <input
+            required
             className="w-full p-4 rounded-xl bg-white/40 outline-none"
             placeholder="Product Name"
             value={formData.productName}
@@ -183,6 +212,7 @@ const AddProduct = () => {
           />
 
           <select
+            required
             className="w-full p-4 rounded-xl bg-white/40 outline-none"
             value={formData.productType}
             onChange={(e) =>
@@ -197,6 +227,7 @@ const AddProduct = () => {
           </select>
 
           <textarea
+            required
             className="w-full p-4 rounded-xl bg-white/40 outline-none"
             rows={4}
             placeholder="Description"

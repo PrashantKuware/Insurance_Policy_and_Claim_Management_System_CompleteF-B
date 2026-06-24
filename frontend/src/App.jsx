@@ -22,6 +22,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddAgent from './components/AddAgent'
 import RegisterCustomer from './components/RegisterCustomer'
+import AddCustomer from './components/AddCustomer'
 
 const App = () => {
 
@@ -163,6 +164,12 @@ const App = () => {
           path="/register"
           element={
             <RegisterCustomer />
+          }
+        />
+        <Route
+          path="/addCustomer"
+          element={
+            <AddCustomer />
           }
         />
 

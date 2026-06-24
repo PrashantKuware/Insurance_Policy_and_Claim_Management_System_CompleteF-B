@@ -275,6 +275,7 @@ const AddPolicyPlan = () => {
           <input
             className="w-full p-4 rounded-xl bg-white/40 outline-none"
             placeholder="Plan Name"
+            required
             value={formData.planName}
             onChange={(e) =>
               setFormData({ ...formData, planName: e.target.value })
@@ -285,6 +286,7 @@ const AddPolicyPlan = () => {
             <input
               className="w-full p-4 rounded-xl bg-white/40 outline-none"
               type="number"
+              required
               placeholder="Coverage"
               value={formData.coverageAmount}
               onChange={(e) =>
@@ -295,6 +297,7 @@ const AddPolicyPlan = () => {
             <input
               className="w-full p-4 rounded-xl bg-white/40 outline-none"
               type="number"
+              required
               placeholder="Premium"
               value={formData.premiumAmount}
               onChange={(e) =>
@@ -307,6 +310,7 @@ const AddPolicyPlan = () => {
             className="w-full p-4 rounded-xl bg-white/40 outline-none"
             type="number"
             placeholder="Duration"
+            required
             value={formData.duration}
             onChange={(e) =>
               setFormData({ ...formData, duration: e.target.value })
@@ -316,6 +320,7 @@ const AddPolicyPlan = () => {
           <select
             className="w-full p-4 rounded-xl bg-white/40 outline-none"
             value={formData.premiumType}
+            required
             onChange={(e) =>
               setFormData({ ...formData, premiumType: e.target.value })
             }
@@ -328,6 +333,7 @@ const AddPolicyPlan = () => {
           <textarea
             className="w-full p-4 rounded-xl bg-white/40 outline-none"
             rows={4}
+            required
             placeholder="Terms & Conditions"
             value={formData.termsConditions}
             onChange={(e) =>

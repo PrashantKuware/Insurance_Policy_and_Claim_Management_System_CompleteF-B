@@ -6,10 +6,9 @@ export const loginService = async (email, password) => {
             email,
             password,
         });
-
         return res.data;
     } catch (error) {
         console.log("Login API Error:", error?.response?.data || error.message);
-        throw error; // IMPORTANT
+        throw error; 
     }
 };

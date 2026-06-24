@@ -91,11 +91,6 @@ const AdminDashboard = () => {
 
 
                 <div>
-
-                    <h2 className="sectionTitle mb-6">
-                        Insurance Products
-                    </h2>
-
                     <Product />
 
                 </div>

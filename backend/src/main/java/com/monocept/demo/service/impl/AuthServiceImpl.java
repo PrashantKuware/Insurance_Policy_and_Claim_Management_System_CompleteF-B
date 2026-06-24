@@ -2,6 +2,7 @@ package com.monocept.demo.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +14,7 @@ import com.monocept.demo.dto.request.LoginRequestDto;
 import com.monocept.demo.dto.request.RegisterRequestDto;
 import com.monocept.demo.dto.request.UserStatusUpdateDto;
 import com.monocept.demo.dto.response.AuthResponseDto;
+import com.monocept.demo.dto.response.UserResponseDto;
 import com.monocept.demo.entity.OtpVerification;
 import com.monocept.demo.entity.User;
 import com.monocept.demo.enums.Role;
@@ -87,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
 	    otpRepository.delete(emailOtp);
 	    otpRepository.delete(mobileOtp);
 
-	    return new AuthResponseDto(null, null, "User Registered Successfully");
+	    return new AuthResponseDto(null, null, "User Registered Successfully", user.getRole());
 	}
 	@Override
 	public AuthResponseDto loginUser(LoginRequestDto loginRequestDto) {
@@ -99,31 +101,97 @@ public class AuthServiceImpl implements AuthService {
 
 		String token = jwtService.generateToken(userDetails);
 
-		return new AuthResponseDto(token, "Bearer", userDetails.getUsername());
+		return new AuthResponseDto(token, "Bearer", userDetails.getUsername(), userDetails.getRole());
 	}
 
 	@Override
-	public List<User> getAllUser() {
+	public List<UserResponseDto> getAllUser() {
 
-		return userRepository.findAll();
+	return userRepository.findAll()
+	        .stream()
+	        .map(user -> UserResponseDto.builder()
+	                .userId(user.getUserId())
+	                .fullName(user.getFullName())
+	                .email(user.getEmail())
+	                .mobileNumber(user.getMobileNumber())
+	                .role(user.getRole())
+	                .emailVerified(user.isEmailVerified())
+	                .mobileVerified(user.isMobileVerified())
+	                .active(user.getActive())
+	                .createdDate(user.getCreatedDate())
+	                .updatedDate(user.getUpdatedDate())
+	                .build())
+	        .toList();
+
 	}
 
-	@Override
-	public AuthResponseDto createAgent(RegisterRequestDto request) {
 
-		User agent = new User();
+//	@Override
+//	public AuthResponseDto createAgent(RegisterRequestDto request) {
 
-		agent.setFullName(request.getFullName());
-		agent.setEmail(request.getEmail());
-		agent.setMobileNumber(request.getMobileNumber());
+//		User agent = new User();
+//
+//		agent.setFullName(request.getFullName());
+//		agent.setEmail(request.getEmail());
+//		agent.setMobileNumber(request.getMobileNumber());
+//
+//		agent.setPassword(passwordEncoder.encode(request.getPassword()));
+//
+//		agent.setRole(Role.AGENT);
+//
+//		userRepository.save(agent);
+//
+//		return new AuthResponseDto(null, null, "Agent created successfully", agent.getRole());
+		
+		@Override
+		public AuthResponseDto createAgent(RegisterRequestDto dto) {
 
-		agent.setPassword(passwordEncoder.encode(request.getPassword()));
+		    if (userRepository.existsByEmail(dto.getEmail())) {
+		        throw new DuplicateResourceException("Email already registered");
+		    }
 
-		agent.setRole(Role.AGENT);
+		    // 1. EMAIL OTP VERIFY
+		    OtpVerification emailOtp = otpRepository.findByEmail(dto.getEmail())
+		            .orElseThrow(() -> new RuntimeException("Email OTP not found"));
 
-		userRepository.save(agent);
+		    if (!emailOtp.getOtp().equals(dto.getEmailOtp())) {
+		        throw new RuntimeException("Invalid Email OTP");
+		    }
 
-		return new AuthResponseDto(null, null, "Agent created successfully");
+		    if (emailOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+		        throw new RuntimeException("Email OTP expired");
+		    }
+
+		    // 2. MOBILE OTP VERIFY
+		    OtpVerification mobileOtp = otpRepository.findByEmail(dto.getMobileNumber())
+		            .orElseThrow(() -> new RuntimeException("Mobile OTP not found"));
+
+		    if (!mobileOtp.getOtp().equals(dto.getMobileOtp())) {
+		        throw new RuntimeException("Invalid Mobile OTP");
+		    }
+
+		    if (mobileOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+		        throw new RuntimeException("Mobile OTP expired");
+		    }
+
+		    // 3. CREATE AGENT
+		    User agent = new User();
+		    agent.setFullName(dto.getFullName());
+		    agent.setEmail(dto.getEmail());
+		    agent.setMobileNumber(dto.getMobileNumber());
+		    agent.setPassword(passwordEncoder.encode(dto.getPassword()));
+		    agent.setRole(Role.AGENT);
+
+		    agent.setEmailVerified(true);
+		    agent.setMobileVerified(true);
+
+		    userRepository.save(agent);
+
+		    otpRepository.delete(emailOtp);
+		    otpRepository.delete(mobileOtp);
+
+		    return new AuthResponseDto(null, null, "Agent Registered Successfully", agent.getRole());
+//		}
 	}
 
 	@Override
@@ -170,5 +238,26 @@ public class AuthServiceImpl implements AuthService {
 	    otpRepository.save(verification);
 
 	    smsService.sendOtp(mobileNumber, otp);
+	}
+	
+	@Override
+	public UserResponseDto getCurrentUser(String emailFromToken) {
+
+	    User user = userRepository.findByEmail(emailFromToken)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException("User not found"));
+
+	    return UserResponseDto.builder()
+	            .userId(user.getUserId())
+	            .fullName(user.getFullName())
+	            .email(user.getEmail())
+	            .mobileNumber(user.getMobileNumber())
+	            .role(user.getRole())
+	            .emailVerified(user.isEmailVerified())
+	            .mobileVerified(user.isMobileVerified())
+	            .active(user.getActive())
+	            .createdDate(user.getCreatedDate())
+	            .updatedDate(user.getUpdatedDate())
+	            .build();
 	}
 }

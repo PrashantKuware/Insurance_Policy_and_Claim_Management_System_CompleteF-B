@@ -260,6 +260,14 @@ const AddAgent = () => {
     }
   };
 
+  const onError = (errors) => {
+    const firstError = Object.values(errors)[0];
+
+    toast.error(
+      firstError?.message || "Please fill all required fields"
+    );
+  };
+
   const onSubmit = async (data) => {
     const loading = toast.loading("Creating agent...");
 
@@ -274,12 +282,13 @@ const AddAgent = () => {
       });
 
       setTimeout(() => navigate("/admindashboard"), 800);
-    } catch {
+
+    } catch (error) {
       toast.update(loading, {
-        render: "Something went wrong ❌",
+        render: error.message || "Something went wrong ❌",
         type: "error",
         isLoading: false,
-        autoClose: 2000,
+        autoClose: 3000,
       });
     }
   };
@@ -302,24 +311,31 @@ const AddAgent = () => {
           Secure OTP Verified Agent Creation
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
 
           {/* NAME */}
           <div>
             <input
-              {...register("fullName", { required: "Name required" })}
+              {...register("fullName", {
+                required: "Full Name is required",
+              })}
               placeholder="Full Name"
               className="w-full p-4 rounded-xl bg-white/40 outline-none"
             />
-            <p className="text-red-500 text-sm">
-              {errors.fullName?.message}
-            </p>
+
+            {errors.fullName && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.fullName.message}
+              </p>
+            )}
           </div>
 
-          {/* EMAIL + OTP */}
+          {/* EMAIL */}
           <div className="flex gap-2">
             <input
-              {...register("email", { required: true })}
+              {...register("email", {
+                required: "Email is required",
+              })}
               placeholder="Email"
               className="w-full p-4 rounded-xl bg-white/40 outline-none"
             />
@@ -336,16 +352,35 @@ const AddAgent = () => {
             </button>
           </div>
 
-          <input
-            {...register("emailOtp", { required: true })}
-            placeholder="Email OTP"
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-          />
+          {errors.email && (
+            <p className="text-red-500 text-sm">
+              {errors.email.message}
+            </p>
+          )}
 
-          {/* MOBILE + OTP */}
+          {/* EMAIL OTP */}
+          <div>
+            <input
+              {...register("emailOtp", {
+                required: "Email OTP is required",
+              })}
+              placeholder="Email OTP"
+              className="w-full p-4 rounded-xl bg-white/40 outline-none"
+            />
+
+            {errors.emailOtp && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.emailOtp.message}
+              </p>
+            )}
+          </div>
+
+          {/* MOBILE */}
           <div className="flex gap-2">
             <input
-              {...register("mobileNumber", { required: true })}
+              {...register("mobileNumber", {
+                required: "Mobile Number is required",
+              })}
               placeholder="Mobile Number"
               className="w-full p-4 rounded-xl bg-white/40 outline-none"
             />
@@ -354,7 +389,9 @@ const AddAgent = () => {
               type="button"
               disabled={mobileTimer > 0}
               onClick={(e) =>
-                handleMobileOtp(e.target.form.mobileNumber.value)
+                handleMobileOtp(
+                  e.target.form.mobileNumber.value
+                )
               }
               className="px-4 rounded-xl bg-green-300 text-white font-semibold disabled:bg-gray-400"
             >
@@ -362,19 +399,51 @@ const AddAgent = () => {
             </button>
           </div>
 
-          <input
-            {...register("mobileOtp", { required: true })}
-            placeholder="Mobile OTP"
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-          />
+          {errors.mobileNumber && (
+            <p className="text-red-500 text-sm">
+              {errors.mobileNumber.message}
+            </p>
+          )}
+
+          {/* MOBILE OTP */}
+          <div>
+            <input
+              {...register("mobileOtp", {
+                required: "Mobile OTP is required",
+              })}
+              placeholder="Mobile OTP"
+              className="w-full p-4 rounded-xl bg-white/40 outline-none"
+            />
+
+            {errors.mobileOtp && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.mobileOtp.message}
+              </p>
+            )}
+          </div>
 
           {/* PASSWORD */}
-          <input
-            type="password"
-            {...register("password", { required: true })}
-            placeholder="Password"
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-          />
+          <div>
+            <input
+              type="password"
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message:
+                    "Password must be at least 6 characters",
+                },
+              })}
+              placeholder="Password"
+              className="w-full p-4 rounded-xl bg-white/40 outline-none"
+            />
+
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
 
           {/* SUBMIT */}
           <button

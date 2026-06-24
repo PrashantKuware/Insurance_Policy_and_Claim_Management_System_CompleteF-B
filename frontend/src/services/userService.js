@@ -44,14 +44,12 @@ export const sendMobileOtp = async (mobileNumber) => {
   }
 };
 
-
 export const createAgent = async (data) => {
   try {
     const res = await userApi.post("/agent", data);
     return res.data;
   } catch (error) {
-    console.log(error?.response?.data || error.message);
-    throw error;
+    handleError(error);
   }
 };
 
@@ -64,3 +62,12 @@ export const registerCustomer = async (data) => {
     handleError(error);
   }
 };
+
+export const getCurrentUser = async () => {
+  try {
+    const res = await userApi.get("/me")
+    return res.data
+  } catch (error) {
+    handleError(error);
+  }
+}

@@ -28,8 +28,11 @@ public class JwtService {
 
 	public String generateToken(UserDetails userDetails) {
 
-		return Jwts.builder().subject(userDetails.getUsername()).issuedAt(new Date())
-				.expiration(new Date(System.currentTimeMillis() + jwtExpiration)).signWith(getSigningKey()).compact();
+		CustomUserDetails customUser = (CustomUserDetails) userDetails;
+
+		return Jwts.builder().claim("role", customUser.getRole().name()).subject(userDetails.getUsername())
+				.issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+				.signWith(getSigningKey()).compact();
 	}
 
 	public String extractUsername(String token) {

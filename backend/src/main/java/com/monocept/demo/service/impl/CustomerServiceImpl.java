@@ -166,11 +166,15 @@ public class CustomerServiceImpl implements CustomerService {
 
 		return customerToDto(customer);
 	}
+	
+	@Override
+	public boolean customerExists(String email) {
 
-//	@Override
-//	public Page<CustomerResponseDto> getCustomersByAgent(Long agentId, Pageable pageable) {
+	    User user = userRepository.findByEmail(email)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException("User not found"));
 
-//		return customerRepository.findByAgentUserId(agentId, pageable).map(this::customerToDto);
-//	}
+	    return customerRepository.existsByUser(user);
+	}
 
 }

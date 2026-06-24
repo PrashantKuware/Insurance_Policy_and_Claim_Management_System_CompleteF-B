@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.monocept.demo.entity.User;
+import com.monocept.demo.enums.Role;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -24,6 +25,10 @@ public class CustomUserDetails implements UserDetails {
         return List.of(
                 new SimpleGrantedAuthority(
                         "ROLE_" + user.getRole().name()));
+    }
+
+    public Role getRole() {
+    	return user.getRole();
     }
 
     @Override

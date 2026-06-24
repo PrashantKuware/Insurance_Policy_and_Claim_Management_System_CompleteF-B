@@ -2,6 +2,8 @@ package com.monocept.demo.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.modelmapper.ModelMapper;
@@ -15,6 +17,7 @@ import com.monocept.demo.dto.request.ClaimDecisionRequestDto;
 import com.monocept.demo.dto.request.ClaimRecommendationRequestDto;
 import com.monocept.demo.dto.request.ClaimRequestDto;
 import com.monocept.demo.dto.request.ClaimReviewRequestDto;
+import com.monocept.demo.dto.response.ClaimDocumentResponseDto;
 import com.monocept.demo.dto.response.ClaimResponseDto;
 import com.monocept.demo.dto.response.DocumentResponse;
 import com.monocept.demo.entity.Claim;
@@ -113,6 +116,14 @@ public class ClaimServiceImpl implements ClaimService {
 
 		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
 			throw new InvalidPolicyStatusException("Claim can only be raised for active policies");
+		}
+
+		boolean hasPendingClaim = claimRepository.existsByPolicyPolicyIdAndClaimStatusIn(policyId,
+				List.of(ClaimStatus.SUBMITTED, ClaimStatus.UNDER_REVIEW, ClaimStatus.RECOMMENDED_FOR_APPROVAL,
+						ClaimStatus.RECOMMENDED_FOR_REJECTION));
+
+		if (hasPendingClaim) {
+			throw new BadRequestException("A claim is already pending for this policy");
 		}
 
 		if (claimRepository.existsByPolicyPolicyIdAndIncidentDate(policyId, requestDto.getIncidentDate())) {
@@ -326,5 +337,59 @@ public class ClaimServiceImpl implements ClaimService {
 				.sizeInBytes(savedDocument.getSizeInBytes()).cloudinaryPublicId(savedDocument.getCloudinaryPublicId())
 				.cloudinaryUrl(savedDocument.getCloudinaryUrl()).resourceType(savedDocument.getResourceType())
 				.uploadedAt(savedDocument.getUploadedAt()).build();
+	}
+	
+	public List<DocumentResponse> uploadDocuments(
+	        Long claimId,
+	        MultipartFile[] files) {
+
+	    List<DocumentResponse> responses = new ArrayList<>();
+
+	    for (MultipartFile file : files) {
+
+	        responses.add(
+	                uploadDocument(claimId, file)
+	        );
+	    }
+
+	    return responses;
+	}
+
+	@Override
+	public List<ClaimDocumentResponseDto> getClaimDocuments(Long claimId) {
+
+	    return claimDocumentRepository
+	            .findByClaimClaimId(claimId)
+	            .stream()
+	            .map(doc -> ClaimDocumentResponseDto.builder()
+	                    .documentId(doc.getDocumentId())
+	                    .originalFileName(doc.getOriginalFileName())
+	                    .contentType(doc.getContentType())
+	                    .sizeInBytes(doc.getSizeInBytes())
+	                    .cloudinaryUrl(doc.getCloudinaryUrl())
+	                    .resourceType(doc.getResourceType())
+	                    .uploadedAt(doc.getUploadedAt())
+	                    .build())
+	            .toList();
+	}
+	
+	@Override
+	public List<ClaimResponseDto> getSubmittedClaims() {
+
+	    return claimRepository.findByClaimStatus(ClaimStatus.SUBMITTED)
+	            .stream()
+	            .map(claim -> {
+
+	                ClaimResponseDto dto = new ClaimResponseDto();
+
+	                dto.setClaimId(claim.getClaimId());
+	                dto.setClaimNumber(claim.getClaimNumber());
+	                dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+	                dto.setClaimReason(claim.getClaimReason());
+	                dto.setClaimStatus(claim.getClaimStatus().name());
+
+	                return dto;
+	            })
+	            .toList();
 	}
 }

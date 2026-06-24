@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
 import { toast } from "react-toastify";
+import { customerExists } from "../services/CustomerService";
 
 const BackgroundOrbs = () => {
   return (
@@ -53,10 +54,31 @@ const Login = () => {
 
       toast.success("Login Successful ✅");
 
-      setTimeout(() => {
-        if (decoded.role === "ADMIN") navigate("/admindashboard");
-        else if (decoded.role === "AGENT") navigate("/agentdashboard");
-        else navigate("/customerdashboard");
+      setTimeout( async () =>{
+        if (decoded.role === "ADMIN") {
+
+          navigate("/admindashboard");
+
+        }
+        else if (decoded.role === "AGENT") {
+
+          navigate("/agentdashboard");
+
+        }
+        else if (decoded.role === "CUSTOMER") {
+
+          const exists = await customerExists();
+
+          if (exists) {
+
+            navigate("/customerdashboard");
+
+          } else {
+
+            navigate("/addCustomer");
+
+          }
+        }
       }, 800);
     } catch (error) {
       toast.error(
@@ -105,7 +127,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            
+
           </div>
 
           {/* Password */}
