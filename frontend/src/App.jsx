@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import AddAgent from './components/AddAgent'
 import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
+import AdminLayout from './components/AdminLayout'
 
 const App = () => {
 
@@ -51,6 +52,18 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/unauthorized" element={<Forbidden />} />
+
+
+<Route
+  path="/admindashboard"
+  element={
+    <ProtectedRoute allowedRoles={["ADMIN"]}>
+      <AdminLayout>
+        <AdminDashboard />
+      </AdminLayout>
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/admindashboard"

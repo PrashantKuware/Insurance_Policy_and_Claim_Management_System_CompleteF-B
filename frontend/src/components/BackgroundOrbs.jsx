@@ -1,3 +1,5 @@
+import "./BackgroundOrbs.css";
+
 const BackgroundOrbs = () => {
     return (
         <>

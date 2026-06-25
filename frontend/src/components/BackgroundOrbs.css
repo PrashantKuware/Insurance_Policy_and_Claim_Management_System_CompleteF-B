@@ -1,0 +1,44 @@
+@keyframes float {
+  50% {
+    transform: translateY(-30px) rotate(10deg);
+  }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, #fff, #9cc8eb);
+  animation: float 8s ease-in-out infinite;
+  z-index: 1;
+}
+
+.orb1 {
+  width: 320px;
+  height: 320px;
+  top: -60px;
+  left: 30%;
+}
+
+.orb2 {
+  width: 150px;
+  height: 150px;
+  top: 15%;
+  right: 20%;
+  animation-delay: 2s;
+}
+
+.orb3 {
+  width: 220px;
+  height: 220px;
+  bottom: 15%;
+  left: 10%;
+  animation-delay: 1s;
+}
+
+.orb4 {
+  width: 180px;
+  height: 180px;
+  bottom: 10%;
+  right: 10%;
+  animation-delay: 3s;
+}
