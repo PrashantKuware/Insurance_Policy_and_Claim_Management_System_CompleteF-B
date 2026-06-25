@@ -322,7 +322,7 @@ const RegisterCustomer = () => {
       await registerCustomer(data);
 
       toast.update(loading, {
-        render: "Registered successfully 🎉",
+        render: error.message || "Registered successfully 🎉",
         type: "success",
         isLoading: false,
         autoClose: 2000,
@@ -384,7 +384,7 @@ const RegisterCustomer = () => {
               onClick={(e) =>
                 handleEmailOtp(e.target.form.email.value)
               }
-              className="px-4 rounded-xl bg-blue-300 text-white font-semibold disabled:bg-gray-400"
+              className="px-4 rounded-xl bg-blue-300 text-white font-semibold disabled:bg-gray-400 cursor-pointer"
             >
               {emailTimer > 0 ? `${emailTimer}s` : "Send OTP"}
             </button>
@@ -410,7 +410,7 @@ const RegisterCustomer = () => {
               onClick={(e) =>
                 handleMobileOtp(e.target.form.mobileNumber.value)
               }
-              className="px-4 rounded-xl bg-green-300 text-white font-semibold disabled:bg-gray-400"
+              className="px-4 rounded-xl bg-green-300 text-white font-semibold disabled:bg-gray-400 cursor-pointer"
             >
               {mobileTimer > 0 ? `${mobileTimer}s` : "Send OTP"}
             </button>
@@ -433,7 +433,7 @@ const RegisterCustomer = () => {
           {/* BUTTON */}
           <button
             className="w-full h-[55px] rounded-xl font-semibold text-lg
-            bg-gradient-to-r from-blue-200 to-blue-300 hover:scale-105 transition"
+            bg-gradient-to-r from-blue-200 to-blue-300 hover:scale-105 transition cursor-pointer"
           >
             Register
           </button>

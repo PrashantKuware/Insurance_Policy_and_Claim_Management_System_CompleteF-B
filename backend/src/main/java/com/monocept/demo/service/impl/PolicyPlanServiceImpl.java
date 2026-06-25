@@ -1,5 +1,7 @@
 package com.monocept.demo.service.impl;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -103,4 +105,14 @@ public class PolicyPlanServiceImpl implements PolicyPlanService {
 				.active(plan.getActive()).build();
 	}
 
+	@Override
+	public List<PolicyPlanResponseDto> getPolicyByProductId(Long productId) {
+
+	    List<PolicyPlan> plans =
+	            policyPlanRepository.findByProductProductId(productId);
+
+	    return plans.stream()
+	            .map(this::mapToResponse)
+	            .toList();
+	}
 }

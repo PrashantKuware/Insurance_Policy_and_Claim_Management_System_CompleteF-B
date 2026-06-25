@@ -2,6 +2,8 @@ package com.monocept.demo.controller;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import com.monocept.demo.dto.request.LoginRequestDto;
 import com.monocept.demo.dto.request.RegisterRequestDto;
 import com.monocept.demo.dto.request.UserStatusUpdateDto;
 import com.monocept.demo.dto.response.AuthResponseDto;
+import com.monocept.demo.dto.response.UserResponseDto;
 import com.monocept.demo.entity.User;
 import com.monocept.demo.service.AuthService;
 
@@ -24,56 +27,74 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:5173/")
 public class AuthController {
 
 	private final AuthService authService;
 
+	// PUBLIC
 	@PostMapping("/register")
-	public AuthResponseDto register(@Valid @RequestBody RegisterRequestDto request) {
+	public AuthResponseDto register(
+			@Valid @RequestBody RegisterRequestDto request) {
 
 		return authService.registerUser(request);
-
 	}
 
+	// PUBLIC
 	@PostMapping("/send-email-otp")
 	public String sendEmailOtp(@RequestParam String email) {
+
 		authService.sendEmailOtp(email);
+
 		return "Email OTP Sent";
 	}
 
+	// PUBLIC
 	@PostMapping("/send-mobile-otp")
 	public String sendMobileOtp(
-	        @RequestParam String mobileNumber) {
-	    System.out.println("Received = [" + mobileNumber + "]");
+			@RequestParam String mobileNumber) {
 
-	    authService.sendMobileOtp(mobileNumber);
+		System.out.println("Received = [" + mobileNumber + "]");
 
-	    return "Mobile OTP Sent Successfully";
+		authService.sendMobileOtp(mobileNumber);
+
+		return "Mobile OTP Sent Successfully";
 	}
 
+	// PUBLIC
 	@PostMapping("/login")
-	public AuthResponseDto login(@Valid @RequestBody LoginRequestDto request) {
+	public AuthResponseDto login(
+			@Valid @RequestBody LoginRequestDto request) {
 
 		return authService.loginUser(request);
 	}
 
+	// ADMIN
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/get")
-	public List<User> getAllUser() {
+	public List<UserResponseDto> getAllUser() {
+
 		return authService.getAllUser();
 	}
 
+	// ADMIN
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/agent")
-	public AuthResponseDto createAgent(@RequestBody RegisterRequestDto request) {
+	public AuthResponseDto createAgent(
+			@RequestBody RegisterRequestDto request) {
 
 		return authService.createAgent(request);
 	}
 
+	// ADMIN
+	@PreAuthorize("hasRole('ADMIN')")
 	@PatchMapping("/{userId}/status")
-	public String updateStatus(@PathVariable Long userId, @RequestBody UserStatusUpdateDto dto) {
+	public String updateStatus(
+			@PathVariable Long userId,
+			@RequestBody UserStatusUpdateDto dto) {
 
 		authService.updateUserStatus(userId, dto);
 
 		return "User status updated";
 	}
-
 }

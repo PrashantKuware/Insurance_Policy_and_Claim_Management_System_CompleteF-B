@@ -1,6 +1,7 @@
 package com.monocept.demo.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.monocept.demo.entity.Claim;
+import com.monocept.demo.enums.ClaimStatus;
 
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
 
@@ -18,4 +20,8 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
 	Page<Claim> findByPolicyPolicyId(Long policyId, Pageable pageable);
 
 	boolean existsByPolicyPolicyIdAndIncidentDate(Long policyId, LocalDate incidentDate);
+
+	boolean existsByPolicyPolicyIdAndClaimStatusIn(Long policyId, List<ClaimStatus> statuses);
+
+	List<Claim> findByClaimStatus(ClaimStatus claimStatus);
 }

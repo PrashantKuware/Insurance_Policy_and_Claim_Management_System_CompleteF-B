@@ -11,7 +11,7 @@ import lombok.Data;
 public class RegisterRequestDto {
 
 	@NotBlank(message = "Full name is required")
-	@Pattern(regexp = "^[a-zA-Z]+$", message = "Username must contain only letters (A-Z, a-z)")
+	@Pattern(regexp = "^[A-Za-z]+(?:\\s[A-Za-z]+)*$", message = "Name should contain only letters and spaces")
 	private String fullName;
 
 	@Email(message = "Invalid email format")

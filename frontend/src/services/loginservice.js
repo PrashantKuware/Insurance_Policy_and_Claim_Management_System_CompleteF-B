@@ -11,5 +11,6 @@ export const loginService = async (email, password) => {
     } catch (error) {
         console.log("Login API Error:", error?.response?.data || error.message);
         throw error; // IMPORTANT
+        console.log("Error occuerd here");
     }
 };

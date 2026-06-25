@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/customers/documents")
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:5173/")
 public class CustomerDocumentController {
 	private final DocumentService documentService;
 

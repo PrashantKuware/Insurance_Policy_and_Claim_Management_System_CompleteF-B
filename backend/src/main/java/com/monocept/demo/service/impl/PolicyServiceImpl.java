@@ -54,6 +54,17 @@ public class PolicyServiceImpl implements PolicyService {
 		if (!plan.getActive()) {
 			throw new ValidationException("Selected plan is inactive");
 		}
+		
+		if (policyRepository
+		        .existsByCustomerCustomerIdAndPolicyPlanPlanIdAndPolicyStatusNot(
+		                customer.getCustomerId(),
+		                plan.getPlanId(),
+		                PolicyStatus.CANCELLED)) {
+
+		    throw new ValidationException(
+		            "You already have this policy"
+		    );
+		}
 
 		Policy policy = Policy.builder().policyNumber("POL" + System.currentTimeMillis()).customer(customer)
 				.policyPlan(plan).policyStatus(PolicyStatus.PENDING_PAYMENT).createdDate(LocalDateTime.now()).build();

@@ -105,7 +105,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            
+
           </div>
 
           {/* Password */}
@@ -132,7 +132,7 @@ const Login = () => {
             type="submit"
             disabled={loading}
             className="w-full h-15 rounded-xl text-lg font-semibold
-            bg-linear-to-r from-[#d2e6ff] to-[#a7ccff] relative overflow-hidden"
+            bg-linear-to-r from-[#d2e6ff] to-[#a7ccff] relative overflow-hidden cursor-pointer"
             whileHover={{ scale: loading ? 1 : 1.05 }}
             whileTap={{ scale: loading ? 1 : 0.95 }}
           >

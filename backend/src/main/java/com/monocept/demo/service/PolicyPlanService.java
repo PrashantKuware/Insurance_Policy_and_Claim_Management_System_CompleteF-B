@@ -1,5 +1,7 @@
 package com.monocept.demo.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +20,7 @@ public interface PolicyPlanService {
 	Page<PolicyPlanResponseDto> getAllPlans(int pageNo, int pageSize);
 
 	void deactivatePlan(Long policyId);
+
+	List<PolicyPlanResponseDto> getPolicyByProductId(Long productId);
 }
 

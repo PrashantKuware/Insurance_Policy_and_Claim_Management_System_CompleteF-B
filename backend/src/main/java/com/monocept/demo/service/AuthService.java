@@ -8,6 +8,7 @@ import com.monocept.demo.dto.request.LoginRequestDto;
 import com.monocept.demo.dto.request.RegisterRequestDto;
 import com.monocept.demo.dto.request.UserStatusUpdateDto;
 import com.monocept.demo.dto.response.AuthResponseDto;
+import com.monocept.demo.dto.response.UserResponseDto;
 import com.monocept.demo.entity.User;
 
 @Service
@@ -17,7 +18,7 @@ public interface AuthService {
 
 	AuthResponseDto loginUser(LoginRequestDto loginRequestDto);
 
-	List<User> getAllUser();
+	List<UserResponseDto> getAllUser();
 
 	AuthResponseDto createAgent(RegisterRequestDto request);
 

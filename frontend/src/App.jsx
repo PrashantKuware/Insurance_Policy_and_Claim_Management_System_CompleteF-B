@@ -49,7 +49,7 @@ const App = () => {
     <div>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/unauthorized" element={<Forbidden />} />
+       
 
         <Route
           path="/admindashboard"
@@ -59,7 +59,8 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
+         <Route path="/unauthorized" element={<Forbidden />} />
+         
         <Route
           path="/agentdashboard"
           element={
