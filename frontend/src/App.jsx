@@ -25,6 +25,7 @@ import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
 import AdminLayout from './components/AdminLayout'
 
+
 const App = () => {
 
   const dispatch = useDispatch();
@@ -48,22 +49,31 @@ const App = () => {
   }, []);
 
   return (
-    <div>
+    <div div className="
+      min-h-screen
+      bg-gradient-to-r
+      from-indigo-50
+      to-slate-50
+      dark:from-gray-900
+      dark:to-black
+      text-gray-900
+      dark:text-white
+    ">
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/unauthorized" element={<Forbidden />} />
 
 
-<Route
-  path="/admindashboard"
-  element={
-    <ProtectedRoute allowedRoles={["ADMIN"]}>
-      <AdminLayout>
-        <AdminDashboard />
-      </AdminLayout>
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/admindashboard"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admindashboard"

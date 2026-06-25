@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 
 const AdminLayout = ({ children }) => {
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 ">
 
       {/* SIDEBAR (FIXED) */}
       <div className="w-72 fixed h-full z-50">

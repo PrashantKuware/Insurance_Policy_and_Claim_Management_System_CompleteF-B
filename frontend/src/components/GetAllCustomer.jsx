@@ -1,37 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { getAllCustomers } from '../services/CustomerService';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from "react";
+import { getAllCustomers } from "../services/CustomerService";
+import { toast } from "react-toastify";
 import "./Product.css";
 
 const GetAllCustomer = () => {
-
     const [cusData, setCusData] = useState([]);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const getAllCustomer = async () => {
-
         try {
-
             setLoading(true);
 
             const data = await getAllCustomers();
 
             setCusData(data.data || []);
-
         } catch (error) {
-
             console.error(error);
 
             toast.error(
-                error?.response?.data?.message ||
-                "Failed To Load Customers ❌"
+                error?.response?.data?.message || "Failed To Load Customers ❌",
             );
-
         } finally {
-
             setLoading(false);
-
         }
     };
 
@@ -41,15 +32,10 @@ const GetAllCustomer = () => {
 
     if (loading) {
         return (
-            <div className="customerGrid">
-
+            <div className="customerGrid ">
                 {Array.from({ length: 6 }).map((_, index) => (
-
-                    <div
-                        key={index}
-                        className="customerCard animate-pulse"
-                    >
-                        <div className="h-6 bg-gray-300 rounded w-24 mb-4"></div>
+                    <div key={index} className="customerCard animate-pulse ">
+                        <div className="h-6 bg-gray-300 rounded w-24 mb-4 "></div>
 
                         <div className="h-5 bg-gray-300 rounded w-40 mb-3"></div>
 
@@ -59,9 +45,7 @@ const GetAllCustomer = () => {
 
                         <div className="h-10 bg-gray-300 rounded"></div>
                     </div>
-
                 ))}
-
             </div>
         );
     }
@@ -69,138 +53,85 @@ const GetAllCustomer = () => {
     return (
         <>
             <div className="customerGrid">
+                {cusData.length > 0 ? (
+                    cusData.map((ele) => (
+                        <div
+                            key={ele.customerId}
+                            className="customerCard "
+                            onClick={() => setSelectedCustomer(ele)}
+                        >
+                            <div className="customerBadge ">CUSTOMER</div>
 
-                {
-                    cusData.length > 0 ? (
+                            <h3>{ele.fullName}</h3>
 
-                        cusData.map((ele) => (
+                            <p>{ele.email}</p>
 
-                            <div
-                                key={ele.customerId}
-                                className="customerCard"
-                                onClick={() => setSelectedCustomer(ele)}
-                            >
+                            <p>
+                                {ele.city}, {ele.state}
+                            </p>
 
-                                <div className="customerBadge">
-                                    CUSTOMER
-                                </div>
-
-                                <h3>{ele.fullName}</h3>
-
-                                <p>{ele.email}</p>
-
-                                <p>
-                                    {ele.city}, {ele.state}
-                                </p>
-
-                                <button
-                                    className="viewDetailsBtn"
-                                >
-                                    View Details
-                                </button>
-
-                            </div>
-
-                        ))
-
-                    ) : (
-
-                        <div className="col-span-full text-center py-10">
-                            <h2 className="text-2xl font-semibold">
-                                No Customer Found
-                            </h2>
+                            <button className="viewDetailsBtn">View Details</button>
                         </div>
-
-                    )
-                }
-
+                    ))
+                ) : (
+                    <div className="col-span-full text-center py-10">
+                        <h2 className="text-2xl font-semibold">No Customer Found</h2>
+                    </div>
+                )}
             </div>
 
-            {
-                selectedCustomer && (
-
-                    <div
-                        className="modalOverlay"
-                        onClick={() =>
-                            setSelectedCustomer(null)
-                        }
-                    >
-
-                        <div
-                            className="modalCard"
-                            onClick={(e) =>
-                                e.stopPropagation()
-                            }
+            {selectedCustomer && (
+                <div className="modalOverlay" onClick={() => setSelectedCustomer(null)}>
+                    <div className="modalCard" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            className="closeBtn"
+                            onClick={() => setSelectedCustomer(null)}
                         >
+                            ×
+                        </button>
 
-                            <button
-                                className="closeBtn"
-                                onClick={() =>
-                                    setSelectedCustomer(null)
-                                }
-                            >
-                                ×
-                            </button>
+                        <h2>Customer Details</h2>
 
-                            <h2>
-                                Customer Details
-                            </h2>
+                        <div className="detailsGrid ">
+                            <p>
+                                <strong>ID:</strong> {selectedCustomer.customerId}
+                            </p>
 
-                            <div className="detailsGrid">
+                            <p>
+                                <strong>Name:</strong> {selectedCustomer.fullName}
+                            </p>
 
-                                <p>
-                                    <strong>ID:</strong>{" "}
-                                    {selectedCustomer.customerId}
-                                </p>
+                            <p>
+                                <strong>Email:</strong> {selectedCustomer.email}
+                            </p>
 
-                                <p>
-                                    <strong>Name:</strong>{" "}
-                                    {selectedCustomer.fullName}
-                                </p>
+                            <p>
+                                <strong>DOB:</strong> {selectedCustomer.dateOfBirth}
+                            </p>
 
-                                <p>
-                                    <strong>Email:</strong>{" "}
-                                    {selectedCustomer.email}
-                                </p>
+                            <p>
+                                <strong>Nominee:</strong> {selectedCustomer.nomineeName}
+                            </p>
 
-                                <p>
-                                    <strong>DOB:</strong>{" "}
-                                    {selectedCustomer.dateOfBirth}
-                                </p>
+                            <p>
+                                <strong>Address:</strong> {selectedCustomer.address}
+                            </p>
 
-                                <p>
-                                    <strong>Nominee:</strong>{" "}
-                                    {selectedCustomer.nomineeName}
-                                </p>
+                            <p>
+                                <strong>City:</strong> {selectedCustomer.city}
+                            </p>
 
-                                <p>
-                                    <strong>Address:</strong>{" "}
-                                    {selectedCustomer.address}
-                                </p>
+                            <p>
+                                <strong>State:</strong> {selectedCustomer.state}
+                            </p>
 
-                                <p>
-                                    <strong>City:</strong>{" "}
-                                    {selectedCustomer.city}
-                                </p>
-
-                                <p>
-                                    <strong>State:</strong>{" "}
-                                    {selectedCustomer.state}
-                                </p>
-
-                                <p>
-                                    <strong>Pincode:</strong>{" "}
-                                    {selectedCustomer.pinCode}
-                                </p>
-
-                            </div>
-
+                            <p>
+                                <strong>Pincode:</strong> {selectedCustomer.pinCode}
+                            </p>
                         </div>
-
                     </div>
-
-                )
-            }
+                </div>
+            )}
         </>
     );
 };

@@ -1,10 +1,8 @@
 @import "tailwindcss";
 
-body {
-  background: linear-gradient(to right, #eef2ff, #f8fafc);
-}
+/* Enable class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* smooth animations */
 * {
   transition: all 0.2s ease-in-out;
 }
