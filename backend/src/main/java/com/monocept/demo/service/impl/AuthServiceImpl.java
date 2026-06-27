@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
 	    otpRepository.delete(emailOtp);
 	    otpRepository.delete(mobileOtp);
 
-	    return new AuthResponseDto(null, null, "User Registered Successfully", user.getRole());
+	    return new AuthResponseDto(null, null, "User Registered Successfully", user.getRole(), null, null);
 	}
 	@Override
 	public AuthResponseDto loginUser(LoginRequestDto loginRequestDto) {
@@ -100,8 +100,19 @@ public class AuthServiceImpl implements AuthService {
 		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
 		String token = jwtService.generateToken(userDetails);
-
-		return new AuthResponseDto(token, "Bearer", userDetails.getUsername(), userDetails.getRole());
+		
+		User user = userRepository
+		        .findByEmail(loginRequestDto.getEmail())
+		        .orElseThrow(() ->
+		            new ResourceNotFoundException("User not found"));
+		
+		return AuthResponseDto.builder()
+		        .token(token)
+		        .tokenType("Bearer")
+		        .username(user.getEmail())
+		        .fullName(user.getFullName())
+		        .role(user.getRole())
+		        .build();
 	}
 
 	@Override
@@ -190,7 +201,7 @@ public class AuthServiceImpl implements AuthService {
 		    otpRepository.delete(emailOtp);
 		    otpRepository.delete(mobileOtp);
 
-		    return new AuthResponseDto(null, null, "Agent Registered Successfully", agent.getRole());
+		    return new AuthResponseDto(null, null, "Agent Registered Successfully", agent.getRole(), null, null);
 //		}
 	}
 

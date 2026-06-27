@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+
 import { motion } from "framer-motion";
 import {
   FaCalendarAlt,
@@ -12,7 +12,11 @@ import {
 import { toast } from "react-toastify";
 import { addCustomer } from "../services/CustomerService";
 import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Country, State, City } from "country-state-city";
 
+
+// background
 
 const BackgroundOrbs = () => {
   return (
@@ -26,8 +30,34 @@ const BackgroundOrbs = () => {
 };
 
 const AddCustomer = () => {
+
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const indianStates = State.getStatesOfCountry("IN");
+    setStates(indianStates);
+  }, []);
+
+
+  const handleStateChange = (e) => {
+    const stateCode = e.target.value;
+
+    const selectedState = states.find((state) => state.isoCode === stateCode);
+
+    setFormData({
+      ...formData,
+      state: selectedState.name,
+      city: "",
+    });
+
+    const cityList = City.getCitiesOfState("IN", stateCode);
+
+    setCities(cityList);
+  };
 
   const [formData, setFormData] = useState({
     dateOfBirth: "",
@@ -70,8 +100,7 @@ const AddCustomer = () => {
       setTimeout(() => navigate("/customerdashboard"), 800);
     } catch (error) {
       toast.error(
-        error?.response?.data?.message ||
-          "Unable To Add Customer ❌"
+        error?.response?.data?.message || "Unable To Add Customer ❌",
       );
     } finally {
       setLoading(false);
@@ -80,7 +109,6 @@ const AddCustomer = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
-
       <div className="absolute inset-0 animate-spin-slow opacity-40">
         <div className="w-[200%] h-[200%] bg-[radial-gradient(circle,#dcefff_0%,transparent_25%),radial-gradient(circle,#b9daf5_0%,transparent_25%)]" />
       </div>
@@ -103,10 +131,7 @@ const AddCustomer = () => {
           Complete Customer Information
         </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-2 gap-4"
-        >
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           {/* DOB */}
           <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
             <FaCalendarAlt />
@@ -134,32 +159,52 @@ const AddCustomer = () => {
             />
           </div>
 
+          {/* State */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            <FaMap />
+            <select
+              value={
+                states.find(
+                  s => s.name === formData.state
+                )?.isoCode || ""
+              }
+              onChange={handleStateChange}
+              className="w-full bg-transparent outline-none"
+              required
+            >
+              <option value="">
+                Select State
+              </option>
+
+              {states.map((state) => (
+                <option
+                  key={state.isoCode}
+                  value={state.isoCode}
+                >
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* City */}
           <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
             <FaCity />
-            <input
-              type="text"
+            <select
               name="city"
-              placeholder="City"
               value={formData.city}
               onChange={handleChange}
               className="w-full bg-transparent outline-none"
               required
-            />
-          </div>
+            >
+              <option value="">Select City</option>
 
-          {/* State */}
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
-            <FaMap />
-            <input
-              type="text"
-              name="state"
-              placeholder="State"
-              value={formData.state}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
+              {cities.map((city) => (
+                <option key={city.name} value={city.name}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Pin Code */}

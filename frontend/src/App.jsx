@@ -24,6 +24,7 @@ import AddAgent from './components/AddAgent'
 import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
 import AdminLayout from './components/AdminLayout'
+import Navbar from './components/Navbar'
 
 
 const App = () => {
@@ -88,7 +89,10 @@ const App = () => {
           path="/agentdashboard"
           element={
             <ProtectedRoute allowedRoles={["AGENT"]}>
+             
+              <Navbar />
               <AgentDashboard />
+              
             </ProtectedRoute>
           }
         />
