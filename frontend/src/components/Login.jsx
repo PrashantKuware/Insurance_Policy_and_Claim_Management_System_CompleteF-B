@@ -42,7 +42,9 @@ const Login = () => {
 
       const data = await loginService(email, pass);
       localStorage.setItem("token", data.token);
-
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("userName", data.fullName);
+      
       const decoded = jwtDecode(data.token);
 
       dispatch(

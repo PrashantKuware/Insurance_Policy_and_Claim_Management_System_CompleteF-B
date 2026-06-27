@@ -13,6 +13,7 @@
     "@reduxjs/toolkit": "^2.12.0",
     "axios": "^1.18.0",
     "dotenv": "^17.4.2",
+    "country-state-city": "^3.2.1",
     "framer-motion": "^12.40.0",
     "gsap": "^3.15.0",
     "jwt-decode": "^4.0.0",

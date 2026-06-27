@@ -24,8 +24,12 @@ import AddAgent from './components/AddAgent'
 import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
 import AdminLayout from './components/AdminLayout'
+<<<<<<< HEAD
 import ViewClaimHistory from './components/ViewClaimHistory'
 import AgentLayout from './components/AgentLayout'
+=======
+import Navbar from './components/Navbar'
+>>>>>>> origin/prashant
 
 
 const App = () => {
@@ -81,7 +85,10 @@ const App = () => {
           path="/agentdashboard"
           element={
             <ProtectedRoute allowedRoles={["AGENT"]}>
+             
+              <Navbar />
               <AgentDashboard />
+              
             </ProtectedRoute>
           }
         /> */}
