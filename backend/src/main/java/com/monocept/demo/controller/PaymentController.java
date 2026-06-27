@@ -31,7 +31,7 @@ public class PaymentController {
     private PaymentService paymentService;
 
     // CUSTOMER + AGENT
-    @PreAuthorize("hasAnyRole('CUSTOMER','AGENT')")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     @PostMapping("/policy/{policyId}")
     public ResponseEntity<PaymentResponseDto> payPremium(
             @PathVariable Long policyId,

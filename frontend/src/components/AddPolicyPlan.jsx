@@ -250,7 +250,7 @@ const AddPolicyPlan = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
+    <div className="relative text-gray-500 min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
 
       {/* ORBS */}
       <div className="absolute w-[320px] h-[320px] bg-blue-200/50 rounded-full blur-3xl top-[-60px] left-[30%]" />

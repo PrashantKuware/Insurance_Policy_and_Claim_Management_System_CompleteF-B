@@ -126,14 +126,37 @@
 
 // export default ViewPolicyPlan
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import usePolicyByProductId from "../hooks/usePolicyByProductId";
 import { useSelector } from "react-redux";
+import { getCurrentUser } from "../services/userService";
 
 const ViewPolicyPlan = () => {
   const { productId } = useParams();
   const { policyData, loading, error } = usePolicyByProductId(productId);
+
+  const [cusData, setCusData] = useState(null);
+
+  const getCusData = async () => {
+    try {
+
+      const data = await getCurrentUser();
+
+      setCusData(data);
+
+      console.log("Agent Data:", data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+  };
+
+  useEffect(() => {
+    getCusData();
+  }, []);
 
   const role = useSelector((state) => state.auth.role);
 
@@ -146,7 +169,7 @@ const ViewPolicyPlan = () => {
   if (error) return <h2 className="text-center p-10">Error</h2>;
 
   return (
-    <div className="min-h-screen bg-[#eef2f7] p-10">
+    <div className="min-h-screen bg-[#eef2f7] p-10 text-gray-500">
 
       <h1 className="text-4xl font-bold text-center mb-10">
         Policy Plans
@@ -174,14 +197,19 @@ const ViewPolicyPlan = () => {
                 {ele.active ? "Active" : "Inactive"}
               </p>
 
-              {role === "CUSTOMER" && (
+              {role === "CUSTOMER" && cusData.active ? (
                 <NavLink
                   to={`/purchasepolicy/${ele.planId}`}
-                  className="block mt-4 text-center py-3 rounded-xl bg-gradient-to-r from-blue-200 to-blue-300 font-semibold"
+                  className="block mt-4 text-center py-3 rounded-xl bg-linear-to-r from-blue-200 to-blue-300 font-semibold"
                 >
                   🛒 Purchase
                 </NavLink>
-              )}
+              ) : <button
+                disabled
+                className="block mt-4 w-42 text-center py-3 rounded-xl bg-linear-to-r from-blue-200 to-blue-300 font-semibold"
+              >
+                Customer Inactive
+              </button>}
             </div>
           ))
         ) : (

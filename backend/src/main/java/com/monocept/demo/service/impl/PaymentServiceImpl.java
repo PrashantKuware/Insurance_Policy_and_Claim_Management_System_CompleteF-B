@@ -19,6 +19,7 @@ import com.monocept.demo.entity.PremiumPayment;
 import com.monocept.demo.entity.User;
 import com.monocept.demo.enums.PaymentStatus;
 import com.monocept.demo.enums.PolicyStatus;
+import com.monocept.demo.enums.PremiumType;
 import com.monocept.demo.enums.Role;
 import com.monocept.demo.exception.ForbiddenAccessException;
 import com.monocept.demo.exception.ResourceNotFoundException;
@@ -44,60 +45,142 @@ public class PaymentServiceImpl implements PaymentService {
 	private ModelMapper mapper;
 
 	@Override
-	public PaymentResponseDto payPremium(Long policyId, PaymentRequestDto requestDto) {
+	public PaymentResponseDto payPremium(
+	        Long policyId,
+	        PaymentRequestDto requestDto) {
 
-		Policy policy = policyRepository.findById(policyId)
-				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
+	    Policy policy = policyRepository.findById(policyId)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Policy not found"));
 
-		if (requestDto.getAmount() == null || requestDto.getAmount().doubleValue() <= 0) {
+	    if (requestDto.getAmount() == null
+	            || requestDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
 
-			throw new ValidationException("Payment amount must be greater than zero");
-		}
+	        throw new ValidationException(
+	                "Payment amount must be greater than zero");
+	    }
 
-		String transactionReference = "TXN-" + System.currentTimeMillis();
+	    BigDecimal premiumAmount =
+	            policy.getPolicyPlan()
+	                    .getPremiumAmount();
 
-		if (paymentRepository.findByTransactionReference(transactionReference).isPresent()) {
+	    PremiumType premiumType =
+	            policy.getPolicyPlan()
+	                    .getPremiumType();
 
-			throw new ValidationException("Duplicate transaction reference");
-		}
+	    // ==========================
+	    // ONE TIME POLICY
+	    // ==========================
+	    if (premiumType == PremiumType.ONE_TIME) {
 
-		PremiumPayment payment = new PremiumPayment();
+	        if (policy.getPolicyStatus()
+	                == PolicyStatus.ACTIVE) {
 
-		payment.setPolicy(policy);
-		payment.setAmount(requestDto.getAmount());
-		payment.setPaymentMode(requestDto.getPaymentMode());
-		payment.setPaymentDate(LocalDateTime.now());
+	            throw new ValidationException(
+	                    "Premium already paid for this policy");
+	        }
 
-		payment.setTransactionReference(transactionReference);
+	        if (requestDto.getAmount()
+	                .compareTo(premiumAmount) != 0) {
 
-		payment.setPaymentStatus(PaymentStatus.SUCCESS);
+	            throw new ValidationException(
+	                    "One time policy requires exact payment of "
+	                            + premiumAmount);
+	        }
+	    }
 
-		payment = paymentRepository.save(payment);
+	    // ==========================
+	    // ANNUAL POLICY
+	    // ==========================
+	    if (premiumType == PremiumType.ANNUAL) {
 
-		// Update Total Premium Paid
+	        PremiumPayment lastPayment =
+	                paymentRepository
+	                        .findTopByPolicyPolicyIdOrderByPaymentDateDesc(
+	                                policyId)
+	                        .orElse(null);
 
-		BigDecimal totalPaid = policy.getTotalPremiumPaid() == null ? BigDecimal.ZERO : policy.getTotalPremiumPaid();
+	        if (lastPayment != null) {
 
-		totalPaid = totalPaid.add(requestDto.getAmount());
+	            LocalDateTime nextAllowedDate =
+	                    lastPayment.getPaymentDate()
+	                            .plusYears(1);
 
-		policy.setTotalPremiumPaid(totalPaid);
+	            if (LocalDateTime.now()
+	                    .isBefore(nextAllowedDate)) {
 
-		// Activate Policy
+	                throw new ValidationException(
+	                        "Next premium payment allowed after "
+	                                + nextAllowedDate);
+	            }
+	        }
 
-		if (payment.getPaymentStatus() == PaymentStatus.SUCCESS) {
+	        if (requestDto.getAmount()
+	                .compareTo(premiumAmount) != 0) {
 
-			policy.setPolicyStatus(PolicyStatus.ACTIVE);
+	            throw new ValidationException(
+	                    "Annual premium must be exactly "
+	                            + premiumAmount);
+	        }
+	    }
 
-			policy.setStartDate(LocalDate.now());
+	    String transactionReference =
+	            "TXN-" + System.currentTimeMillis();
 
-			policy.setEndDate(LocalDate.now().plusYears(policy.getPolicyPlan().getDuration()));
-		}
+	    PremiumPayment payment =
+	            new PremiumPayment();
 
-		policyRepository.save(policy);
+	    payment.setPolicy(policy);
+	    payment.setAmount(requestDto.getAmount());
+	    payment.setPaymentMode(
+	            requestDto.getPaymentMode());
+	    payment.setPaymentDate(
+	            LocalDateTime.now());
+	    payment.setTransactionReference(
+	            transactionReference);
+	    payment.setPaymentStatus(
+	            PaymentStatus.SUCCESS);
 
-		return mapper.map(payment, PaymentResponseDto.class);
+	    payment = paymentRepository.save(payment);
+
+	    BigDecimal totalPaid =
+	            policy.getTotalPremiumPaid() == null
+	            ? BigDecimal.ZERO
+	            : policy.getTotalPremiumPaid();
+
+	    totalPaid =
+	            totalPaid.add(
+	                    requestDto.getAmount());
+
+	    policy.setTotalPremiumPaid(
+	            totalPaid);
+
+	    // First successful payment activates policy
+	    if (policy.getPolicyStatus()
+	            != PolicyStatus.ACTIVE) {
+
+	        policy.setPolicyStatus(
+	                PolicyStatus.ACTIVE);
+
+	        policy.setStartDate(
+	                LocalDate.now());
+
+	        policy.setEndDate(
+	                LocalDate.now()
+	                        .plusYears(
+	                                policy.getPolicyPlan()
+	                                        .getDuration()));
+	    }
+
+	    policyRepository.save(policy);
+
+	    return mapper.map(
+	            payment,
+	            PaymentResponseDto.class);
 	}
-
+	
+	
 	@Override
 	public PaymentResponseDto getPaymentById(Long paymentId) {
 

@@ -24,6 +24,8 @@ import AddAgent from './components/AddAgent'
 import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
 import AdminLayout from './components/AdminLayout'
+import ViewClaimHistory from './components/ViewClaimHistory'
+import AgentLayout from './components/AgentLayout'
 
 
 const App = () => {
@@ -49,7 +51,7 @@ const App = () => {
   }, []);
 
   return (
-    <div div className="
+    <div className="
       min-h-screen
       bg-gradient-to-r
       from-indigo-50
@@ -75,20 +77,21 @@ const App = () => {
           }
         />
 
-        <Route
-          path="/admindashboard"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
+        {/* <Route
           path="/agentdashboard"
           element={
             <ProtectedRoute allowedRoles={["AGENT"]}>
               <AgentDashboard />
+            </ProtectedRoute>
+          }
+        /> */}
+        <Route
+          path="/agentdashboard"
+          element={
+            <ProtectedRoute allowedRoles={["AGENT"]}>
+              <AgentLayout>
+                <AgentDashboard />
+              </AgentLayout>
             </ProtectedRoute>
           }
         />
@@ -107,6 +110,24 @@ const App = () => {
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
               <AddProduct />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/claim-history/claim/:claimId"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "AGENT", "CUSTOMER"]}>
+              <ViewClaimHistory />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/claim-history/policy/:policyId"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "AGENT", "CUSTOMER"]}>
+              <ViewClaimHistory />
             </ProtectedRoute>
           }
         />

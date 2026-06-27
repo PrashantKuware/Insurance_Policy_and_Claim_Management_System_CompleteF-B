@@ -79,7 +79,7 @@ const AddCustomer = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-[#eceef2] text-gray-400 overflow-hidden">
 
       <div className="absolute inset-0 animate-spin-slow opacity-40">
         <div className="w-[200%] h-[200%] bg-[radial-gradient(circle,#dcefff_0%,transparent_25%),radial-gradient(circle,#b9daf5_0%,transparent_25%)]" />

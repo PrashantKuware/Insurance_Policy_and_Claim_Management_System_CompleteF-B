@@ -18,4 +18,10 @@ public interface ClaimStatusHistoryService {
 
 	    List<ClaimHistoryResponseDto>
 	    getClaimHistory(Long claimId);
+	    
+	    List<ClaimHistoryResponseDto>
+	    getPolicyClaimHistory(Long policyId);
+	    
+	    byte[] generateClaimHistoryPdf(
+	            Long policyId);
 }

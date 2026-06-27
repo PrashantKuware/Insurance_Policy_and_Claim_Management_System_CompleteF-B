@@ -11,7 +11,7 @@ const StatCard = ({ title, value, color }) => (
 
 const AdminDashboard = () => {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-gray-500">
 
       {/* HEADER */}
       <div>

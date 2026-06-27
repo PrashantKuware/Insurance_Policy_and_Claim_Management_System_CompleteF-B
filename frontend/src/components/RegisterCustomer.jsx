@@ -345,7 +345,7 @@ const RegisterCustomer = () => {
       <Orbs />
 
       {/* CARD */}
-      <div className="relative z-10 w-full max-w-xl p-10 rounded-[35px]
+      <div className="relative z-10 w-full max-w-xl p-10 rounded-[35px] text-black
       backdrop-blur-3xl bg-white/30 border border-white/40 shadow-xl">
 
         <h2 className="text-3xl font-bold text-center text-[#243447]">

@@ -7,6 +7,7 @@ import {
     withdrawClaimById
 } from '../services/claimService';
 import { toast } from 'react-toastify';
+import { downloadClaimHistoryPdf } from '../services/claimHistoryService';
 
 const ViewClaim = () => {
 
@@ -46,14 +47,17 @@ const ViewClaim = () => {
 
             const data = await getClaimByPolicyId(policyId);
 
-            const claim = data?.content?.[0];
+            const claims = data?.content || [];
 
-            if (claim) {
+            if (claims.length > 0) {
 
-                setClaimData(claim);
-                setClaimId(claim.claimId);
+                const latestClaim = claims[claims.length - 1];
+
+                setClaimData(latestClaim);
+                setClaimId(latestClaim.claimId);
 
             }
+
 
         } catch (error) {
 
@@ -165,16 +169,46 @@ const ViewClaim = () => {
         );
     }
 
+    const oneYearCompleted =
+        planData?.startDate &&
+        new Date(
+            new Date(planData.startDate).setFullYear(
+                new Date(planData.startDate).getFullYear() + 1
+            )
+        ) <= new Date();
+
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 text-gray-500">
 
             {/* Policy Details */}
-
             <div className="bg-white rounded-xl shadow-lg p-6">
 
-                <h2 className="text-2xl font-bold mb-4">
-                    Policy Details
-                </h2>
+                <div className="flex items-center justify-between mb-6">
+
+                    <h2 className="text-2xl font-bold">
+                        Policy Details
+                    </h2>
+
+                    {
+                        planData.policyStatus === "ACTIVE" &&
+                        (
+                            !claimData ||
+                            claimData.claimStatus === "APPROVED" ||
+                            claimData.claimStatus === "REJECTED" ||
+                            claimData.claimStatus === "WITHDRAWN"
+                        ) && (
+
+                            <NavLink
+                                to={`/policy/submitclaim/${planData.policyId}`}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
+                            >
+                                Submit New Claim
+                            </NavLink>
+
+                        )
+                    }
+
+                </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
 
@@ -200,11 +234,18 @@ const ViewClaim = () => {
 
                     <p>
                         <strong>Status:</strong>{" "}
-                        {planData.policyStatus}
+                        <span
+                            className={`font-semibold ${planData.policyStatus === "ACTIVE"
+                                ? "text-green-600"
+                                : "text-red-600"
+                                }`}
+                        >
+                            {planData.policyStatus}
+                        </span>
                     </p>
 
                     <p>
-                        <strong>Total Premium:</strong>{" "}
+                        <strong>Total Premium Paid:</strong>{" "}
                         ₹{planData.totalPremiumPaid}
                     </p>
 
@@ -218,25 +259,27 @@ const ViewClaim = () => {
                         {planData.endDate}
                     </p>
 
-                </div>
-
-                {
-                    planData.policyStatus === "ACTIVE" &&
-                    !claimData && (
-                        <div className="mt-5">
-
-                            <NavLink
-                                to={`/policy/submitclaim/${planData.policyId}`}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    <NavLink
+                                to={`/claim-history/policy/${planData.policyId}`}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
                             >
-                                Submit Claim
+                                View Full Claim History
                             </NavLink>
 
-                        </div>
-                    )
-                }
+                                                <button
+    onClick={() =>
+        downloadClaimHistoryPdf(
+            planData.policyId
+        )
+    }
+    className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
+>
+    Download PDF
+</button>
+                </div>
 
             </div>
+
 
             {/* Claim Details */}
 
@@ -275,6 +318,13 @@ const ViewClaim = () => {
                                 <strong>Reason:</strong>{" "}
                                 {claimData.claimReason}
                             </p>
+
+                            <NavLink
+                                to={`/claim-history/claim/${claimData.claimId}`}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
+                            >
+                                View Claim History
+                            </NavLink>
 
                         </div>
 

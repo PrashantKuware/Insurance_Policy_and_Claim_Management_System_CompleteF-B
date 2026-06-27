@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +25,7 @@ import com.monocept.demo.dto.response.DocumentResponse;
 import com.monocept.demo.entity.Claim;
 import com.monocept.demo.entity.ClaimDocument;
 import com.monocept.demo.entity.Policy;
+import com.monocept.demo.entity.User;
 import com.monocept.demo.enums.ClaimStatus;
 import com.monocept.demo.enums.PolicyStatus;
 import com.monocept.demo.exception.BadRequestException;
@@ -33,6 +36,7 @@ import com.monocept.demo.exception.ResourceNotFoundException;
 import com.monocept.demo.repository.ClaimDocumentRepository;
 import com.monocept.demo.repository.ClaimRepository;
 import com.monocept.demo.repository.PolicyRepository;
+import com.monocept.demo.repository.UserRepository;
 import com.monocept.demo.service.ClaimService;
 import com.monocept.demo.service.ClaimStatusHistoryService;
 import com.monocept.demo.service.DocumentService;
@@ -54,6 +58,9 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Autowired
 	private DocumentService fileUploadService;
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private ClaimDocumentRepository claimDocumentRepository;
@@ -110,10 +117,30 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	public ClaimResponseDto submitClaim(Long policyId, ClaimRequestDto requestDto) {
+		Authentication authentication =
+	            SecurityContextHolder.getContext()
+	                    .getAuthentication();
+
+	    String email = authentication.getName();
+
+	    User cusUser = userRepository
+	            .findByEmail(email)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Customer not found"
+	                    ));
+
+	    if (!cusUser.getActive()) {
+
+	        throw new BadRequestException(
+	                "Your account is inactive. You cannot buy policy."
+	        );
+	    }
 
 		Policy policy = policyRepository.findById(policyId)
 				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
 
+		
 		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
 			throw new InvalidPolicyStatusException("Claim can only be raised for active policies");
 		}
@@ -136,6 +163,20 @@ public class ClaimServiceImpl implements ClaimService {
 		if (requestDto.getClaimAmount().compareTo(coverageAmount) > 0) {
 
 			throw new BadRequestException("Claim amount cannot exceed policy coverage amount");
+		}
+		
+		BigDecimal alreadyClaimed =
+		        claimRepository.getTotalApprovedClaimAmount(policyId);
+
+		BigDecimal remainingCoverage =
+		        coverageAmount.subtract(alreadyClaimed);
+
+		if (requestDto.getClaimAmount()
+		        .compareTo(remainingCoverage) > 0) {
+
+		    throw new BadRequestException(
+		            "Remaining coverage amount is only ₹"
+		                    + remainingCoverage);
 		}
 
 		Claim claim = new Claim();
@@ -162,31 +203,122 @@ public class ClaimServiceImpl implements ClaimService {
 
 		return mapper.map(claim, ClaimResponseDto.class);
 	}
-
+	
 	@Override
-	public ClaimResponseDto reviewClaim(Long claimId, ClaimReviewRequestDto requestDto) {
+	public ClaimResponseDto reviewClaim(
+	        Long claimId,
+	        ClaimReviewRequestDto requestDto) {
 
-		Claim claim = getClaimEntity(claimId);
+	    Authentication authentication =
+	            SecurityContextHolder.getContext()
+	                    .getAuthentication();
 
-		validateClaimNotFinalized(claim);
+	    String email = authentication.getName();
 
-		if (claim.getClaimStatus() != ClaimStatus.SUBMITTED) {
-			throw new InvalidClaimStatusException("Only submitted claims can be reviewed");
-		}
+	    User agentUser = userRepository
+	            .findByEmail(email)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Agent not found"
+	                    ));
 
-		ClaimStatus oldStatus = claim.getClaimStatus();
+	    if (!agentUser.getActive()) {
 
-		claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
+	        throw new BadRequestException(
+	                "Your account is inactive. You cannot review claims."
+	        );
+	    }
+	    
+	    Claim claim = getClaimEntity(claimId);
 
-		claim.setAgentRemarks(requestDto.getRemarks());
+	    User customerUser = claim.getPolicy()
+	            .getCustomer()
+	            .getUser();
 
-		claim.setUpdatedDate(LocalDateTime.now());
+	    if (!customerUser.getActive()) {
 
-		claimRepository.save(claim);
+	        throw new BadRequestException(
+	                "This claim cannot be reviewed because the customer account is inactive."
+	        );
+	    }
+	    validateClaimNotFinalized(claim);
 
-		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.UNDER_REVIEW, requestDto.getRemarks());
+	    if (claim.getClaimStatus() != ClaimStatus.SUBMITTED) {
 
-		return mapper.map(claim, ClaimResponseDto.class);
+	        throw new InvalidClaimStatusException(
+	                "Only submitted claims can be reviewed"
+	        );
+	    }
+
+	    ClaimStatus oldStatus = claim.getClaimStatus();
+
+	    claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
+
+	    claim.setAgentRemarks(
+	            requestDto.getRemarks()
+	    );
+
+	    claim.setUpdatedDate(
+	            LocalDateTime.now()
+	    );
+
+	    claimRepository.save(claim);
+
+	    historyService.saveStatusHistory(
+	            claimId,
+	            oldStatus,
+	            ClaimStatus.UNDER_REVIEW,
+	            requestDto.getRemarks()
+	    );
+
+	    return buildFullClaimDto(claim);
+	}
+	
+	private ClaimResponseDto buildFullClaimDto(Claim claim) {
+
+	    ClaimResponseDto dto = new ClaimResponseDto();
+
+	    dto.setClaimId(claim.getClaimId());
+	    dto.setClaimNumber(claim.getClaimNumber());
+	    dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+	    dto.setClaimStatus(claim.getClaimStatus().name());
+	    dto.setClaimReason(claim.getClaimReason());
+
+	    Policy policy = claim.getPolicy();
+
+	    dto.setPolicyId(policy.getPolicyId());
+
+	    dto.setCustomerName(
+	        policy.getCustomer()
+	              .getUser()
+	              .getFullName()
+	    );
+
+	    dto.setCustomerEmail(
+	        policy.getCustomer()
+	              .getUser()
+	              .getEmail()
+	    );
+
+	    dto.setPlanName(
+	        policy.getPolicyPlan()
+	              .getPlanName()
+	    );
+
+	    dto.setCoverageAmount(
+	        policy.getPolicyPlan()
+	              .getCoverageAmount()
+	    );
+
+	    dto.setPremiumAmount(
+	        policy.getPolicyPlan()
+	              .getPremiumAmount()
+	    );
+
+	    dto.setPolicyStartDate(policy.getStartDate());
+	    dto.setPolicyEndDate(policy.getEndDate());
+
+	    return dto;
 	}
 
 	@Override
@@ -241,13 +373,60 @@ public class ClaimServiceImpl implements ClaimService {
 		return mapper.map(claim, ClaimResponseDto.class);
 	}
 
-	@Override
-	public ClaimResponseDto getClaimById(Long claimId) {
+@Override
+public ClaimResponseDto getClaimById(Long claimId) {
 
-		Claim claim = getClaimEntity(claimId);
+    Claim claim = getClaimEntity(claimId);
 
-		return mapper.map(claim, ClaimResponseDto.class);
-	}
+    ClaimResponseDto dto = new ClaimResponseDto();
+
+    dto.setClaimId(claim.getClaimId());
+    dto.setClaimNumber(claim.getClaimNumber());
+    dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+    dto.setClaimStatus(claim.getClaimStatus().name());
+    dto.setClaimReason(claim.getClaimReason());
+
+    Policy policy = claim.getPolicy();
+
+    dto.setPolicyId(policy.getPolicyId());
+
+    dto.setCustomerName(
+        policy.getCustomer()
+              .getUser()
+              .getFullName()
+    );
+
+    dto.setCustomerEmail(
+        policy.getCustomer()
+              .getUser()
+              .getEmail()
+    );
+
+    dto.setPlanName(
+        policy.getPolicyPlan()
+              .getPlanName()
+    );
+
+    dto.setCoverageAmount(
+        policy.getPolicyPlan()
+              .getCoverageAmount()
+    );
+
+    dto.setPremiumAmount(
+        policy.getPolicyPlan()
+              .getPremiumAmount()
+    );
+
+    dto.setPolicyStartDate(
+        policy.getStartDate()
+    );
+
+    dto.setPolicyEndDate(
+        policy.getEndDate()
+    );
+
+    return dto;
+}
 
 	@Override
 	public ClaimResponseDto getClaimByClaimNumber(String claimNumber) {
@@ -378,6 +557,11 @@ public class ClaimServiceImpl implements ClaimService {
 
 	    return claimRepository.findByClaimStatus(ClaimStatus.SUBMITTED)
 	            .stream()
+	            .filter(claim ->
+	                    claim.getPolicy()
+	                         .getCustomer()
+	                         .getUser()
+	                         .getActive())
 	            .map(claim -> {
 
 	                ClaimResponseDto dto = new ClaimResponseDto();

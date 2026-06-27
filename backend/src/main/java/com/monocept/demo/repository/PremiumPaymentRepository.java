@@ -13,4 +13,6 @@ public interface PremiumPaymentRepository extends JpaRepository<PremiumPayment, 
 	Page<PremiumPayment> findByPolicyPolicyId(Long policyId, Pageable pageable);
 
 	Optional<PremiumPayment> findByTransactionReference(String transactionReference);
+
+	Optional<PremiumPayment> findTopByPolicyPolicyIdOrderByPaymentDateDesc(Long policyId);
 }

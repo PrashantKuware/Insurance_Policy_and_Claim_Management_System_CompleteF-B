@@ -1,48 +1,38 @@
-import React from 'react';
-import Product from '../components/Product';
-import MyPolicies from '../components/MyPolicies';
-import BackgroundOrbs from '../components/BackgroundOrbs';
-import "../components/Product.css";
+import CustomerLayout from "../components/CustomerLayaout";
+import MyPolicies from "../components/MyPolicies";
+import Product from "../components/Product";
 
 const CustomerDashboard = () => {
-
-    return (
-        <div className="dashboardContainer">
-
-            <BackgroundOrbs />
-
-            <div className="dashboardContent">
-
-                <h1 className="dashboardTitle mb-8">
-                    Customer Dashboard
-                </h1>
+  return (
+    <CustomerLayout>
+      <div className="relative">
 
 
-                <div className="mb-12">
+        <div className="relative z-10 space-y-10 text-white">
 
-                    <h2 className="sectionTitle mb-6">
-                        My Policies
-                    </h2>
+          <div>
+            <h1 className="text-4xl font-bold text-[#243447]">
+              Customer Dashboard
+            </h1>
 
-                    <MyPolicies />
+            <p className="text-gray-600 mt-2">
+              Manage your policies & explore plans
+            </p>
+          </div>
 
-                </div>
+          <section>
+            <MyPolicies />
+          </section>
 
-
-                <div>
-
-                    <h2 className="sectionTitle mb-6">
-                        Available Insurance Products
-                    </h2>
-
-                    <Product />
-
-                </div>
-
-            </div>
+          <section>
+            <Product />
+          </section>
 
         </div>
-    );
+
+      </div>
+    </CustomerLayout>
+  );
 };
 
 export default CustomerDashboard;

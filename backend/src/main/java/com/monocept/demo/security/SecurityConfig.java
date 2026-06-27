@@ -131,7 +131,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/claims/*/reject").hasRole("ADMIN")
 
 						// CLAIM HISTORY
-						.requestMatchers(HttpMethod.GET, "/api/claim-history/**").hasAnyRole("ADMIN", "AGENT")
+						.requestMatchers(HttpMethod.GET, "/api/claim-history/**").hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
 
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint)

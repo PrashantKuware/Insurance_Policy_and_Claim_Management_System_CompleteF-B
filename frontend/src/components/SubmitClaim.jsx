@@ -101,7 +101,7 @@ const SubmitClaim = () => {
 
   return (
     <>
-      <div className="relative min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
+      <div className="relative text-gray-500 min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
 
         {/* Background Animation */}
         <div className="absolute inset-0 animate-spin-slow opacity-40">
