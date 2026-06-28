@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +25,7 @@ import com.monocept.demo.dto.response.DocumentResponse;
 import com.monocept.demo.entity.Claim;
 import com.monocept.demo.entity.ClaimDocument;
 import com.monocept.demo.entity.Policy;
+import com.monocept.demo.entity.User;
 import com.monocept.demo.enums.ClaimStatus;
 import com.monocept.demo.enums.PolicyStatus;
 import com.monocept.demo.exception.BadRequestException;
@@ -33,6 +36,7 @@ import com.monocept.demo.exception.ResourceNotFoundException;
 import com.monocept.demo.repository.ClaimDocumentRepository;
 import com.monocept.demo.repository.ClaimRepository;
 import com.monocept.demo.repository.PolicyRepository;
+import com.monocept.demo.repository.UserRepository;
 import com.monocept.demo.service.ClaimService;
 import com.monocept.demo.service.ClaimStatusHistoryService;
 import com.monocept.demo.service.DocumentService;
@@ -42,6 +46,9 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Autowired
 	private ClaimRepository claimRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private PolicyRepository policyRepository;
@@ -58,6 +65,52 @@ public class ClaimServiceImpl implements ClaimService {
 	@Autowired
 	private ClaimDocumentRepository claimDocumentRepository;
 
+	private ClaimResponseDto mapToDto(Claim claim) {
+
+	    ClaimResponseDto dto = new ClaimResponseDto();
+
+	    dto.setClaimId(claim.getClaimId());
+	    dto.setClaimNumber(claim.getClaimNumber());
+
+	    if (claim.getClaimAmount() != null) {
+	        dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+	    }
+
+	    dto.setClaimStatus(claim.getClaimStatus().name());
+	    dto.setClaimReason(claim.getClaimReason());
+
+	    // Agent/Admin who made final decision
+	    if (claim.getDecisionBy() != null) {
+
+	        dto.setAgentName(claim.getDecisionBy().getFullName());
+	        dto.setAgentEmail(claim.getDecisionBy().getEmail());
+
+	        // If you want to display admin instead
+	        dto.setAdminName(claim.getDecisionBy().getFullName());
+	    }
+
+	    dto.setAgentRemark(claim.getAgentRemarks());
+	    dto.setAdminRemark(claim.getAdminRemarks());
+
+	    dto.setApprovedDate(claim.getDecisionDate());
+
+	    // Recommendation shown on Details popup
+	    if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_APPROVAL) {
+	        dto.setAgentRecommendation("Recommended For Approval");
+	    }
+	    else if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_REJECTION) {
+	        dto.setAgentRecommendation("Recommended For Rejection");
+	    }
+	    else if (claim.getClaimStatus() == ClaimStatus.APPROVED) {
+	        dto.setAgentRecommendation("Approved");
+	    }
+	    else if (claim.getClaimStatus() == ClaimStatus.REJECTED) {
+	        dto.setAgentRecommendation("Rejected");
+	    }
+
+	    return dto;
+	}
+	
 	@Override
 	public ClaimResponseDto recommendClaimForApproval(Long claimId, ClaimRecommendationRequestDto requestDto) {
 
@@ -80,7 +133,7 @@ public class ClaimServiceImpl implements ClaimService {
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.RECOMMENDED_FOR_APPROVAL,
 				requestDto.getRemarks());
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		return mapToDto(claim);
 	}
 
 	@Override
@@ -160,7 +213,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 		historyService.saveStatusHistory(claim.getClaimId(), null, ClaimStatus.SUBMITTED, "Claim Submitted");
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		return mapToDto(claim);
 	}
 
 	@Override
@@ -191,9 +244,18 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	public ClaimResponseDto approveClaim(Long claimId, ClaimDecisionRequestDto requestDto) {
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+		String email = authentication.getName();
+		
 		Claim claim = getClaimEntity(claimId);
-
+		
+		User agent = userRepository
+		        .findByEmail(email)
+		        .orElseThrow(() ->
+		            new ResourceNotFoundException("Agent not found"));
+		
 		validateClaimNotFinalized(claim);
 
 		if (claim.getClaimStatus() != ClaimStatus.RECOMMENDED_FOR_APPROVAL) {
@@ -208,16 +270,29 @@ public class ClaimServiceImpl implements ClaimService {
 
 		claim.setUpdatedDate(LocalDateTime.now());
 
+		claim.setDecisionBy(agent);
+
+		claim.setDecisionDate(LocalDateTime.now());
+
 		claimRepository.save(claim);
 
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.APPROVED, requestDto.getRemarks());
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		 return mapToDto(claim);
 	}
 
 	@Override
 	public ClaimResponseDto rejectClaim(Long claimId, ClaimDecisionRequestDto requestDto) {
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+		String email = authentication.getName();
+
+		User agent = userRepository
+		        .findByEmail(email)
+		        .orElseThrow(() ->
+		            new ResourceNotFoundException("Agent not found"));
+		
 		Claim claim = getClaimEntity(claimId);
 
 		validateClaimNotFinalized(claim);
@@ -233,20 +308,24 @@ public class ClaimServiceImpl implements ClaimService {
 		claim.setAdminRemarks(requestDto.getRemarks());
 
 		claim.setUpdatedDate(LocalDateTime.now());
+		
+		claim.setDecisionBy(agent);
+
+		claim.setDecisionDate(LocalDateTime.now());
 
 		claimRepository.save(claim);
 
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.REJECTED, requestDto.getRemarks());
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		 return mapToDto(claim);
 	}
 
 	@Override
 	public ClaimResponseDto getClaimById(Long claimId) {
 
-		Claim claim = getClaimEntity(claimId);
+	    Claim claim = getClaimEntity(claimId);
 
-		return mapper.map(claim, ClaimResponseDto.class);
+	    return mapToDto(claim);
 	}
 
 	@Override
@@ -255,20 +334,20 @@ public class ClaimServiceImpl implements ClaimService {
 		Claim claim = claimRepository.findByClaimNumber(claimNumber)
 				.orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		 return mapToDto(claim);
 	}
 
 	@Override
 	public Page<ClaimResponseDto> getClaimsByCustomer(Long customerId, Pageable pageable) {
 
 		return claimRepository.findByPolicy_Customer_CustomerId(customerId, pageable)
-				.map(claim -> mapper.map(claim, ClaimResponseDto.class));
+				.map(this::mapToDto);
 	}
 
 	@Override
 	public Page<ClaimResponseDto> getAllClaims(Pageable pageable) {
 
-		return claimRepository.findAll(pageable).map(claim -> mapper.map(claim, ClaimResponseDto.class));
+		return claimRepository.findAll(pageable).map(this::mapToDto);
 	}
 
 	private Claim getClaimEntity(Long claimId) {
@@ -280,7 +359,7 @@ public class ClaimServiceImpl implements ClaimService {
 	public Page<ClaimResponseDto> getClaimsByPolicy(Long policyId, Pageable pageable) {
 
 		return claimRepository.findByPolicyPolicyId(policyId, pageable)
-				.map(claim -> mapper.map(claim, ClaimResponseDto.class));
+				.map(this::mapToDto);
 	}
 
 	@Override
@@ -305,7 +384,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.WITHDRAWN, "Claim Withdrawn");
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		return mapToDto(claim);
 	}
 
 	private void validateClaimNotFinalized(Claim claim) {

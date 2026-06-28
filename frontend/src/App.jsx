@@ -25,6 +25,7 @@ import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
 import AdminLayout from './components/AdminLayout'
 import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 
 
 const App = () => {

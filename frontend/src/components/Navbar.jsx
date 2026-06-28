@@ -33,6 +33,8 @@ const Navbar = () => {
         border-gray-200
         dark:border-gray-700
         shadow-md
+        sticky
+        top-0 z-50
       "
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -90,6 +92,7 @@ const Navbar = () => {
               hover:bg-gray-200
               dark:hover:bg-gray-700
               transition
+              cursor-pointer
             "
           >
             {theme === "light" ? (
@@ -121,6 +124,7 @@ const Navbar = () => {
                 text-white
                 transition-all
                 duration-300
+                cursor-pointer
               "
             >
               <FaSignOutAlt />
