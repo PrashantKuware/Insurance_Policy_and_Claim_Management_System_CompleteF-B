@@ -1,15 +1,8 @@
-@keyframes float {
-  50% {
-    transform: translateY(-30px) rotate(10deg);
-  }
-}
-
 .orb {
   position: absolute;
   border-radius: 9999px;
   background: radial-gradient(circle at 30% 30%, #fff, #9cc8eb);
   animation: float 8s ease-in-out infinite;
-  z-index: 1;
 }
 
 .orb1 {

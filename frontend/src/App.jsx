@@ -24,12 +24,20 @@ import AddAgent from './components/AddAgent'
 import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
 import AdminLayout from './components/AdminLayout'
-<<<<<<< HEAD
 import ViewClaimHistory from './components/ViewClaimHistory'
 import AgentLayout from './components/AgentLayout'
-=======
 import Navbar from './components/Navbar'
->>>>>>> origin/prashant
+import InsuranceHero from './components/InsuranceHero'
+import AgentProfile from './components/AgentProfile'
+import CustomerLayout from './components/CustomerLayaout'
+import MyPolicies from './components/MyPolicies'
+import ViewAllPolicies from './components/ViewAllPolicy'
+import CustomerProfile from './components/CustomerProfile'
+import Product from './components/Product'
+import CustomerProduct from './components/CustomerProduct'
+import CustomerViewPolicyPlan from './components/CustomerViewPolicyPlan'
+import UpdateCustomer from './components/UpdateCustomer'
+import ForgetPassword from '../ForgetPassword'
 
 
 const App = () => {
@@ -66,8 +74,11 @@ const App = () => {
       dark:text-white
     ">
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<InsuranceHero />} />
         <Route path="/unauthorized" element={<Forbidden />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<RegisterCustomer />} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
 
 
         <Route
@@ -120,7 +131,54 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/customer/policies"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayout>
+                <ViewAllPolicies />
+              </CustomerLayout>
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/customer/product/:productType"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayout>
+                <CustomerProduct />
+              </CustomerLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/product"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayout>
+                <CustomerProduct />
+              </CustomerLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/profile"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayout>
+                <CustomerProfile />
+              </CustomerLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customer/edit-profile"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <UpdateCustomer />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/claim-history/claim/:claimId"
           element={
@@ -149,11 +207,44 @@ const App = () => {
         />
 
         <Route
+          path="/viewallplancustomer/:productId"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "CUSTOMER"]}>
+              <CustomerViewPolicyPlan />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/addplan/:productId"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
               <AddPolicyPlan />
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/agentprofile"
+          element={
+            <ProtectedRoute allowedRoles={["AGENT"]}>
+              <AgentLayout>
+                <AgentProfile />
+              </AgentLayout>
+            </ProtectedRoute>
+
+          }
+        />
+
+        <Route
+          path="/viewallclaimagent"
+          element={
+            <ProtectedRoute allowedRoles={["AGENT"]}>
+              <AgentLayout>
+                <ViewAllClaimADMIN />
+              </AgentLayout>
+            </ProtectedRoute>
+
           }
         />
 
@@ -196,7 +287,7 @@ const App = () => {
         <Route
           path="/viewallclaim"
           element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "AGENT"]}>
               <ViewAllClaimADMIN />
             </ProtectedRoute>
           }

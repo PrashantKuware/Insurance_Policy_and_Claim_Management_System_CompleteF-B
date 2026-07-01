@@ -166,3 +166,16 @@ export const adminRejectClaim = async (claimId, remarks) => {
     handleError(error);
   }
 };
+
+// export const getAllClaims = async (page = 0, size = 10) => {
+//   try {
+//     const res = await claimApi.get(
+//       `?page=${page}&size=${size}`
+//     );
+
+//     return res.data;
+//   } catch (error) {
+//     console.error("Error fetching claims:", error);
+//     throw error;
+//   }
+// };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { loginService } from "../services/loginservice";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -92,7 +92,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
+    <div className="relative text-gray-500 h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
 
       {/* animated background layer */}
       <div className="absolute inset-0 animate-spin-slow opacity-40">
@@ -150,6 +150,7 @@ const Login = () => {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
+          <NavLink to={"/forget-password"} className="text-sm text-red-500 flex justify-end hover:text-gray-500 transition hover:scale-105">Forget Password?</NavLink>
 
           {/* Button */}
           <motion.button

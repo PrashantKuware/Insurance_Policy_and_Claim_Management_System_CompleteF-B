@@ -1,5 +1,7 @@
 package com.monocept.demo.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.monocept.demo.dto.request.ProductRequestDto;
 import com.monocept.demo.dto.response.ProductResponseDto;
+import com.monocept.demo.enums.ProductType;
 import com.monocept.demo.service.ProductService;
 
 import jakarta.validation.Valid;
@@ -31,8 +34,7 @@ public class ProductController {
 	// ADMIN
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ProductResponseDto addProduct(
-			@Valid @RequestBody ProductRequestDto dto) {
+	public ProductResponseDto addProduct(@Valid @RequestBody ProductRequestDto dto) {
 
 		return productService.addProduct(dto);
 	}
@@ -40,8 +42,7 @@ public class ProductController {
 	// ADMIN, AGENT, CUSTOMER
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
-	public ProductResponseDto getProductById(
-			@PathVariable Long id) {
+	public ProductResponseDto getProductById(@PathVariable Long id) {
 
 		return productService.getProductById(id);
 	}
@@ -49,8 +50,7 @@ public class ProductController {
 	// ADMIN, AGENT, CUSTOMER
 	@GetMapping
 	@PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
-	public Page<ProductResponseDto> getAllProducts(
-			@RequestParam(defaultValue = "0") int pageNo,
+	public Page<ProductResponseDto> getAllProducts(@RequestParam(defaultValue = "0") int pageNo,
 			@RequestParam(defaultValue = "10") int pageSize) {
 
 		return productService.getAllProducts(pageNo, pageSize);
@@ -59,9 +59,7 @@ public class ProductController {
 	// ADMIN
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ProductResponseDto updateProduct(
-			@PathVariable Long id,
-			@Valid @RequestBody ProductRequestDto dto) {
+	public ProductResponseDto updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequestDto dto) {
 
 		return productService.updateProduct(id, dto);
 	}
@@ -69,11 +67,16 @@ public class ProductController {
 	// ADMIN
 	@PatchMapping("/{id}/deactivate")
 	@PreAuthorize("hasRole('ADMIN')")
-	public String deactivateProduct(
-			@PathVariable Long id) {
+	public String deactivateProduct(@PathVariable Long id) {
 
 		productService.deactivateProduct(id);
 
 		return "Product deactivated successfully";
 	}
+
+	@GetMapping("/producttype")
+	public List<ProductResponseDto> getProductByProductType(@RequestParam ProductType productType) {
+		return productService.getProductByProductType(productType);
+	}
 }
+

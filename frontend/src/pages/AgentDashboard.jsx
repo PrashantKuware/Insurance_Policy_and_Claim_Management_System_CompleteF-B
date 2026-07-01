@@ -5,7 +5,10 @@ import {
     Clock3,
     BadgeCheck
 } from "lucide-react";
+import { getSubmittedClaim } from "../services/claimService";
 import { getCurrentUser } from "../services/userService";
+import { getAllClaims } from "../services/claimService";
+import AgentClaimReview from "../components/AgentClaimReview";
 
 const AgentDashboard = () => {
 
@@ -13,25 +16,51 @@ const AgentDashboard = () => {
         useState(false);
 
     const [agentData, setAgentData] = useState(null);
+    const [claims, setClaims] = useState([])
+
+    const [submitClaimData, setSubmitClaimData] = useState([]);
+    const [loadingClaims, setLoadingClaims] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [selectedClaimId, setSelectedClaimId] = useState(null);
 
     const getAgentData = async () => {
         try {
-
             const data = await getCurrentUser();
-
             setAgentData(data);
-
             console.log("Agent Data:", data);
-
         } catch (error) {
-
             console.error(error);
+        }
+    };
 
+    const fetchSubmittedClaims = async () => {
+        try {
+            setLoadingClaims(true);
+
+            const data = await getSubmittedClaim();
+
+            setSubmitClaimData(data || []);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoadingClaims(false);
+        }
+    };
+
+    const fetchClaims = async () => {
+        try {
+            const data = await getAllClaims(0, 10);
+            console.log(data);
+            setClaims(data.content);
+        } catch (error) {
+            console.error(error);
         }
     };
 
     useEffect(() => {
         getAgentData();
+        fetchClaims();
+        fetchSubmittedClaims();
     }, []);
 
     return (
@@ -40,7 +69,7 @@ const AgentDashboard = () => {
             <div className="mb-8">
 
                 <h1 className="text-4xl font-bold text-white">
-                    Welcome Agent 👋
+                    Welcome {agentData?.fullName} 👋
                 </h1>
 
                 <p className="text-slate-400 mt-2">
@@ -61,10 +90,16 @@ const AgentDashboard = () => {
                         p-6
                     "
                 >
-                    <ClipboardCheck
-                        size={40}
-                        className="text-cyan-400 mb-4"
-                    />
+                    <div className="flex gap-2">
+                        <ClipboardCheck
+                            size={40}
+                            className="text-cyan-400 mb-4"
+                        />
+                        <p className="text-3xl font-bold text-white">
+                            {submitClaimData.length}
+                        </p>
+                    </div>
+
 
                     <h3 className="text-white text-xl font-bold">
                         Submitted Claims
@@ -85,10 +120,15 @@ const AgentDashboard = () => {
                         p-6
                     "
                 >
-                    <Clock3
-                        size={40}
-                        className="text-yellow-400 mb-4"
-                    />
+                    <div className="flex gap-2">
+                        <Clock3
+                            size={40}
+                            className="text-yellow-400 mb-4"
+                        />
+                        <p className="text-3xl font-bold text-white">
+                            {submitClaimData.length}
+                        </p>
+                    </div>
 
                     <h3 className="text-white text-xl font-bold">
                         Pending Reviews
@@ -109,10 +149,20 @@ const AgentDashboard = () => {
                         p-6
                     "
                 >
-                    <BadgeCheck
-                        size={40}
-                        className="text-green-400 mb-4"
-                    />
+                    <div className="flex gap-2 ">
+                        <BadgeCheck
+                            size={40}
+                            className="text-green-400 mb-4"
+                        />
+                        <p className="text-3xl font-bold text-white">
+                            {
+                                claims.filter(
+                                    claim =>
+                                        claim.claimStatus === "APPROVED"
+                                ).length
+                            }
+                        </p>
+                    </div>
 
                     <h3 className="text-white text-xl font-bold">
                         Approved Recommendations
@@ -185,14 +235,34 @@ const AgentDashboard = () => {
 
             </div>
 
+            {/* Submitted Claims Modal */}
+
             {showClaimsModal && (
                 <GetSubmittedClaim
-                    onClose={() =>
-                        setShowClaimsModal(false)
-                    }
+                    onClose={() => setShowClaimsModal(false)}
+                    submitClaimData={submitClaimData}
+                    loading={loadingClaims}
+                    refreshClaims={fetchSubmittedClaims}
+                    setShowReviewModal={setShowReviewModal}
+                    setSelectedClaimId={setSelectedClaimId}
                 />
             )}
 
+            {/* Review Claim Modal */}
+
+            {showReviewModal && selectedClaimId && (
+                <AgentClaimReview
+                    claimId={selectedClaimId}
+                    isModal={true}
+                    onClose={() => {
+                        setShowReviewModal(false);
+                        setSelectedClaimId(null);
+
+                        fetchSubmittedClaims();
+                        fetchClaims();
+                    }}
+                />
+            )}
         </div>
     );
 };

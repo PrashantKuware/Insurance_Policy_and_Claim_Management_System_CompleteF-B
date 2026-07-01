@@ -1,212 +1,7 @@
-// import React, { useState } from 'react'
-// import { useNavigate, useParams } from 'react-router-dom'
-// import { addNewPlanPolicy } from '../services/PlanServices';
-// import { motion } from "framer-motion";
-// import './Login.css'
-// import { toast } from "react-toastify";
-
-// const AddPolicyPlan = () => {
-
-//     const [formData, setFormData] = useState({
-//         planName: "",
-//         coverageAmount: "",
-//         premiumAmount: "",
-//         premiumType: "",
-//         duration: "",
-//         termsConditions: ""
-//     });
-
-//     const [loading, setLoading] = useState(false);
-
-//     const navigate = useNavigate();
-//     const { productId } = useParams();
-
-//     const handleAppPolicy = async (e) => {
-
-//         e.preventDefault();
-
-//         try {
-
-//             setLoading(true);
-
-//             const res = await addNewPlanPolicy(
-//                 productId,
-//                 formData.planName,
-//                 formData.coverageAmount,
-//                 formData.premiumAmount,
-//                 formData.premiumType,
-//                 formData.duration,
-//                 formData.termsConditions
-//             );
-
-//             console.log(res);
-
-//             toast.success("Policy Plan Added Successfully ✅");
-
-//             setTimeout(() => {
-//                 navigate("/admindashboard");
-//             }, 1000);
-
-//         } catch (error) {
-
-//             console.error(error);
-
-//             toast.error(
-//                 error?.response?.data?.message ||
-//                 "Failed To Add Policy Plan ❌"
-//             );
-
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
-
-//     return (
-//         <>
-//             <div className="container">
-
-//                 <div className="orb orb1"></div>
-//                 <div className="orb orb2"></div>
-//                 <div className="orb orb3"></div>
-//                 <div className="orb orb4"></div>
-
-//                 <motion.div
-//                     className="card"
-//                     initial={{ opacity: 0, scale: 0.7, y: 80 }}
-//                     animate={{ opacity: 1, scale: 1, y: 0 }}
-//                     transition={{ duration: 1 }}
-//                 >
-//                     <motion.h1
-//                         initial={{ opacity: 0 }}
-//                         animate={{ opacity: 1 }}
-//                         transition={{ delay: .5 }}
-//                     >
-//                         Insurance Portal
-//                     </motion.h1>
-
-//                     <p>Add Policy</p>
-
-//                     <form onSubmit={handleAppPolicy}>
-
-//                         <div className="inputBox">
-//                             <input
-//                                 type="text"
-//                                 placeholder="Plan Name"
-//                                 value={formData.planName}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         planName: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             />
-//                         </div>
-
-//                         <div className="doubleInput">
-
-//                             <div className="inputBox">
-//                                 <input
-//                                     type="number"
-//                                     placeholder="Coverage Amount"
-//                                     value={formData.coverageAmount}
-//                                     onChange={(e) =>
-//                                         setFormData({
-//                                             ...formData,
-//                                             coverageAmount: e.target.value
-//                                         })
-//                                     }
-//                                     required
-//                                 />
-//                             </div>
-
-//                             <div className="inputBox">
-//                                 <input
-//                                     type="number"
-//                                     placeholder="Premium Amount"
-//                                     value={formData.premiumAmount}
-//                                     onChange={(e) =>
-//                                         setFormData({
-//                                             ...formData,
-//                                             premiumAmount: e.target.value
-//                                         })
-//                                     }
-//                                     required
-//                                 />
-//                             </div>
-
-//                         </div>
-
-//                         <div className="inputBox">
-//                             <input
-//                                 type="number"
-//                                 placeholder="Enter Duration"
-//                                 value={formData.duration}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         duration: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             />
-//                         </div>
-
-//                         <div className="inputBox">
-//                             <select
-//                                 value={formData.premiumType}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         premiumType: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             >
-//                                 <option value="">Select Premium Type</option>
-//                                 <option value="ANNUAL">ANNUAL</option>
-//                                 <option value="ONE_TIME">ONE_TIME</option>
-//                             </select>
-//                         </div>
-
-//                         <div className="inputBox">
-//                             <textarea
-//                                 rows="4"
-//                                 placeholder="Terms & Conditions"
-//                                 value={formData.termsConditions}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         termsConditions: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             />
-//                         </div>
-
-//                         <motion.button
-//                             className="button"
-//                             type="submit"
-//                             disabled={loading}
-//                             whileHover={{ scale: 1.05, y: -4 }}
-//                             whileTap={{ scale: .95 }}
-//                         >
-//                             {loading ? "Adding..." : "Add Plan →"}
-//                         </motion.button>
-
-//                     </form>
-
-//                 </motion.div>
-//             </div>
-//         </>
-//     );
-// }
-
-// export default AddPolicyPlan;
-
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { addNewPlanPolicy } from "../services/PlanServices";
+import { motion } from "framer-motion"; // Framer motion import kiya
 import { toast } from "react-toastify";
 
 const AddPolicyPlan = () => {
@@ -250,30 +45,34 @@ const AddPolicyPlan = () => {
   };
 
   return (
-    <div className="relative text-gray-500 min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
+    <div className="relative text-gray-500 w-screen h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden p-4 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]">
 
-      {/* ORBS */}
-      <div className="absolute w-[320px] h-[320px] bg-blue-200/50 rounded-full blur-3xl top-[-60px] left-[30%]" />
-      <div className="absolute w-[150px] h-[150px] bg-blue-300/40 rounded-full blur-2xl top-[15%] right-[20%]" />
-      <div className="absolute w-[220px] h-[220px] bg-blue-200/40 rounded-full blur-3xl bottom-[15%] left-[10%]" />
-      <div className="absolute w-[180px] h-[180px] bg-blue-300/40 rounded-full blur-2xl bottom-[10%] right-[10%]" />
+      {/* BACKGROUND ORBS */}
+      <div className="absolute rounded-full bg-[radial-gradient(circle_at_30%_30%,#fff,#9cc8eb)] animate-[float_8s_ease-in-out_infinite] w-[320px] h-[320px] top-[-60px] left-[30%] pointer-events-none select-none"></div>
+      <div className="absolute rounded-full bg-[radial-gradient(circle_at_30%_30%,#fff,#9cc8eb)] animate-[float_8s_ease-in-out_infinite] [animation-delay:2s] w-[150px] h-[150px] top-[15%] right-[20%] pointer-events-none select-none"></div>
+      <div className="absolute rounded-full bg-[radial-gradient(circle_at_30%_30%,#fff,#9cc8eb)] animate-[float_8s_ease-in-out_infinite] [animation-delay:1s] w-[220px] h-[220px] bottom-[15%] left-[10%] pointer-events-none select-none"></div>
+      <div className="absolute rounded-full bg-[radial-gradient(circle_at_30%_30%,#fff,#9cc8eb)] animate-[float_8s_ease-in-out_infinite] [animation-delay:3s] w-[180px] h-[180px] bottom-[10%] right-[10%] pointer-events-none select-none"></div>
 
-      {/* CARD */}
-      <div className="relative z-10 w-[90%] max-w-[520px] p-10 rounded-[35px]
-      backdrop-blur-3xl bg-white/30 border border-white/40 shadow-xl">
-
-        <h1 className="text-4xl font-bold text-center text-[#243447]">
+      {/* CARD CONTAINER WITH ENTRY ANIMATION */}
+      <motion.div
+        className="relative z-10 w-[35vw] max-w-xl p-8 rounded-[35px]
+        backdrop-blur-[35px] bg-white/30 border border-white/40 shadow-[0_20px_60px_rgba(0,0,0,0.08)] max-h-[95vh] flex flex-col justify-center"
+        initial={{ opacity: 0, scale: 0.7, y: 40 }} // Starting state
+        animate={{ opacity: 1, scale: 1, y: 0 }}    // Load state
+        transition={{ duration: 0.8 }}              // Speed of animation
+      >
+        <h1 className="text-3xl font-bold text-center text-[#243447]">
           Insurance Portal
         </h1>
 
-        <p className="text-center text-gray-600 mt-2 mb-6">
+        <p className="text-center text-gray-500 mt-2 mb-6 text-sm">
           Add Policy Plan
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]">
 
           <input
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
+            className="w-full p-3 rounded-xl bg-white/40 outline-none text-zinc-800 text-sm placeholder-gray-400 border border-transparent focus:border-white/60 transition"
             placeholder="Plan Name"
             required
             value={formData.planName}
@@ -284,10 +83,10 @@ const AddPolicyPlan = () => {
 
           <div className="flex gap-3">
             <input
-              className="w-full p-4 rounded-xl bg-white/40 outline-none"
+              className="w-full p-3 rounded-xl bg-white/40 outline-none text-zinc-800 text-sm placeholder-gray-400 border border-transparent focus:border-white/60 transition"
               type="number"
               required
-              placeholder="Coverage"
+              placeholder="Coverage Amount"
               value={formData.coverageAmount}
               onChange={(e) =>
                 setFormData({ ...formData, coverageAmount: e.target.value })
@@ -295,10 +94,10 @@ const AddPolicyPlan = () => {
             />
 
             <input
-              className="w-full p-4 rounded-xl bg-white/40 outline-none"
+              className="w-full p-3 rounded-xl bg-white/40 outline-none text-zinc-800 text-sm placeholder-gray-400 border border-transparent focus:border-white/60 transition"
               type="number"
               required
-              placeholder="Premium"
+              placeholder="Premium Amount"
               value={formData.premiumAmount}
               onChange={(e) =>
                 setFormData({ ...formData, premiumAmount: e.target.value })
@@ -307,9 +106,9 @@ const AddPolicyPlan = () => {
           </div>
 
           <input
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
+            className="w-full p-3 rounded-xl bg-white/40 outline-none text-zinc-800 text-sm placeholder-gray-400 border border-transparent focus:border-white/60 transition"
             type="number"
-            placeholder="Duration"
+            placeholder="Duration (Months)"
             required
             value={formData.duration}
             onChange={(e) =>
@@ -318,21 +117,21 @@ const AddPolicyPlan = () => {
           />
 
           <select
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
+            className="w-full p-3 rounded-xl bg-white/40 outline-none text-zinc-800 text-sm border border-transparent focus:border-white/60 transition"
             value={formData.premiumType}
             required
             onChange={(e) =>
               setFormData({ ...formData, premiumType: e.target.value })
             }
           >
-            <option value="">Select Premium Type</option>
+            <option value="" className="text-gray-400">Select Premium Type</option>
             <option value="ANNUAL">ANNUAL</option>
             <option value="ONE_TIME">ONE_TIME</option>
           </select>
 
           <textarea
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-            rows={4}
+            className="w-full p-3 rounded-xl bg-white/40 outline-none text-zinc-800 text-sm placeholder-gray-400 border border-transparent focus:border-white/60 transition resize-none"
+            rows={3}
             required
             placeholder="Terms & Conditions"
             value={formData.termsConditions}
@@ -341,16 +140,25 @@ const AddPolicyPlan = () => {
             }
           />
 
-          <button
+          {/* BUTTON WITH HOVER/CLICK EFFECT */}
+          <motion.button
             disabled={loading}
-            className="w-full h-[55px] rounded-xl font-semibold text-lg
-            bg-gradient-to-r from-blue-200 to-blue-300 hover:scale-105 transition"
+            className="w-full h-12 rounded-xl font-semibold text-md text-zinc-800 mt-4
+            bg-gradient-to-r from-[#d2e6ff] to-[#a7ccff] shadow-sm relative overflow-hidden"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
             {loading ? "Adding..." : "Add Plan →"}
-          </button>
+          </motion.button>
 
         </form>
-      </div>
+      </motion.div>
+
+      <style>{`
+        @keyframes float {
+          50% { transform: translateY(-30px) rotate(10deg); }
+        }
+      `}</style>
     </div>
   );
 };

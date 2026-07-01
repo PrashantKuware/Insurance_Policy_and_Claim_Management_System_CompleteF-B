@@ -32,15 +32,23 @@ export const addCustomer = async (customerData) => {
 };
 
 export const customerExists = async () => {
-    try {
+  try {
+    const res = await customerApi.get("/exists");
+    return res.data;
 
-        const res = await customerApi.get("/exists");
-
-        return res.data;
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
+
+export const updateCustomer = async (customerData) => {
+  try {
+    const res = await customerApi.put("", customerData);
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+} 

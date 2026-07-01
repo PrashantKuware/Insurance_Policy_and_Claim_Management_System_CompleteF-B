@@ -36,3 +36,17 @@ export const addNewProduct = async (
     handleError(error);
   }
 };
+
+export const getProductBtProductType = async (productType) => {
+  try {
+    const res = await productApi.get("/producttype", {
+      params: {
+        productType,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
