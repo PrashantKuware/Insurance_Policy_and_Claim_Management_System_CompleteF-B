@@ -1,357 +1,224 @@
-// import React, { useState } from 'react'
-// import { useNavigate, useParams } from 'react-router-dom'
-// import { addNewPlanPolicy } from '../services/PlanServices';
-// import { motion } from "framer-motion";
-// import './Login.css'
-// import { toast } from "react-toastify";
-
-// const AddPolicyPlan = () => {
-
-//     const [formData, setFormData] = useState({
-//         planName: "",
-//         coverageAmount: "",
-//         premiumAmount: "",
-//         premiumType: "",
-//         duration: "",
-//         termsConditions: ""
-//     });
-
-//     const [loading, setLoading] = useState(false);
-
-//     const navigate = useNavigate();
-//     const { productId } = useParams();
-
-//     const handleAppPolicy = async (e) => {
-
-//         e.preventDefault();
-
-//         try {
-
-//             setLoading(true);
-
-//             const res = await addNewPlanPolicy(
-//                 productId,
-//                 formData.planName,
-//                 formData.coverageAmount,
-//                 formData.premiumAmount,
-//                 formData.premiumType,
-//                 formData.duration,
-//                 formData.termsConditions
-//             );
-
-//             console.log(res);
-
-//             toast.success("Policy Plan Added Successfully ✅");
-
-//             setTimeout(() => {
-//                 navigate("/admindashboard");
-//             }, 1000);
-
-//         } catch (error) {
-
-//             console.error(error);
-
-//             toast.error(
-//                 error?.response?.data?.message ||
-//                 "Failed To Add Policy Plan ❌"
-//             );
-
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
-
-//     return (
-//         <>
-//             <div className="container">
-
-//                 <div className="orb orb1"></div>
-//                 <div className="orb orb2"></div>
-//                 <div className="orb orb3"></div>
-//                 <div className="orb orb4"></div>
-
-//                 <motion.div
-//                     className="card"
-//                     initial={{ opacity: 0, scale: 0.7, y: 80 }}
-//                     animate={{ opacity: 1, scale: 1, y: 0 }}
-//                     transition={{ duration: 1 }}
-//                 >
-//                     <motion.h1
-//                         initial={{ opacity: 0 }}
-//                         animate={{ opacity: 1 }}
-//                         transition={{ delay: .5 }}
-//                     >
-//                         Insurance Portal
-//                     </motion.h1>
-
-//                     <p>Add Policy</p>
-
-//                     <form onSubmit={handleAppPolicy}>
-
-//                         <div className="inputBox">
-//                             <input
-//                                 type="text"
-//                                 placeholder="Plan Name"
-//                                 value={formData.planName}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         planName: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             />
-//                         </div>
-
-//                         <div className="doubleInput">
-
-//                             <div className="inputBox">
-//                                 <input
-//                                     type="number"
-//                                     placeholder="Coverage Amount"
-//                                     value={formData.coverageAmount}
-//                                     onChange={(e) =>
-//                                         setFormData({
-//                                             ...formData,
-//                                             coverageAmount: e.target.value
-//                                         })
-//                                     }
-//                                     required
-//                                 />
-//                             </div>
-
-//                             <div className="inputBox">
-//                                 <input
-//                                     type="number"
-//                                     placeholder="Premium Amount"
-//                                     value={formData.premiumAmount}
-//                                     onChange={(e) =>
-//                                         setFormData({
-//                                             ...formData,
-//                                             premiumAmount: e.target.value
-//                                         })
-//                                     }
-//                                     required
-//                                 />
-//                             </div>
-
-//                         </div>
-
-//                         <div className="inputBox">
-//                             <input
-//                                 type="number"
-//                                 placeholder="Enter Duration"
-//                                 value={formData.duration}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         duration: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             />
-//                         </div>
-
-//                         <div className="inputBox">
-//                             <select
-//                                 value={formData.premiumType}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         premiumType: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             >
-//                                 <option value="">Select Premium Type</option>
-//                                 <option value="ANNUAL">ANNUAL</option>
-//                                 <option value="ONE_TIME">ONE_TIME</option>
-//                             </select>
-//                         </div>
-
-//                         <div className="inputBox">
-//                             <textarea
-//                                 rows="4"
-//                                 placeholder="Terms & Conditions"
-//                                 value={formData.termsConditions}
-//                                 onChange={(e) =>
-//                                     setFormData({
-//                                         ...formData,
-//                                         termsConditions: e.target.value
-//                                     })
-//                                 }
-//                                 required
-//                             />
-//                         </div>
-
-//                         <motion.button
-//                             className="button"
-//                             type="submit"
-//                             disabled={loading}
-//                             whileHover={{ scale: 1.05, y: -4 }}
-//                             whileTap={{ scale: .95 }}
-//                         >
-//                             {loading ? "Adding..." : "Add Plan →"}
-//                         </motion.button>
-
-//                     </form>
-
-//                 </motion.div>
-//             </div>
-//         </>
-//     );
-// }
-
-// export default AddPolicyPlan;
-
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { addNewPlanPolicy } from "../services/PlanServices";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FaPlusCircle, FaArrowLeft } from "react-icons/fa";
+import PageLayout from "./common/PageLayout";
+import PageHeader from "./common/PageHeader";
+import FormInput from "./common/FormInput";
+import FormSelect from "./common/FormSelect";
+import PrimaryButton from "./common/PrimaryButton";
+import SecondaryButton from "./common/SecondaryButton";
+import GlassCard from "./common/GlassCard";
+import { addPlan } from "../services/PlanServices";
 
 const AddPolicyPlan = () => {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
-    planName: "",
-    coverageAmount: "",
+    policyName: "",
     premiumAmount: "",
+    coverageAmount: "",
+    minimumTerm: "",
+    maximumTerm: "",
+    minimumAge: "",
+    maximumAge: "",
     premiumType: "",
-    duration: "",
-    termsConditions: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { productId } = useParams();
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const valErrors = {};
+    if (!formData.policyName.trim()) valErrors.policyName = "Policy Name is required";
+    if (!formData.premiumAmount || Number(formData.premiumAmount) <= 0) valErrors.premiumAmount = "Enter valid premium amount";
+    if (!formData.coverageAmount || Number(formData.coverageAmount) <= 0) valErrors.coverageAmount = "Enter valid coverage amount";
+    if (!formData.minimumTerm || Number(formData.minimumTerm) <= 0) valErrors.minimumTerm = "Enter valid min term";
+    if (!formData.maximumTerm || Number(formData.maximumTerm) <= 0) valErrors.maximumTerm = "Enter valid max term";
+    if (!formData.minimumAge || Number(formData.minimumAge) <= 0) valErrors.minimumAge = "Enter valid min age";
+    if (!formData.maximumAge || Number(formData.maximumAge) <= 0) valErrors.maximumAge = "Enter valid max age";
+    if (!formData.premiumType) valErrors.premiumType = "Select premium payment type";
+
+    // Term checks
+    if (Number(formData.minimumTerm) > Number(formData.maximumTerm)) {
+      valErrors.minimumTerm = "Min term cannot exceed max term";
+    }
+    // Age checks
+    if (Number(formData.minimumAge) > Number(formData.maximumAge)) {
+      valErrors.minimumAge = "Min age cannot exceed max age";
+    }
+
+    if (Object.keys(valErrors).length > 0) {
+      setErrors(valErrors);
+      return;
+    }
+
+    setLoading(true);
     try {
-      setLoading(true);
+      await addPlan({
+        policyName: formData.policyName,
+        premiumAmount: Number(formData.premiumAmount),
+        coverageAmount: Number(formData.coverageAmount),
+        minimumTerm: Number(formData.minimumTerm),
+        maximumTerm: Number(formData.maximumTerm),
+        minimumAge: Number(formData.minimumAge),
+        maximumAge: Number(formData.maximumAge),
+        premiumType: formData.premiumType,
+        productId: Number(productId), // link plan to product
+      });
 
-      await addNewPlanPolicy(
-        productId,
-        formData.planName,
-        formData.coverageAmount,
-        formData.premiumAmount,
-        formData.premiumType,
-        formData.duration,
-        formData.termsConditions
-      );
-
-      toast.success("Policy Plan Added Successfully ✅");
-
-      setTimeout(() => navigate("/admindashboard"), 800);
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed To Add Policy ❌");
+      toast.success("Policy Plan added successfully ✨");
+      navigate(`/viewallplan/${productId}`);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to add policy plan");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
+    <PageLayout>
+      <PageHeader
+        title="Add Policy Plan"
+        subtitle={`Configure the premium and coverage rules under Product #${productId}`}
+      />
 
-      {/* ORBS */}
-      <div className="absolute w-[320px] h-[320px] bg-blue-200/50 rounded-full blur-3xl top-[-60px] left-[30%]" />
-      <div className="absolute w-[150px] h-[150px] bg-blue-300/40 rounded-full blur-2xl top-[15%] right-[20%]" />
-      <div className="absolute w-[220px] h-[220px] bg-blue-200/40 rounded-full blur-3xl bottom-[15%] left-[10%]" />
-      <div className="absolute w-[180px] h-[180px] bg-blue-300/40 rounded-full blur-2xl bottom-[10%] right-[10%]" />
-
-      {/* CARD */}
-      <div className="relative z-10 w-[90%] max-w-[520px] p-10 rounded-[35px]
-      backdrop-blur-3xl bg-white/30 border border-white/40 shadow-xl">
-
-        <h1 className="text-4xl font-bold text-center text-[#243447]">
-          Insurance Portal
-        </h1>
-
-        <p className="text-center text-gray-600 mt-2 mb-6">
-          Add Policy Plan
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          <input
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-            placeholder="Plan Name"
-            required
-            value={formData.planName}
-            onChange={(e) =>
-              setFormData({ ...formData, planName: e.target.value })
-            }
-          />
-
-          <div className="flex gap-3">
-            <input
-              className="w-full p-4 rounded-xl bg-white/40 outline-none"
-              type="number"
+      <div className="flex justify-center mt-2">
+        <GlassCard hoverable={false} className="w-full max-w-2xl p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <FormInput
+              label="Policy Plan Name"
+              id="policyName"
+              name="policyName"
+              placeholder="e.g. Life Golden Term"
+              value={formData.policyName}
+              onChange={handleChange}
+              error={errors.policyName}
               required
-              placeholder="Coverage"
-              value={formData.coverageAmount}
-              onChange={(e) =>
-                setFormData({ ...formData, coverageAmount: e.target.value })
-              }
             />
 
-            <input
-              className="w-full p-4 rounded-xl bg-white/40 outline-none"
-              type="number"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormInput
+                label="Premium Amount"
+                id="premiumAmount"
+                name="premiumAmount"
+                type="number"
+                placeholder="₹ Amount"
+                value={formData.premiumAmount}
+                onChange={handleChange}
+                error={errors.premiumAmount}
+                required
+              />
+
+              <FormInput
+                label="Coverage Amount"
+                id="coverageAmount"
+                name="coverageAmount"
+                type="number"
+                placeholder="₹ Coverage Limit"
+                value={formData.coverageAmount}
+                onChange={handleChange}
+                error={errors.coverageAmount}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormInput
+                label="Minimum Term (Years)"
+                id="minimumTerm"
+                name="minimumTerm"
+                type="number"
+                placeholder="e.g. 5"
+                value={formData.minimumTerm}
+                onChange={handleChange}
+                error={errors.minimumTerm}
+                required
+              />
+
+              <FormInput
+                label="Maximum Term (Years)"
+                id="maximumTerm"
+                name="maximumTerm"
+                type="number"
+                placeholder="e.g. 25"
+                value={formData.maximumTerm}
+                onChange={handleChange}
+                error={errors.maximumTerm}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormInput
+                label="Minimum Age Requirement"
+                id="minimumAge"
+                name="minimumAge"
+                type="number"
+                placeholder="e.g. 18"
+                value={formData.minimumAge}
+                onChange={handleChange}
+                error={errors.minimumAge}
+                required
+              />
+
+              <FormInput
+                label="Maximum Age Requirement"
+                id="maximumAge"
+                name="maximumAge"
+                type="number"
+                placeholder="e.g. 60"
+                value={formData.maximumAge}
+                onChange={handleChange}
+                error={errors.maximumAge}
+                required
+              />
+            </div>
+
+            <FormSelect
+              label="Premium Payment Frequency"
+              id="premiumType"
+              name="premiumType"
+              placeholder="Select payment frequency"
+              value={formData.premiumType}
+              onChange={handleChange}
+              options={[
+                { label: "ANNUAL", value: "ANNUAL" },
+                { label: "ONE_TIME", value: "ONE_TIME" },
+              ]}
+              error={errors.premiumType}
               required
-              placeholder="Premium"
-              value={formData.premiumAmount}
-              onChange={(e) =>
-                setFormData({ ...formData, premiumAmount: e.target.value })
-              }
             />
-          </div>
 
-          <input
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-            type="number"
-            placeholder="Duration"
-            required
-            value={formData.duration}
-            onChange={(e) =>
-              setFormData({ ...formData, duration: e.target.value })
-            }
-          />
-
-          <select
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-            value={formData.premiumType}
-            required
-            onChange={(e) =>
-              setFormData({ ...formData, premiumType: e.target.value })
-            }
-          >
-            <option value="">Select Premium Type</option>
-            <option value="ANNUAL">ANNUAL</option>
-            <option value="ONE_TIME">ONE_TIME</option>
-          </select>
-
-          <textarea
-            className="w-full p-4 rounded-xl bg-white/40 outline-none"
-            rows={4}
-            required
-            placeholder="Terms & Conditions"
-            value={formData.termsConditions}
-            onChange={(e) =>
-              setFormData({ ...formData, termsConditions: e.target.value })
-            }
-          />
-
-          <button
-            disabled={loading}
-            className="w-full h-[55px] rounded-xl font-semibold text-lg
-            bg-gradient-to-r from-blue-200 to-blue-300 hover:scale-105 transition"
-          >
-            {loading ? "Adding..." : "Add Plan →"}
-          </button>
-
-        </form>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/50 dark:border-slate-800">
+              <SecondaryButton
+                onClick={() => navigate(-1)}
+                disabled={loading}
+                icon={FaArrowLeft}
+              >
+                Cancel
+              </SecondaryButton>
+              <PrimaryButton
+                type="submit"
+                loading={loading}
+                icon={FaPlusCircle}
+              >
+                Add Policy Plan
+              </PrimaryButton>
+            </div>
+          </form>
+        </GlassCard>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

@@ -1,196 +1,148 @@
-// import React, { useEffect, useState } from 'react'
-// import { getPolicyByProductId } from '../services/PlanServices'
-// import { NavLink, useParams } from 'react-router-dom'
-// import "./Product.css"
-// import usePolicyByProductId from '../hooks/usePolicyByProductId'
-// import { useSelector } from 'react-redux'
-
-// const ViewPolicyPlan = () => {
-
-//     const { productId } = useParams();
-
-//     let {
-//         policyData,
-//         loading,
-//         error,
-//         refreshPolicies
-//     } = usePolicyByProductId(productId);
-
-//     const role = useSelector(
-//         (state) => state.auth.role
-//     );
-
-
-//     if (role === "CUSTOMER") {
-//         policyData = policyData.filter((ele) => {
-//             return ele.active === true
-//         })
-//     }
-
-
-//     if (loading) return <h1>Loading...</h1>;
-
-//     if (error) return <h1>Error</h1>;
-
-//     return (
-//         <div className="dashboardContainer">
-
-//             <div className="orb orb1"></div>
-//             <div className="orb orb2"></div>
-//             <div className="orb orb3"></div>
-//             <div className="orb orb4"></div>
-
-//             <div className="dashboardContent">
-
-//                 <h1 className="dashboardTitle">
-//                     Policy Plans
-//                 </h1>
-
-//                 <div className="productGrid">
-
-//                     {
-//                         policyData.length > 0 ?
-
-//                             policyData.map((ele) => (
-
-//                                 <div
-//                                     key={ele.planId}
-//                                     className="productCard"
-//                                 >
-
-//                                     <div className="badge">
-//                                         {ele.premiumType}
-//                                     </div>
-
-//                                     <h2>
-//                                         {ele.planName}
-//                                     </h2>
-
-//                                     <p>
-//                                         Product : {ele.productName}
-//                                     </p>
-
-//                                     <p>
-//                                         Coverage :
-//                                         ₹{ele.coverageAmount}
-//                                     </p>
-
-//                                     <p>
-//                                         Premium :
-//                                         ₹{ele.premiumAmount}
-//                                     </p>
-
-//                                     <p>
-//                                         Duration :
-//                                         {ele.duration} Years
-//                                     </p>
-
-//                                     <p>
-//                                         Status :
-//                                         {
-//                                             ele.active
-//                                                 ? " Active"
-//                                                 : " Inactive"
-//                                         }
-//                                     </p>
-
-//                                     <p>
-//                                         {ele.termsConditions}
-//                                     </p>
-
-//                                     {role === "CUSTOMER" && <NavLink
-//                                         to={`/purchasepolicy/${ele.planId}`}
-//                                         className="addBtn"
-//                                     >
-//                                         🛒 Purchase Policy
-//                                     </NavLink>}
-
-//                                 </div>
-
-//                             ))
-
-//                             :
-
-//                             <h2>
-//                                 No Policy Plan Found
-//                             </h2>
-//                     }
-
-//                 </div>
-
-//             </div>
-
-//         </div>
-//     )
-// }
-
-// export default ViewPolicyPlan
-
-import React from "react";
-import { NavLink, useParams } from "react-router-dom";
-import usePolicyByProductId from "../hooks/usePolicyByProductId";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { FaShieldAlt, FaPlus, FaArrowLeft, FaInbox } from "react-icons/fa";
+import PageLayout from "./common/PageLayout";
+import PageHeader from "./common/PageHeader";
+import GlassCard from "./common/GlassCard";
+import LoadingSpinner from "./common/LoadingSpinner";
+import formatCurrency from "../utils/formatCurrency";
+import { getProductById } from "../services/ProductService";
+import { getPolicyByProductId } from "../services/PlanServices";
 
 const ViewPolicyPlan = () => {
   const { productId } = useParams();
-  const { policyData, loading, error } = usePolicyByProductId(productId);
+  const navigate = useNavigate();
+  const role = localStorage.getItem("role");
 
-  const role = useSelector((state) => state.auth.role);
+  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(null);
+  const [plans, setPlans] = useState([]);
 
-  const data =
-    role === "CUSTOMER"
-      ? policyData.filter((p) => p.active)
-      : policyData;
+  useEffect(() => {
+    const fetchPlanData = async () => {
+      try {
+        const [prodData, plansData] = await Promise.all([
+          getProductById(productId),
+          getPolicyByProductId(productId),
+        ]);
+        setProduct(prodData);
+        setPlans(plansData || []);
+      } catch (err) {
+        toast.error("Failed to load policy plans for this product");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (loading) return <h2 className="text-center p-10">Loading...</h2>;
-  if (error) return <h2 className="text-center p-10">Error</h2>;
+    fetchPlanData();
+  }, [productId]);
+
+  if (loading) return <LoadingSpinner fullPage message="Fetching plans..." />;
 
   return (
-    <div className="min-h-screen bg-[#eef2f7] p-10">
+    <PageLayout>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors"
+          >
+            <FaArrowLeft className="w-4 h-4" />
+          </button>
+          <PageHeader
+            title={product ? `${product.productName} Plans` : "Policy Plans"}
+            subtitle={product ? `${product.description}` : "Browse specific coverage schedules."}
+            showBreadcrumbs={false}
+          />
+        </div>
 
-      <h1 className="text-4xl font-bold text-center mb-10">
-        Policy Plans
-      </h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {data.length > 0 ? (
-          data.map((ele) => (
-            <div
-              key={ele.planId}
-              className="bg-white/30 backdrop-blur-xl border border-white/30 rounded-3xl p-6 shadow hover:-translate-y-2 transition"
-            >
-              <span className="px-4 py-2 bg-purple-100 rounded-full text-sm font-semibold">
-                {ele.premiumType}
-              </span>
-
-              <h2 className="text-xl font-bold mt-3">{ele.planName}</h2>
-
-              <p>Coverage: ₹{ele.coverageAmount}</p>
-              <p>Premium: ₹{ele.premiumAmount}</p>
-              <p>Duration: {ele.duration} Years</p>
-
-              <p className="font-semibold mt-2">
-                {ele.active ? "Active" : "Inactive"}
-              </p>
-
-              {role === "CUSTOMER" && (
-                <NavLink
-                  to={`/purchasepolicy/${ele.planId}`}
-                  className="block mt-4 text-center py-3 rounded-xl bg-gradient-to-r from-blue-200 to-blue-300 font-semibold"
-                >
-                  🛒 Purchase
-                </NavLink>
-              )}
-            </div>
-          ))
-        ) : (
-          <h2 className="text-center col-span-full">
-            No Policy Found
-          </h2>
+        {role === "ADMIN" && (
+          <button
+            type="button"
+            onClick={() => navigate(`/addplan/${productId}`)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+          >
+            <FaPlus className="w-3 h-3" /> Add Policy Plan
+          </button>
         )}
       </div>
-    </div>
+
+      {plans.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+          {plans.map((plan) => (
+            <GlassCard key={plan.planId} hoverable className="flex flex-col justify-between p-6">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="inline-block px-3 py-1 text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 rounded-full uppercase tracking-wider">
+                    {plan.premiumType}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    ID: #{plan.planId}
+                  </span>
+                </div>
+
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-3">
+                  {plan.policyName || "Premium Protection"}
+                </h3>
+
+                <div className="space-y-3.5 my-5 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/80 p-4 rounded-xl">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-bold uppercase">Coverage</span>
+                    <span className="font-extrabold text-slate-800 dark:text-white">
+                      {formatCurrency(plan.coverageAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-bold uppercase">Premium Amount</span>
+                    <span className="font-extrabold text-slate-800 dark:text-white">
+                      {formatCurrency(plan.premiumAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-bold uppercase">Min Term</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      {plan.minimumTerm} years
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-bold uppercase">Max Term</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      {plan.maximumTerm} years
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-200/50 dark:border-slate-850">
+                {role === "CUSTOMER" ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/purchasepolicy/${plan.planId}`)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md cursor-pointer transition-all active:scale-[0.97]"
+                  >
+                    <FaShieldAlt className="w-3.5 h-3.5" /> Purchase Policy
+                  </button>
+                ) : (
+                  <div className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    {role || "Guest"} Account
+                  </div>
+                )}
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      ) : (
+        <div className="py-20 flex flex-col items-center justify-center text-center text-slate-400">
+          <FaInbox className="w-12 h-12 mb-4" />
+          <p className="text-sm font-semibold mb-2">No policy plans configured for this product category.</p>
+          <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+            Please ask the administrator to create active policy structures under this product category.
+          </p>
+        </div>
+      )}
+    </PageLayout>
   );
 };
 

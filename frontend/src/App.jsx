@@ -1,71 +1,55 @@
-import React, { useEffect } from 'react'
-import Login from './components/Login'
-import { Route, Routes } from 'react-router-dom'
-import AdminDashboard from './pages/AdminDashboard'
-import AgentDashboard from './pages/AgentDashboard'
-import CustomerDashboard from './pages/CustomerDashboard'
-import AddProduct from './components/AddProduct'
-import ViewPolicyPlan from './components/ViewPolicyPlan'
-import AddPolicyPlan from './components/AddPolicyPlan'
-import ProtectedRoute from './components/ProtectedRoute'
-import { useDispatch } from 'react-redux'
-import { jwtDecode } from 'jwt-decode'
-import { login } from './redux/authSlice'
-import PurchasePolicy from './components/PurchasePolicy'
-import ViewClaim from './components/ViewClaim'
-import SubmitClaim from './components/SubmitClaim'
-import AgentClaimReview from './components/AgentClaimReview'
-import ViewAllClaimADMIN from './components/ViewAllClaimADMIN'
-import Forbidden from './components/Forbidden'
-import ImpossibleLightbulb from './components/ImpossibleLightbulb'
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import AddAgent from './components/AddAgent'
-import RegisterCustomer from './components/RegisterCustomer'
-import AddCustomer from './components/AddCustomer'
-import AdminLayout from './components/AdminLayout'
-import Navbar from './components/Navbar'
-import Sidebar from './components/Sidebar'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
+// Layouts
+import AdminLayout from "./components/AdminLayout";
+import AgentLayout from "./components/AgentLayout";
+import CustomerLayaout from "./components/CustomerLayaout";
 
-const App = () => {
+// Core Components
+import Login from "./components/Login";
+import Register from "./components/Register";
 
-  const dispatch = useDispatch();
+// Pages
+import AdminDashboard from "./pages/AdminDashboard";
+import AgentDashboard from "./pages/AgentDashboard";
+import CustomerDashboard from "./pages/CustomerDashboard";
 
-  useEffect(() => {
+// Submodules
+import AllProducts from "./components/AllProducts";
+import AddProduct from "./components/AddProduct";
+import AllCustomers from "./components/AllCustomers";
+import AddCustomer from "./components/AddCustomer";
+import AllAgents from "./components/AllAgents";
+import AddAgent from "./components/AddAgent";
+import AddPolicyPlan from "./components/AddPolicyPlan";
+import ViewPolicyPlan from "./components/ViewPolicyPlan";
+import PurchasePolicy from "./components/PurchasePolicy";
+import ViewClaim from "./components/ViewClaim";
+import SubmitClaim from "./components/SubmitClaim";
 
-    const token = localStorage.getItem("token");
+// Dynamic Layout Selector Wrapper for shared routes
+const LayoutWrapper = ({ children }) => {
+  const role = localStorage.getItem("role");
+  if (role === "ADMIN") {
+    return <AdminLayout>{children}</AdminLayout>;
+  } else if (role === "AGENT") {
+    return <AgentLayout>{children}</AgentLayout>;
+  } else {
+    return <CustomerLayaout>{children}</CustomerLayaout>;
+  }
+};
 
-    if (token) {
-
-      const decoded = jwtDecode(token);
-
-      dispatch(
-        login({
-          token,
-          role: decoded.role
-        })
-      );
-    }
-
-  }, []);
-
+function App() {
   return (
-    <div div className="
-      min-h-screen
-      bg-gradient-to-r
-      from-indigo-50
-      to-slate-50
-      dark:from-gray-900
-      dark:to-black
-      text-gray-900
-      dark:text-white
-    ">
+    <Router>
       <Routes>
+        {/* Public Credentials Routes */}
         <Route path="/" element={<Login />} />
-        <Route path="/unauthorized" element={<Forbidden />} />
+        <Route path="/register" element={<Register />} />
 
-
+        {/* ADMIN RESTRICTED PANELS */}
         <Route
           path="/admindashboard"
           element={
@@ -76,143 +60,148 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/admindashboard"
+          path="/allProducts"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminDashboard />
+              <AdminLayout>
+                <AllProducts />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
-
-        <Route
-          path="/agentdashboard"
-          element={
-            <ProtectedRoute allowedRoles={["AGENT"]}>
-             
-              <Navbar />
-              <AgentDashboard />
-              
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/customerdashboard"
-          element={
-            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-              <CustomerDashboard />
-            </ProtectedRoute>
-          }
-        />
-
         <Route
           path="/addProduct"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AddProduct />
+              <AdminLayout>
+                <AddProduct />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/viewallplan/:productId"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN", "CUSTOMER"]}>
-              <ViewPolicyPlan />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/addplan/:productId"
+          path="/allCustomers"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AddPolicyPlan />
+              <AdminLayout>
+                <AllCustomers />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/purchasepolicy/:planId"
-          element={
-            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-              <PurchasePolicy />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/policy/:policyId"
-          element={
-            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-              <ViewClaim />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/policy/submitclaim/:policyId"
-          element={
-            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-              <SubmitClaim />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/:claimId/review"
-          element={
-            <ProtectedRoute allowedRoles={["AGENT"]}>
-              <AgentClaimReview />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/viewallclaim"
+          path="/allAgents"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <ViewAllClaimADMIN />
+              <AdminLayout>
+                <AllAgents />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/addagent"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AddAgent />
+              <AdminLayout>
+                <AddAgent />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/addplan/:productId"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminLayout>
+                <AddPolicyPlan />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
 
+        {/* AGENT RESTRICTED PANELS */}
         <Route
-          path="/register"
+          path="/agentdashboard"
           element={
-            <RegisterCustomer />
+            <ProtectedRoute allowedRoles={["AGENT"]}>
+              <AgentLayout>
+                <AgentDashboard />
+              </AgentLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* CUSTOMER RESTRICTED PANELS */}
+        <Route
+          path="/customerdashboard"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayaout>
+                <CustomerDashboard />
+              </CustomerLayaout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/addCustomer"
           element={
-            <AddCustomer />
+            <ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]}>
+              <LayoutWrapper>
+                <AddCustomer />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/purchasepolicy/:planId"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayaout>
+                <PurchasePolicy />
+              </CustomerLayaout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/submitclaim"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayaout>
+                <SubmitClaim />
+              </CustomerLayaout>
+            </ProtectedRoute>
           }
         />
 
+        {/* SHARED DYNAMIC CHANNELS */}
         <Route
-          path="*"
-          element={<ImpossibleLightbulb />}
+          path="/viewallplan/:productId"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "CUSTOMER"]}>
+              <LayoutWrapper>
+                <ViewPolicyPlan />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
         />
-      </Routes>
+        <Route
+          path="/viewallclaim"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "AGENT", "CUSTOMER"]}>
+              <LayoutWrapper>
+                <ViewClaim />
+              </LayoutWrapper>
+            </ProtectedRoute>
+          }
+        />
 
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-      />
-    </div>
-  )
+        {/* Fallback Redirection */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;

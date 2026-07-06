@@ -1,389 +1,472 @@
-import React, { useEffect, useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
-import { getPolicyByPolicyId } from '../services/policyService';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { FaInbox, FaFolderOpen, FaArrowLeft, FaPlus, FaCheck, FaBan, FaUpload } from "react-icons/fa";
+import PageLayout from "./common/PageLayout";
+import PageHeader from "./common/PageHeader";
+import DataTable from "./common/DataTable";
+import TableHeader from "./common/TableHeader";
+import TableRow from "./common/TableRow";
+import StatusBadge from "./common/StatusBadge";
+import SearchBar from "./common/SearchBar";
+import FilterDropdown from "./common/FilterDropdown";
+import Pagination from "./common/Pagination";
+import LoadingSpinner, { TableSkeleton } from "./common/LoadingSpinner";
+import DetailsModal from "./common/DetailsModal";
+import ConfirmationModal from "./common/ConfirmationModal";
+import GlassCard from "./common/GlassCard";
+import FormTextarea from "./common/FormTextarea";
+import formatCurrency from "../utils/formatCurrency";
 import {
-    getClaimByPolicyId,
-    getClaimDocument,
-    withdrawClaimById
-} from '../services/claimService';
-import { toast } from 'react-toastify';
+  getAllClaims,
+  getClaimsByCustomer,
+  getSubmittedClaims,
+  withdrawClaim,
+  reviewClaim,
+  recommendClaimApproval,
+  recommendClaimRejection,
+  approveClaim,
+  rejectClaim,
+  uploadClaimDocuments,
+  getClaimDocuments,
+} from "../services/claimService";
+import { checkCustomerProfileExists, getAllCustomers } from "../services/CustomerService";
 
 const ViewClaim = () => {
+  const navigate = useNavigate();
+  const role = localStorage.getItem("role");
 
-    const { policyId } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [claims, setClaims] = useState([]);
+  const [customerId, setCustomerId] = useState(null);
 
-    const [planData, setPlanData] = useState({});
-    const [claimData, setClaimData] = useState(null);
-    const [claimDocuData, setClaimDocuData] = useState([]);
+  // Pagination & Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
 
-    const [claimId, setClaimId] = useState(null);
+  // Modal Decision logs
+  const [activeClaim, setActiveClaim] = useState(null);
+  const [isDecisionOpen, setIsDecisionOpen] = useState(false);
+  const [decisionRemarks, setDecisionRemarks] = useState("");
+  const [decisionType, setDecisionType] = useState(""); // 'recommend-approve', 'recommend-reject', 'approve', 'reject'
+  const [submitting, setSubmitting] = useState(false);
 
-    const [loading, setLoading] = useState(true);
-    const [withdrawLoading, setWithdrawLoading] = useState(false);
+  // Document Uploads
+  const [uploadClaimId, setUploadClaimId] = useState(null);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState([]);
+  const [docsList, setDocsList] = useState([]);
 
-    const getPolicyById = async () => {
-
-        try {
-
-            const data = await getPolicyByPolicyId(policyId);
-
-            setPlanData(data);
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast.error(
-                error?.response?.data?.message ||
-                "Failed To Load Policy ❌"
-            );
+  const loadClaimsData = async () => {
+    setLoading(true);
+    try {
+      if (role === "CUSTOMER") {
+        const exists = await checkCustomerProfileExists();
+        if (exists) {
+          // Fetch customer's own ID
+          const customersRes = await getAllCustomers();
+          const email = localStorage.getItem("userName");
+          const cust = (customersRes?.data || []).find((c) => c.email === email);
+          if (cust) {
+            setCustomerId(cust.customerId);
+            const pageClaims = await getClaimsByCustomer(cust.customerId, page, size);
+            setClaims(pageClaims.content || []);
+            setTotalPages(pageClaims.totalPages || 1);
+          }
         }
-    };
+      } else if (role === "AGENT") {
+        const claimsList = await getSubmittedClaims();
+        setClaims(claimsList || []);
+        setTotalPages(1);
+      } else {
+        const pageClaims = await getAllClaims(page, size);
+        setClaims(pageClaims.content || []);
+        setTotalPages(pageClaims.totalPages || 1);
+      }
+    } catch (err) {
+      toast.error("Failed to load claims database records");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const getClaimData = async () => {
+  useEffect(() => {
+    loadClaimsData();
+  }, [page, size]);
 
-        try {
+  const handleWithdraw = async (claimId) => {
+    if (!window.confirm("Are you sure you want to withdraw this claim request?")) return;
+    try {
+      await withdrawClaim(claimId);
+      toast.warning("Claim withdrawn successfully 🚀");
+      loadClaimsData();
+    } catch (err) {
+      toast.error("Failed to withdraw claim");
+    }
+  };
 
-            const data = await getClaimByPolicyId(policyId);
+  const handleProcessClick = (claim, type) => {
+    setActiveClaim(claim);
+    setDecisionType(type);
+    setDecisionRemarks("");
+    setIsDecisionOpen(true);
+  };
 
-            const claim = data?.content?.[0];
-
-            if (claim) {
-
-                setClaimData(claim);
-                setClaimId(claim.claimId);
-
-            }
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast.error(
-                error?.response?.data?.message ||
-                "Failed To Load Claim ❌"
-            );
-        }
-    };
-
-    const getDocuData = async (id) => {
-
-        try {
-
-            const data = await getClaimDocument(id);
-
-            setClaimDocuData(data || []);
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast.error(
-                error?.response?.data?.message ||
-                "Failed To Load Documents ❌"
-            );
-        }
-    };
-
-    const withdrawClaim = async () => {
-
-        try {
-
-            setWithdrawLoading(true);
-
-            const data = await withdrawClaimById(claimId);
-
-            setClaimData(data);
-
-            toast.success(
-                "Claim Withdrawn Successfully ✅"
-            );
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast.error(
-                error?.response?.data?.message ||
-                "Failed To Withdraw Claim ❌"
-            );
-
-        } finally {
-
-            setWithdrawLoading(false);
-
-        }
-    };
-
-    useEffect(() => {
-
-        const loadData = async () => {
-
-            setLoading(true);
-
-            await Promise.all([
-                getPolicyById(),
-                getClaimData()
-            ]);
-
-            setLoading(false);
-        };
-
-        loadData();
-
-    }, [policyId]);
-
-    useEffect(() => {
-
-        if (claimId) {
-            getDocuData(claimId);
-        }
-
-    }, [claimId]);
-
-    if (loading) {
-
-        return (
-            <div className="p-6 space-y-4">
-
-                <div className="bg-white p-6 rounded-xl shadow animate-pulse">
-
-                    <div className="h-6 bg-gray-300 rounded w-52 mb-4"></div>
-
-                    <div className="space-y-3">
-
-                        <div className="h-4 bg-gray-300 rounded"></div>
-                        <div className="h-4 bg-gray-300 rounded"></div>
-                        <div className="h-4 bg-gray-300 rounded"></div>
-                        <div className="h-4 bg-gray-300 rounded"></div>
-
-                    </div>
-
-                </div>
-
-            </div>
-        );
+  const handleDecisionSubmit = async (e) => {
+    e.preventDefault();
+    if (!decisionRemarks.trim()) {
+      toast.error("Please enter decision remarks");
+      return;
     }
 
-    return (
-        <div className="p-6 space-y-6">
+    setSubmitting(true);
+    try {
+      if (decisionType === "start-review") {
+        await reviewClaim(activeClaim.claimId, { remarks: decisionRemarks });
+        toast.success("Claim status updated to Under Review 🔍");
+      } else if (decisionType === "recommend-approve") {
+        await recommendClaimApproval(activeClaim.claimId, { remarks: decisionRemarks, approve: true });
+        toast.success("Claim recommended for approval ✨");
+      } else if (decisionType === "recommend-reject") {
+        await recommendClaimRejection(activeClaim.claimId, { remarks: decisionRemarks, approve: false });
+        toast.warning("Claim recommended for rejection ⛔");
+      } else if (decisionType === "approve") {
+        await approveClaim(activeClaim.claimId, { remarks: decisionRemarks, approve: true });
+        toast.success("Claim approved successfully ✨");
+      } else if (decisionType === "reject") {
+        await rejectClaim(activeClaim.claimId, { remarks: decisionRemarks, approve: false });
+        toast.error("Claim rejected successfully ⛔");
+      }
+      setIsDecisionOpen(false);
+      loadClaimsData();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to submit claim decision");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-            {/* Policy Details */}
+  const handleDocsClick = async (claimId) => {
+    setUploadClaimId(claimId);
+    setUploadFiles([]);
+    setIsUploadOpen(true);
+    try {
+      const docs = await getClaimDocuments(claimId);
+      setDocsList(docs || []);
+    } catch (err) {
+      setDocsList([]);
+    }
+  };
 
-            <div className="bg-white rounded-xl shadow-lg p-6">
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
+    if (uploadFiles.length === 0) {
+      toast.error("Please select files to upload");
+      return;
+    }
 
-                <h2 className="text-2xl font-bold mb-4">
-                    Policy Details
-                </h2>
+    const formData = new FormData();
+    for (let i = 0; i < uploadFiles.length; i++) {
+      formData.append("files", uploadFiles[i]);
+    }
 
-                <div className="grid md:grid-cols-2 gap-4">
+    setSubmitting(true);
+    try {
+      await uploadClaimDocuments(uploadClaimId, formData);
+      toast.success("Documents uploaded successfully 📄");
+      setIsUploadOpen(false);
+      loadClaimsData();
+    } catch (err) {
+      toast.error("Failed to upload claim documents");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-                    <p>
-                        <strong>Customer:</strong>{" "}
-                        {planData.customerName}
-                    </p>
+  // Search & Filter
+  const filteredClaims = claims.filter((c) => {
+    const matchesSearch =
+      c.claimReason.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(c.claimId).includes(searchTerm);
+    const matchesStatus = selectedStatus === "" || c.claimStatus === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
 
-                    <p>
-                        <strong>Plan:</strong>{" "}
-                        {planData.planName}
-                    </p>
+  const getModalTitle = () => {
+    switch (decisionType) {
+      case "start-review": return "Start Claim Review";
+      case "recommend-approve": return "Recommend Claim Approval";
+      case "recommend-reject": return "Recommend Claim Rejection";
+      case "approve": return "Approve Claim Request";
+      case "reject": return "Reject Claim Request";
+      default: return "Submit Claim Review Decision";
+    }
+  };
 
-                    <p>
-                        <strong>Policy ID:</strong>{" "}
-                        {planData.policyId}
-                    </p>
+  const headers = [
+    "Claim ID",
+    "Policy ID",
+    "Reason",
+    "Amount Requested",
+    "Status",
+    "Docs",
+    "Actions",
+  ];
 
-                    <p>
-                        <strong>Policy Number:</strong>{" "}
-                        {planData.policyNumber}
-                    </p>
+  return (
+    <PageLayout>
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title="Claims Portfolio"
+          subtitle="Submit new claim requests, authorize reviews, or finalize settlements."
+        />
 
-                    <p>
-                        <strong>Status:</strong>{" "}
-                        {planData.policyStatus}
-                    </p>
+        {role === "CUSTOMER" && customerId && (
+          <button
+            type="button"
+            onClick={() => navigate("/submitclaim")}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+          >
+            <FaPlus className="w-3 h-3" /> File Claim
+          </button>
+        )}
+      </div>
 
-                    <p>
-                        <strong>Total Premium:</strong>{" "}
-                        ₹{planData.totalPremiumPaid}
-                    </p>
-
-                    <p>
-                        <strong>Start Date:</strong>{" "}
-                        {planData.startDate}
-                    </p>
-
-                    <p>
-                        <strong>End Date:</strong>{" "}
-                        {planData.endDate}
-                    </p>
-
-                </div>
-
-                {
-                    planData.policyStatus === "ACTIVE" &&
-                    !claimData && (
-                        <div className="mt-5">
-
-                            <NavLink
-                                to={`/policy/submitclaim/${planData.policyId}`}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-                            >
-                                Submit Claim
-                            </NavLink>
-
-                        </div>
-                    )
-                }
-
-            </div>
-
-            {/* Claim Details */}
-
-            {
-                claimData ? (
-
-                    <div className="bg-green-50 border border-green-300 rounded-xl p-6 shadow">
-
-                        <h2 className="text-2xl font-bold mb-4">
-                            Claim Details
-                        </h2>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-
-                            <p>
-                                <strong>Claim ID:</strong>{" "}
-                                {claimData.claimId}
-                            </p>
-
-                            <p>
-                                <strong>Claim Number:</strong>{" "}
-                                {claimData.claimNumber}
-                            </p>
-
-                            <p>
-                                <strong>Claim Amount:</strong>{" "}
-                                ₹{claimData.claimAmount}
-                            </p>
-
-                            <p>
-                                <strong>Status:</strong>{" "}
-                                {claimData.claimStatus}
-                            </p>
-
-                            <p className="md:col-span-2">
-                                <strong>Reason:</strong>{" "}
-                                {claimData.claimReason}
-                            </p>
-
-                        </div>
-
-                        {
-                            claimData.claimStatus === "SUBMITTED" && (
-
-                                <button
-                                    onClick={withdrawClaim}
-                                    disabled={withdrawLoading}
-                                    className="mt-5 bg-red-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-                                >
-
-                                    {
-                                        withdrawLoading
-                                            ? "Processing..."
-                                            : "Withdraw Claim"
-                                    }
-
-                                </button>
-
-                            )
-                        }
-
-                    </div>
-
-                ) : (
-
-                    <div className="bg-yellow-50 border border-yellow-300 rounded-xl p-6">
-
-                        <h2 className="text-xl font-semibold">
-                            Claim Not Submitted Yet
-                        </h2>
-
-                    </div>
-
-                )
-            }
-
-            {/* Documents */}
-
-            {
-                claimDocuData.length > 0 && (
-
-                    <div>
-
-                        <h2 className="text-2xl font-bold mb-4">
-                            Uploaded Documents
-                        </h2>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-
-                            {
-                                claimDocuData.map((doc) => (
-
-                                    <div
-                                        key={doc.documentId}
-                                        className="bg-white border rounded-xl p-4 shadow"
-                                    >
-
-                                        <p>
-                                            <strong>File:</strong>{" "}
-                                            {doc.originalFileName}
-                                        </p>
-
-                                        <p>
-                                            <strong>Type:</strong>{" "}
-                                            {doc.contentType}
-                                        </p>
-
-                                        <p>
-                                            <strong>Size:</strong>{" "}
-                                            {doc.sizeInBytes} bytes
-                                        </p>
-
-                                        {
-                                            doc.resourceType === "image" && (
-
-                                                <img
-                                                    src={doc.cloudinaryUrl}
-                                                    alt={doc.originalFileName}
-                                                    className="w-full h-56 object-cover rounded mt-3"
-                                                />
-
-                                            )
-                                        }
-
-                                        <a
-                                            href={doc.cloudinaryUrl}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="text-blue-600 underline mt-3 block"
-                                        >
-                                            View Full Document
-                                        </a>
-
-                                    </div>
-
-                                ))
-                            }
-
-                        </div>
-
-                    </div>
-
-                )
-            }
-
+      {/* Filters */}
+      <GlassCard className="p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <SearchBar
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by ID, claim reason..."
+            onClear={() => setSearchTerm("")}
+          />
+          <FilterDropdown
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            options={[
+              { label: "All Claim Statuses", value: "" },
+              { label: "Submitted", value: "SUBMITTED" },
+              { label: "Under Review", value: "UNDER_REVIEW" },
+              { label: "Recommended Approved", value: "RECOMMENDED_FOR_APPROVAL" },
+              { label: "Recommended Rejected", value: "RECOMMENDED_FOR_REJECTION" },
+              { label: "Approved", value: "APPROVED" },
+              { label: "Rejected", value: "REJECTED" },
+              { label: "Withdrawn", value: "WITHDRAWN" },
+            ]}
+            label="Claim Status"
+          />
         </div>
-    );
+      </GlassCard>
+
+      {/* Grid */}
+      <GlassCard padding={false}>
+        <DataTable>
+          <TableHeader headers={headers} />
+          <tbody>
+            {loading ? (
+              <TableSkeleton rows={size} cols={7} />
+            ) : filteredClaims.length > 0 ? (
+              filteredClaims.map((claim) => (
+                <TableRow key={claim.claimId}>
+                  <td className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-white">
+                    #{claim.claimId}
+                  </td>
+                  <td className="px-6 py-4 text-xs font-semibold text-slate-500">
+                    Policy #{claim.policyId}
+                  </td>
+                  <td className="px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 max-w-[140px] truncate">
+                    {claim.claimReason}
+                  </td>
+                  <td className="px-6 py-4 text-xs font-extrabold text-slate-800 dark:text-white">
+                    {formatCurrency(claim.claimAmount)}
+                  </td>
+                  <td className="px-6 py-4 text-xs font-semibold">
+                    <StatusBadge status={claim.claimStatus} />
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      type="button"
+                      onClick={() => handleDocsClick(claim.claimId)}
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                    >
+                      Files
+                    </button>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5">
+                      {role === "CUSTOMER" && claim.claimStatus === "SUBMITTED" && (
+                        <button
+                          type="button"
+                          onClick={() => handleWithdraw(claim.claimId)}
+                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition-all"
+                        >
+                          Withdraw
+                        </button>
+                      )}
+
+                      {role === "AGENT" && claim.claimStatus === "SUBMITTED" && (
+                        <button
+                          type="button"
+                          onClick={() => handleProcessClick(claim, "start-review")}
+                          className="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold"
+                        >
+                          Start Review
+                        </button>
+                      )}
+
+                      {role === "AGENT" && claim.claimStatus === "UNDER_REVIEW" && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleProcessClick(claim, "recommend-approve")}
+                            className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-bold"
+                          >
+                            Recommend Approve
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleProcessClick(claim, "recommend-reject")}
+                            className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold"
+                          >
+                            Recommend Reject
+                          </button>
+                        </>
+                      )}
+
+                      {role === "ADMIN" && claim.claimStatus === "RECOMMENDED_FOR_APPROVAL" && (
+                        <button
+                          type="button"
+                          onClick={() => handleProcessClick(claim, "approve")}
+                          className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-bold"
+                        >
+                          Approve
+                        </button>
+                      )}
+
+                      {role === "ADMIN" && claim.claimStatus === "RECOMMENDED_FOR_REJECTION" && (
+                        <button
+                          type="button"
+                          onClick={() => handleProcessClick(claim, "reject")}
+                          className="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold"
+                        >
+                          Reject
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </TableRow>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} className="py-12 text-center text-xs font-semibold text-slate-400">
+                  No claims submitted matching search specs.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </DataTable>
+
+        {role !== "AGENT" && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            pageSize={size}
+            onPageSizeChange={setSize}
+          />
+        )}
+      </GlassCard>
+
+      {/* Decision Remarks Modal */}
+      <DetailsModal
+        isOpen={isDecisionOpen}
+        onClose={() => setIsDecisionOpen(false)}
+        title={getModalTitle()}
+      >
+        <form onSubmit={handleDecisionSubmit} className="space-y-4">
+          <FormTextarea
+            label="Decision Remarks / Reason"
+            id="remarks"
+            name="remarks"
+            placeholder="Type your verification notes or remarks for final review..."
+            value={decisionRemarks}
+            onChange={(e) => setDecisionRemarks(e.target.value)}
+            required
+          />
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200/50 dark:border-slate-805">
+            <SecondaryButton onClick={() => setIsDecisionOpen(false)} disabled={submitting}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton type="submit" loading={submitting}>
+              Submit Decision
+            </PrimaryButton>
+          </div>
+        </form>
+      </DetailsModal>
+
+      {/* Documents Modal */}
+      <DetailsModal
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        title={`Claim Documents (Claim #${uploadClaimId})`}
+      >
+        <div className="space-y-5">
+          {docsList.length > 0 ? (
+            <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/40 p-4 border border-slate-100 dark:border-slate-805 rounded-xl">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Attached Files</span>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {docsList.map((doc, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-xs font-semibold">
+                    <span className="text-slate-700 dark:text-slate-300 truncate max-w-[200px]">{doc.documentName}</span>
+                    <a
+                      href={doc.documentUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Download
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400">No documents uploaded for this claim yet.</p>
+          )}
+
+          {role === "CUSTOMER" && (
+            <form onSubmit={handleFileUpload} className="space-y-4 border-t border-slate-200/50 dark:border-slate-805 pt-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
+                  Upload Coverage Proof Documents
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => setUploadFiles(e.target.files)}
+                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 dark:file:bg-slate-800 dark:file:text-slate-200 hover:file:bg-blue-100 cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <SecondaryButton onClick={() => setIsUploadOpen(false)} disabled={submitting}>
+                  Close
+                </SecondaryButton>
+                <PrimaryButton type="submit" loading={submitting} icon={FaUpload}>
+                  Upload Proof
+                </PrimaryButton>
+              </div>
+            </form>
+          )}
+        </div>
+      </DetailsModal>
+    </PageLayout>
+  );
 };
 
 export default ViewClaim;

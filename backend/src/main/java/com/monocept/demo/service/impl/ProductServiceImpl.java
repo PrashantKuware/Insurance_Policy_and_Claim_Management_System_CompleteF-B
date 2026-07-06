@@ -64,6 +64,7 @@ public class ProductServiceImpl implements ProductService {
 		product.setProductName(dto.getProductName());
 		product.setProductType(dto.getProductType());
 		product.setDescription(dto.getDescription());
+		product.setActive(dto.isStatus());
 		product.setUpdatedDate(LocalDateTime.now());
 
 		repository.save(product);

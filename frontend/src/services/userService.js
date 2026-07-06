@@ -1,73 +1,41 @@
+import apiClient from "../api/apiClient";
 
-import userApi from "../api/userApi";
-
-const handleError = (error) => {
-  const message =
-    error?.response?.data?.message ||
-    error?.response?.data ||
-    error.message;
-
-  console.log("API Error:", message);
-  throw new Error(message);
+export const loginUser = async (loginData) => {
+  const response = await apiClient.post("/auth/login", loginData);
+  return response.data;
 };
 
-
-export const getAllUsers = async () => {
-  try {
-    const res = await userApi.get("/get");
-    return res.data;
-  } catch (error) {
-    handleError(error);
-  }
+export const registerUser = async (registerData) => {
+  const response = await apiClient.post("/auth/register", registerData);
+  return response.data;
 };
-
 
 export const sendEmailOtp = async (email) => {
-  try {
-    const res = await userApi.post(`/send-email-otp?email=${email}`);
-    return res.data;
-  } catch (error) {
-    console.log(error?.response?.data || error.message);
-    throw error;
-  }
+  const response = await apiClient.post(`/auth/send-email-otp?email=${encodeURIComponent(email)}`);
+  return response.data;
 };
 
 export const sendMobileOtp = async (mobileNumber) => {
-  try {
-    const res = await userApi.post(
-      `/send-mobile-otp?mobileNumber=${mobileNumber}`
-    );
-    return res.data;
-  } catch (error) {
-    console.log(error?.response?.data || error.message);
-    throw error;
-  }
-};
-
-export const createAgent = async (data) => {
-  try {
-    const res = await userApi.post("/agent", data);
-    return res.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-
-export const registerCustomer = async (data) => {
-  try {
-    const res = await userApi.post("/register", data);
-    return res.data;
-  } catch (error) {
-    handleError(error);
-  }
+  const response = await apiClient.post(`/auth/send-mobile-otp?mobileNumber=${encodeURIComponent(mobileNumber)}`);
+  return response.data;
 };
 
 export const getCurrentUser = async () => {
-  try {
-    const res = await userApi.get("/me")
-    return res.data
-  } catch (error) {
-    handleError(error);
-  }
-}
+  const response = await apiClient.get("/auth/me");
+  return response.data;
+};
+
+export const getAllUsers = async () => {
+  const response = await apiClient.get("/auth/get");
+  return response.data;
+};
+
+export const createAgent = async (agentData) => {
+  const response = await apiClient.post("/auth/agent", agentData);
+  return response.data;
+};
+
+export const updateUserStatus = async (userId, activeState) => {
+  const response = await apiClient.patch(`/auth/${userId}/status`, { active: activeState });
+  return response.data;
+};
