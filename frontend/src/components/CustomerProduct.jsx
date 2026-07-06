@@ -44,22 +44,24 @@ const CustomerProduct = () => {
   const params = useParams()
   const productType = params.productType
 
+  useEffect(() => {
+    if (productType) {
+      getByProductType()
+    }
+  }, [productType])
+
   const getByProductType = async () => {
     try {
       const data = await getProductBtProductType(productType)
       setProdData(data)
       console.log(data)
     } catch (error) {
-    toast.error(error?.message || "Failed To Load Products ❌");
+      toast.error(error?.message || "Failed To Load Products ❌");
       console.log(error)
     }
   }
 
-  useEffect(() => {
-    if (productType) {
-      getByProductType()
-    }
-  }, [])
+
 
   const displayData = productType ? prodData : productData
 

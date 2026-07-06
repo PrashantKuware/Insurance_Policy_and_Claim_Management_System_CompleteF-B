@@ -237,18 +237,47 @@ const AddCustomer = () => {
           </div>
 
           {/* Nominee Relation */}
-          <div className="col-span-2 flex items-center gap-3 p-4 rounded-xl bg-white/40">
-            <FaUsers />
-            <input
-              type="text"
-              name="nomineeRelation"
-              placeholder="Nominee Relation"
-              value={formData.nomineeRelation}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none"
-              required
-            />
-          </div>
+         {/* // <div className="col-span-2 flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            //<FaUsers />
+            //<input
+              //type="text"
+             // name="nomineeRelation"
+             // placeholder="Nominee Relation"
+              //value={formData.nomineeRelation}
+              //onChange={handleChange}
+              //className="w-full bg-transparent outline-none"
+             // required
+           // />
+         // </div> */}
+         {/* Nominee Relation */}
+<div className="col-span-2 flex items-center gap-3 p-4 rounded-xl bg-white/40">
+  <FaUsers />
+
+  <select
+    name="nomineeRelation"
+    value={formData.nomineeRelation}
+    onChange={handleChange}
+    className="w-full bg-transparent outline-none"
+    required
+  >
+    <option value="">Select Nominee Relation</option>
+
+    <option value="Father">Father</option>
+    <option value="Mother">Mother</option>
+    <option value="Husband">Husband</option>
+    <option value="Wife">Wife</option>
+    <option value="Son">Son</option>
+    <option value="Daughter">Daughter</option>
+    <option value="Brother">Brother</option>
+    <option value="Sister">Sister</option>
+    <option value="Grandfather">Grandfather</option>
+    <option value="Grandmother">Grandmother</option>
+    <option value="Uncle">Uncle</option>
+    <option value="Aunt">Aunt</option>
+    <option value="Friend">Friend</option>
+    <option value="Other">Other</option>
+  </select>
+</div>
 
           <motion.button
             type="submit"
