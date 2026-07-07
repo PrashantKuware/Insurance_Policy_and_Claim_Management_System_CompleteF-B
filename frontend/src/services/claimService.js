@@ -1,75 +1,181 @@
-import apiClient from "../api/apiClient";
+import claimApi from "../api/claimApi";
 
-export const submitClaim = async (policyId, claimData) => {
-  const response = await apiClient.post(`/claims/policy/${policyId}`, claimData);
-  return response.data;
+const handleError = (error) => {
+  console.log(
+    "Claim API Error:",
+    error?.response?.data || error.message
+  );
+  throw error;
 };
 
-export const getClaimsByPolicy = async (policyId, page = 0, size = 10) => {
-  const response = await apiClient.get(`/claims/policy/${policyId}?page=${page}&size=${size}`);
-  return response.data;
+export const submitClaim = async (
+  policyId,
+  claimAmount,
+  claimReason,
+  incidentDate
+) => {
+  try {
+    const res = await claimApi.post(`/policy/${policyId}`, {
+      claimAmount,
+      claimReason,
+      incidentDate,
+    });
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const withdrawClaim = async (claimId) => {
-  const response = await apiClient.put(`/claims/${claimId}/withdraw`);
-  return response.data;
+export const uploadDocument = async (claimId, files = []) => {
+  try {
+    if (!Array.isArray(files) || files.length === 0) {
+      throw new Error("No files provided for upload");
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+
+    const res = await claimApi.post(
+      `/${claimId}/documents`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const reviewClaim = async (claimId, reviewData) => {
-  const response = await apiClient.put(`/claims/${claimId}/review`, reviewData);
-  return response.data;
+export const getClaimByPolicyId = async (policyId) => {
+  try {
+    const res = await claimApi.get(`/policy/${policyId}`);
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const recommendClaimApproval = async (claimId, recommendData) => {
-  const response = await apiClient.put(`/claims/${claimId}/recommend-approval`, recommendData);
-  return response.data;
+export const getClaimDocument = async (claimId) => {
+  try {
+    const res = await claimApi.get(`/${claimId}/documents`);
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const recommendClaimRejection = async (claimId, recommendData) => {
-  const response = await apiClient.put(`/claims/${claimId}/recommend-rejection`, recommendData);
-  return response.data;
+export const withdrawClaimById = async (claimId) => {
+  try {
+    const res = await claimApi.put(`/${claimId}/withdraw`, {});
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const approveClaim = async (claimId, decisionData) => {
-  const response = await apiClient.put(`/claims/${claimId}/approve`, decisionData);
-  return response.data;
+export const getSubmittedClaim = async () => {
+  try {
+    const res = await claimApi.get("/submitted");
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const rejectClaim = async (claimId, decisionData) => {
-  const response = await apiClient.put(`/claims/${claimId}/reject`, decisionData);
-  return response.data;
+export const agentClaimReview = async (claimId) => {
+  try {
+    const res = await claimApi.put(`/${claimId}/review`, {});
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getClaimById = async (claimId) => {
-  const response = await apiClient.get(`/claims/${claimId}`);
-  return response.data;
+export const agentRecommendClaimForApproval = async (
+  claimId,
+  remarks
+) => {
+  try {
+    const res = await claimApi.put(
+      `/${claimId}/recommend-approval`,
+      { remarks }
+    );
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getClaimsByCustomer = async (customerId, page = 0, size = 10) => {
-  const response = await apiClient.get(`/claims/customer/${customerId}?page=${page}&size=${size}`);
-  return response.data;
+export const agentRecommendClaimForRejection = async (
+  claimId,
+  remarks
+) => {
+  try {
+    const res = await claimApi.put(
+      `/${claimId}/recommend-rejection`,
+      { remarks }
+    );
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getAllClaims = async (page = 0, size = 10) => {
-  const response = await apiClient.get(`/claims?page=${page}&size=${size}`);
-  return response.data;
+export const getAllClaims = async (page = 0, size = 20) => {
+  try {
+    const res = await claimApi.get("", {
+      params: { page, size },
+    });
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const uploadClaimDocuments = async (claimId, formData) => {
-  const response = await apiClient.post(`/claims/${claimId}/documents`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return response.data;
+export const adminApproveClaim = async (claimId, remarks) => {
+  try {
+    const res = await claimApi.put(
+      `/${claimId}/approve`,
+      { remarks }
+    );
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getClaimDocuments = async (claimId) => {
-  const response = await apiClient.get(`/claims/${claimId}/documents`);
-  return response.data;
+export const adminRejectClaim = async (claimId, remarks) => {
+  try {
+    const res = await claimApi.put(
+      `/${claimId}/reject`,
+      { remarks }
+    );
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getSubmittedClaims = async () => {
-  const response = await apiClient.get("/claims/submitted");
-  return response.data;
-};
+// export const getAllClaims = async (page = 0, size = 10) => {
+//   try {
+//     const res = await claimApi.get(
+//       `?page=${page}&size=${size}`
+//     );
+
+//     return res.data;
+//   } catch (error) {
+//     console.error("Error fetching claims:", error);
+//     throw error;
+//   }
+// };

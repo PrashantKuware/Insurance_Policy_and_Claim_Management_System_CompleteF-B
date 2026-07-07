@@ -1,31 +1,63 @@
-import apiClient from "../api/apiClient";
+import planApi from "../api/planApi";
 
-export const addPlan = async (planData) => {
-  const response = await apiClient.post("/plans", planData);
-  return response.data;
+const handleError = (error) => {
+  console.log("Plan API Error:", error?.response?.data || error.message);
+  throw error;
 };
 
-export const getPlanById = async (id) => {
-  const response = await apiClient.get(`/plans/${id}`);
-  return response.data;
+
+export const getAllPolicy = async () => {
+  try {
+    const res = await planApi.get("");
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getAllPlans = async (pageNo = 0, pageSize = 10) => {
-  const response = await apiClient.get(`/plans?pageNo=${pageNo}&pageSize=${pageSize}`);
-  return response.data;
+
+export const addNewPlanPolicy = async (
+  productId,
+  planName,
+  coverageAmount,
+  premiumAmount,
+  premiumType,
+  duration,
+  termsConditions
+) => {
+  try {
+    const res = await planApi.post("", {
+      productId,
+      planName,
+      coverageAmount,
+      premiumAmount,
+      premiumType,
+      duration,
+      termsConditions,
+    });
+
+    return res.data; 
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const updatePlan = async (id, planData) => {
-  const response = await apiClient.put(`/plans/${id}`, planData);
-  return response.data;
-};
-
-export const deactivatePlan = async (id) => {
-  const response = await apiClient.patch(`/plans/${id}/deactivate`);
-  return response.data;
-};
 
 export const getPolicyByProductId = async (productId) => {
-  const response = await apiClient.get(`/plans/product/${productId}`);
-  return response.data;
+  try {
+    const res = await planApi.get(`/product/${productId}`);
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+
+export const getPolicyByPlanId = async (planId) => {
+  try {
+    const res = await planApi.get(`/${planId}`);
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };

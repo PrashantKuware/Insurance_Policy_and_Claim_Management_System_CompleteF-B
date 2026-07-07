@@ -1,58 +1,39 @@
-import apiClient from "../api/apiClient";
+import policyApi from "../api/policyApi";
 
-// Policies endpoints
-export const purchasePolicy = async (purchaseData) => {
-  const response = await apiClient.post("/policies/purchase", purchaseData);
-  return response.data;
+const handleError = (error) => {
+  console.log("Policy API Error:", error?.response?.data || error.message);
+  throw error;
 };
 
-export const getPolicyById = async (policyId) => {
-  const response = await apiClient.get(`/policies/${policyId}`);
-  return response.data;
+
+export const getAllPoliciesByCustomer = async () => {
+  try {
+    const res = await policyApi.get("/my-policies");
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getMyPolicies = async () => {
-  const response = await apiClient.get("/policies/my-policies");
-  return response.data; // Returns list
+
+export const purchasePolicy = async (planId) => {
+  try {
+    const res = await policyApi.post("/purchase", {
+      planId,
+    });
+
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
-export const getAllPolicies = async (pageNo = 0, pageSize = 10, sortBy = "policyId") => {
-  const response = await apiClient.get(`/policies?pageNo=${pageNo}&pageSize=${pageSize}&sortBy=${sortBy}`);
-  return response.data; // Returns page
-};
 
-export const activatePolicy = async (policyId) => {
-  const response = await apiClient.patch(`/policies/${policyId}/activate`);
-  return response.data;
-};
-
-export const cancelPolicy = async (policyId) => {
-  const response = await apiClient.patch(`/policies/${policyId}/cancel`);
-  return response.data;
-};
-
-// Payments endpoints
-export const payPremium = async (policyId, paymentRequestDto) => {
-  const response = await apiClient.post(`/payments/policy/${policyId}`, paymentRequestDto);
-  return response.data;
-};
-
-export const getPaymentById = async (paymentId) => {
-  const response = await apiClient.get(`/payments/${paymentId}`);
-  return response.data;
-};
-
-export const getPaymentsByPolicy = async (policyId, page = 0, size = 10) => {
-  const response = await apiClient.get(`/payments/policy/${policyId}?page=${page}&size=${size}`);
-  return response.data;
-};
-
-export const getAllPayments = async (page = 0, size = 10) => {
-  const response = await apiClient.get(`/payments?page=${page}&size=${size}`);
-  return response.data;
-};
-
-export const updatePaymentStatus = async (paymentId, status) => {
-  const response = await apiClient.patch(`/payments/${paymentId}/status?status=${encodeURIComponent(status)}`);
-  return response.data;
+export const getPolicyByPolicyId = async (policyId) => {
+  try {
+    const res = await policyApi.get(`/${policyId}`);
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
 };

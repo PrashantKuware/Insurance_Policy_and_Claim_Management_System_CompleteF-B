@@ -1,31 +1,22 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { Provider } from "react-redux";
-import { ToastContainer } from "react-toastify";
-import App from "./App";
-import store from "./redux/store";
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { BrowserRouter } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import { store } from './redux/store.js'
 import { ThemeProvider } from "./context/ThemeContext";
-import "./index.css";
-import "react-toastify/dist/ReactToastify.css";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')).render(
+
+  <BrowserRouter>
     <Provider store={store}>
       <ThemeProvider>
-        <App />
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </ThemeProvider>
     </Provider>
-  </React.StrictMode>
-);
+  </BrowserRouter>
+)

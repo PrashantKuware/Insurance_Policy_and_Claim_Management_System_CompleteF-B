@@ -1,31 +1,54 @@
-import apiClient from "../api/apiClient";
-
-export const createCustomerProfile = async (customerData) => {
-  const response = await apiClient.post("/customer", customerData);
-  return response.data;
-};
+import customerApi from "../api/customerApi";
 
 export const getAllCustomers = async () => {
-  const response = await apiClient.get("/customer");
-  return response.data; // Note: returns ApiResponse containing the list in the 'data' field
+  try {
+    const response = await customerApi.get("");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
-export const getCustomerById = async (customerId) => {
-  const response = await apiClient.get(`/customer/${customerId}`);
-  return response.data;
+export const getCustomerByCustomerId = async (customerID) => {
+  try {
+    const res = await customerApi.get(`/${customerID}`);
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
-export const deleteCustomer = async (customerId) => {
-  const response = await apiClient.delete(`/customer/${customerId}`);
-  return response.data;
+export const addCustomer = async (customerData) => {
+  try {
+    const res = await customerApi.post("", customerData);
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
-export const updateCustomerProfile = async (customerData) => {
-  const response = await apiClient.put("/customer", customerData);
-  return response.data;
+export const customerExists = async () => {
+  try {
+    const res = await customerApi.get("/exists");
+    return res.data;
+
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
 };
 
-export const checkCustomerProfileExists = async () => {
-  const response = await apiClient.get("/customer/exists");
-  return response.data; // returns boolean direct from ResponseEntity
-};
+export const updateCustomer = async (customerData) => {
+  try {
+    const res = await customerApi.put("", customerData);
+
+    return res.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+} 

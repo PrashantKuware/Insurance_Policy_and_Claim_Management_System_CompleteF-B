@@ -1,131 +1,270 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaInbox, FaFolderOpen, FaClock, FaCheckCircle, FaArrowRight } from "react-icons/fa";
-import { toast } from "react-toastify";
-import PageLayout from "../components/common/PageLayout";
-import PageHeader from "../components/common/PageHeader";
-import StatsCard from "../components/common/StatsCard";
-import DataTable from "../components/common/DataTable";
-import TableHeader from "../components/common/TableHeader";
-import TableRow from "../components/common/TableRow";
-import StatusBadge from "../components/common/StatusBadge";
-import GlassCard from "../components/common/GlassCard";
-import LoadingSpinner from "../components/common/LoadingSpinner";
-import formatCurrency from "../utils/formatCurrency";
-import { getSubmittedClaims } from "../services/claimService";
+import { useEffect, useState } from "react";
+import GetSubmittedClaim from "../components/GetSubmittedClaim";
+import {
+    ClipboardCheck,
+    Clock3,
+    BadgeCheck
+} from "lucide-react";
+import { getSubmittedClaim } from "../services/claimService";
+import { getCurrentUser } from "../services/userService";
+import { getAllClaims } from "../services/claimService";
+import AgentClaimReview from "../components/AgentClaimReview";
 
 const AgentDashboard = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [submittedClaims, setSubmittedClaims] = useState([]);
 
-  useEffect(() => {
-    const fetchAgentData = async () => {
-      try {
-        const claims = await getSubmittedClaims();
-        setSubmittedClaims(claims || []);
-      } catch (err) {
-        toast.error("Failed to load agent claims dashboard");
-      } finally {
-        setLoading(false);
-      }
+    const [showClaimsModal, setShowClaimsModal] =
+        useState(false);
+
+    const [agentData, setAgentData] = useState(null);
+    const [claims, setClaims] = useState([])
+
+    const [submitClaimData, setSubmitClaimData] = useState([]);
+    const [loadingClaims, setLoadingClaims] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [selectedClaimId, setSelectedClaimId] = useState(null);
+
+    const getAgentData = async () => {
+        try {
+            const data = await getCurrentUser();
+            setAgentData(data);
+            console.log("Agent Data:", data);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
-    fetchAgentData();
-  }, []);
+    const fetchSubmittedClaims = async () => {
+        try {
+            setLoadingClaims(true);
 
-  const pendingClaimsCount = submittedClaims.filter((c) => c.claimStatus === "SUBMITTED" || c.claimStatus === "UNDER_REVIEW").length;
-  const processedClaimsCount = submittedClaims.filter((c) => c.claimStatus !== "SUBMITTED" && c.claimStatus !== "UNDER_REVIEW").length;
+            const data = await getSubmittedClaim();
 
-  if (loading) return <LoadingSpinner fullPage message="Fetching claim registries..." />;
+            setSubmitClaimData(data || []);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoadingClaims(false);
+        }
+    };
 
-  return (
-    <PageLayout>
-      <PageHeader
-        title="Agent Workspace"
-        subtitle="Review customer claim request forms and submit recommendations."
-      />
+    const fetchClaims = async () => {
+        try {
+            const data = await getAllClaims(0, 10);
+            console.log(data);
+            setClaims(data.content);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-      {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <StatsCard
-          title="Submitted Queue"
-          value={pendingClaimsCount}
-          icon={FaClock}
-          description="Waiting for agent review"
-        />
-        <StatsCard
-          title="Reviewed Claims"
-          value={processedClaimsCount}
-          icon={FaCheckCircle}
-          description="Processed recommendation"
-        />
-        <StatsCard
-          title="Total Assigned"
-          value={submittedClaims.length}
-          icon={FaFolderOpen}
-          description="Total claims in portfolio"
-        />
-      </div>
+    useEffect(() => {
+        getAgentData();
+        fetchClaims();
+        fetchSubmittedClaims();
+    }, []);
 
-      {/* Claims Queue Card */}
-      <GlassCard className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-slate-800 dark:text-white">
-            Pending Claims Review Queue
-          </h3>
-          <button
-            type="button"
-            onClick={() => navigate("/viewallclaim")}
-            className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-          >
-            Review Full Queue <FaArrowRight className="w-2.5 h-2.5" />
-          </button>
-        </div>
+    return (
+        <div>
 
-        {submittedClaims.length > 0 ? (
-          <DataTable>
-            <TableHeader headers={["Claim ID", "Policy ID", "Description", "Amount", "Status", "Action"]} />
-            <tbody>
-              {submittedClaims.map((claim) => (
-                <TableRow key={claim.claimId}>
-                  <td className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-white">
-                    #{claim.claimId}
-                  </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-slate-500">
-                    Policy #{claim.policyId}
-                  </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-slate-700 dark:text-slate-300 max-w-[150px] truncate">
-                    {claim.claimReason}
-                  </td>
-                  <td className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-white">
-                    {formatCurrency(claim.claimAmount)}
-                  </td>
-                  <td className="px-6 py-4 text-xs font-semibold">
-                    <StatusBadge status={claim.claimStatus} />
-                  </td>
-                  <td className="px-6 py-4 text-xs font-bold">
+            <div className="mb-8">
+
+                <h1 className="text-4xl font-bold text-white">
+                    Welcome {agentData?.fullName} 👋
+                </h1>
+
+                <p className="text-slate-400 mt-2">
+                    Review customer claims and manage recommendations.
+                </p>
+
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+
+                <div
+                    className="
+                        rounded-3xl
+                        border
+                        border-white/10
+                        bg-white/5
+                        backdrop-blur-xl
+                        p-6
+                    "
+                >
+                    <div className="flex gap-2">
+                        <ClipboardCheck
+                            size={40}
+                            className="text-cyan-400 mb-4"
+                        />
+                        <p className="text-3xl font-bold text-white">
+                            {submitClaimData.length}
+                        </p>
+                    </div>
+
+
+                    <h3 className="text-white text-xl font-bold">
+                        Submitted Claims
+                    </h3>
+
+                    <p className="text-slate-400 mt-2">
+                        Claims waiting for review.
+                    </p>
+                </div>
+
+                <div
+                    className="
+                        rounded-3xl
+                        border
+                        border-white/10
+                        bg-white/5
+                        backdrop-blur-xl
+                        p-6
+                    "
+                >
+                    <div className="flex gap-2">
+                        <Clock3
+                            size={40}
+                            className="text-yellow-400 mb-4"
+                        />
+                        <p className="text-3xl font-bold text-white">
+                            {submitClaimData.length}
+                        </p>
+                    </div>
+
+                    <h3 className="text-white text-xl font-bold">
+                        Pending Reviews
+                    </h3>
+
+                    <p className="text-slate-400 mt-2">
+                        Claims awaiting recommendation.
+                    </p>
+                </div>
+
+                <div
+                    className="
+                        rounded-3xl
+                        border
+                        border-white/10
+                        bg-white/5
+                        backdrop-blur-xl
+                        p-6
+                    "
+                >
+                    <div className="flex gap-2 ">
+                        <BadgeCheck
+                            size={40}
+                            className="text-green-400 mb-4"
+                        />
+                        <p className="text-3xl font-bold text-white">
+                            {
+                                claims.filter(
+                                    claim =>
+                                        claim.claimStatus === "APPROVED"
+                                ).length
+                            }
+                        </p>
+                    </div>
+
+                    <h3 className="text-white text-xl font-bold">
+                        Approved Recommendations
+                    </h3>
+
+                    <p className="text-slate-400 mt-2">
+                        Successfully reviewed claims.
+                    </p>
+                </div>
+
+            </div>
+
+            <div
+                className="
+                    rounded-3xl
+                    border
+                    border-white/10
+                    bg-white/5
+                    backdrop-blur-xl
+                    p-8
+                "
+            >
+                <h2 className="text-2xl text-white font-bold mb-3">
+                    Claim Review Portal
+                </h2>
+
+                <p className="text-slate-400 mb-6">
+                    Open submitted claims and start reviewing.
+                </p>
+
+                {agentData?.active ? (
+
                     <button
-                      type="button"
-                      onClick={() => navigate(`/viewallclaim`)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
+                        onClick={() =>
+                            setShowClaimsModal(true)
+                        }
+                        className="
+                            px-6
+                            py-3
+                            rounded-xl
+                            text-white
+                            font-semibold
+                            bg-gradient-to-r
+                            from-cyan-500
+                            to-blue-600
+                            hover:scale-105
+                            transition
+                        "
                     >
-                      Process
+                        Review Submitted Claims
                     </button>
-                  </td>
-                </TableRow>
-              ))}
-            </tbody>
-          </DataTable>
-        ) : (
-          <div className="py-12 flex flex-col items-center justify-center text-center text-slate-400">
-            <FaInbox className="w-8 h-8 mb-2" />
-            <p className="text-xs font-semibold">All caught up! No claims waiting for review.</p>
-          </div>
-        )}
-      </GlassCard>
-    </PageLayout>
-  );
+
+                ) : (
+
+                    <button
+                        disabled
+                        className="
+                            px-6
+                            py-3
+                            rounded-xl
+                            bg-gray-600
+                            text-white
+                            cursor-not-allowed
+                        "
+                    >
+                        Agent Inactive
+                    </button>
+
+                )}
+
+            </div>
+
+            {/* Submitted Claims Modal */}
+
+            {showClaimsModal && (
+                <GetSubmittedClaim
+                    onClose={() => setShowClaimsModal(false)}
+                    submitClaimData={submitClaimData}
+                    loading={loadingClaims}
+                    refreshClaims={fetchSubmittedClaims}
+                    setShowReviewModal={setShowReviewModal}
+                    setSelectedClaimId={setSelectedClaimId}
+                />
+            )}
+
+            {/* Review Claim Modal */}
+
+            {showReviewModal && selectedClaimId && (
+                <AgentClaimReview
+                    claimId={selectedClaimId}
+                    isModal={true}
+                    onClose={() => {
+                        setShowReviewModal(false);
+                        setSelectedClaimId(null);
+
+                        fetchSubmittedClaims();
+                        fetchClaims();
+                    }}
+                />
+            )}
+        </div>
+    );
 };
 
 export default AgentDashboard;

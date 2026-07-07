@@ -1,267 +1,357 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { motion } from "framer-motion";
+import {
+  FaCalendarAlt,
+  FaMapMarkerAlt,
+  FaCity,
+  FaMap,
+  FaHashtag,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
-import { FaSave, FaArrowLeft } from "react-icons/fa";
-import { State, City } from "country-state-city";
-import PageLayout from "./common/PageLayout";
-import PageHeader from "./common/PageHeader";
-import FormInput from "./common/FormInput";
-import FormSelect from "./common/FormSelect";
-import PrimaryButton from "./common/PrimaryButton";
-import SecondaryButton from "./common/SecondaryButton";
-import GlassCard from "./common/GlassCard";
-import LoadingSpinner from "./common/LoadingSpinner";
-import { getCurrentUser } from "../services/userService";
-import { createCustomerProfile } from "../services/CustomerService";
+import { addCustomer } from "../services/CustomerService";
+import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Country, State, City } from "country-state-city";
+
+
+// background
+
+const BackgroundOrbs = () => {
+  return (
+    <>
+      <div className="orb orb1"></div>
+      <div className="orb orb2"></div>
+      <div className="orb orb3"></div>
+      <div className="orb orb4"></div>
+    </>
+  );
+};
 
 const AddCustomer = () => {
-  const navigate = useNavigate();
+
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
   const [loading, setLoading] = useState(false);
-  const [fetchingUser, setFetchingUser] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const indianStates = State.getStatesOfCountry("IN");
+    setStates(indianStates);
+  }, []);
+
+
+  const handleStateChange = (e) => {
+    const stateCode = e.target.value;
+
+    const selectedState = states.find((state) => state.isoCode === stateCode);
+
+    setFormData({
+      ...formData,
+      state: selectedState.name,
+      city: "",
+    });
+
+    const cityList = City.getCitiesOfState("IN", stateCode);
+
+    setCities(cityList);
+  };
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    mobileNumber: "",
     dateOfBirth: "",
     address: "",
-    state: "",
     city: "",
+    state: "",
     pinCode: "",
     nomineeName: "",
     nomineeRelation: "",
   });
 
-  const [errors, setErrors] = useState({});
-  const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
-
-  // Fetch logged-in user profile details
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const user = await getCurrentUser();
-        setFormData((prev) => ({
-          ...prev,
-          fullName: user.fullName || "",
-          email: user.email || "",
-          mobileNumber: user.mobileNumber || "",
-        }));
-
-        // Load India states (Country code "IN")
-        const indiaStates = State.getStatesOfCountry("IN") || [];
-        setStates(indiaStates);
-      } catch (err) {
-        toast.error("Failed to load user credentials. Please log in again.");
-        navigate("/");
-      } finally {
-        setFetchingUser(false);
-      }
-    };
-    fetchUser();
-  }, [navigate]);
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const handleStateChange = (e) => {
-    const stateIsoCode = e.target.value;
-    const selectedStateObj = states.find((s) => s.isoCode === stateIsoCode);
-    const stateName = selectedStateObj ? selectedStateObj.name : "";
-
-    setFormData((prev) => ({
-      ...prev,
-      state: stateName,
-      city: "", // reset city
-    }));
-
-    if (stateIsoCode) {
-      const stateCities = City.getCitiesOfState("IN", stateIsoCode) || [];
-      setCities(stateCities);
-    } else {
-      setCities([]);
-    }
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const valErrors = {};
-    if (!formData.dateOfBirth) valErrors.dateOfBirth = "Date of Birth is required";
-    if (!formData.address.trim()) valErrors.address = "Residential address is required";
-    if (!formData.state) valErrors.state = "State selection is required";
-    if (!formData.city) valErrors.city = "City selection is required";
-    if (!formData.pinCode.trim()) valErrors.pinCode = "Pin Code is required";
-    if (!formData.nomineeName.trim()) valErrors.nomineeName = "Nominee name is required";
-    if (!formData.nomineeRelation.trim()) valErrors.nomineeRelation = "Nominee relation is required";
-
-    if (Object.keys(valErrors).length > 0) {
-      setErrors(valErrors);
-      return;
-    }
-
-    setLoading(true);
     try {
-      await createCustomerProfile(formData);
-      toast.success("Customer profile registered successfully! ✨");
-      navigate("/customerdashboard");
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to save profile details");
+      setLoading(true);
+
+      const data = await addCustomer(formData);
+
+      console.log(data);
+
+      toast.success("Customer Added Successfully ✅");
+
+      setFormData({
+        dateOfBirth: "",
+        address: "",
+        city: "",
+        state: "",
+        pinCode: "",
+        nomineeName: "",
+        nomineeRelation: "",
+      });
+      setTimeout(() => navigate("/customerdashboard"), 800);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Unable To Add Customer ❌",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (fetchingUser) return <LoadingSpinner fullPage message="Loading profile..." />;
-
-  const stateOptions = states.map((s) => ({ label: s.name, value: s.isoCode }));
-  const cityOptions = cities.map((c) => ({ label: c.name, value: c.name }));
-
   return (
-    <PageLayout>
-      <PageHeader
-        title="Complete Customer Profile"
-        subtitle="Complete your profile info to purchase coverage policies."
-      />
+    <div className="relative min-h-screen flex items-center justify-center bg-[#eceef2] text-gray-400 overflow-hidden">
 
-      <div className="flex justify-center mt-2">
-        <GlassCard hoverable={false} className="w-full max-w-2xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormInput
-                label="Full Name"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                disabled
-              />
+      <div className="absolute inset-0 animate-spin-slow opacity-40">
+        <div className="w-[200%] h-[200%] bg-[radial-gradient(circle,#dcefff_0%,transparent_25%),radial-gradient(circle,#b9daf5_0%,transparent_25%)]" />
+      </div>
 
-              <FormInput
-                label="Email Address"
-                id="email"
-                name="email"
-                value={formData.email}
-                disabled
-              />
-            </div>
+      <BackgroundOrbs />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormInput
-                label="Mobile Number"
-                id="mobileNumber"
-                name="mobileNumber"
-                value={formData.mobileNumber}
-                disabled
-              />
+      <motion.div
+        className="relative z-10 w-[700px] p-10 rounded-[35px]
+        backdrop-blur-[35px] bg-white/30 border border-white/40
+        shadow-[0_20px_60px_rgba(0,0,0,0.08)]"
+        initial={{ opacity: 0, scale: 0.7, y: 80 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <h1 className="text-4xl font-bold text-center text-[#243447]">
+          Add Customer
+        </h1>
 
-              <FormInput
-                label="Date of Birth"
-                id="dateOfBirth"
-                name="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                error={errors.dateOfBirth}
-                required
-              />
-            </div>
+        <p className="text-center mt-3 mb-8 text-gray-500">
+          Complete Customer Information
+        </p>
 
-            <FormTextarea
-              label="Residential Address"
-              id="address"
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          {/* DOB */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            <FaCalendarAlt />
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              className="w-full bg-transparent outline-none"
+              required
+            />
+          </div>
+
+          {/* Address */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            <FaMapMarkerAlt />
+            <input
+              type="text"
               name="address"
-              placeholder="123 Main St, Apartment 4B"
+              placeholder="Address"
               value={formData.address}
               onChange={handleChange}
-              error={errors.address}
+              className="w-full bg-transparent outline-none"
               required
             />
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormSelect
-                label="State"
-                id="state"
-                name="state"
-                placeholder="Select State"
-                value={states.find((s) => s.name === formData.state)?.isoCode || ""}
-                onChange={handleStateChange}
-                options={stateOptions}
-                error={errors.state}
-                required
-              />
+          {/* State */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            <FaMap />
+            <select
+              value={
+                states.find(
+                  s => s.name === formData.state
+                )?.isoCode || ""
+              }
+              onChange={handleStateChange}
+              className="w-full bg-transparent outline-none"
+              required
+            >
+              <option value="">
+                Select State
+              </option>
 
-              <FormSelect
-                label="City"
-                id="city"
-                name="city"
-                placeholder="Select City"
-                value={formData.city}
-                onChange={handleChange}
-                options={cityOptions}
-                error={errors.city}
-                required
-                disabled={!formData.state}
-              />
-            </div>
+              {states.map((state) => (
+                <option
+                  key={state.isoCode}
+                  value={state.isoCode}
+                >
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <FormInput
-              label="Pin Code"
-              id="pinCode"
+          {/* City */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            <FaCity />
+            <select
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              className="w-full bg-transparent outline-none"
+              required
+            >
+              <option value="">Select City</option>
+
+              {cities.map((city) => (
+                <option key={city.name} value={city.name}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Pin Code */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            <FaHashtag />
+            <input
+              type="text"
               name="pinCode"
-              placeholder="e.g. 400001"
+              placeholder="Pin Code"
               value={formData.pinCode}
               onChange={handleChange}
-              error={errors.pinCode}
+              className="w-full bg-transparent outline-none"
               required
             />
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-blue-50/20 dark:bg-slate-850/50 border border-slate-100 dark:border-slate-800/80 p-4 rounded-xl">
-              <FormInput
-                label="Nominee Name"
-                id="nomineeName"
-                name="nomineeName"
-                placeholder="e.g. Mary Doe"
-                value={formData.nomineeName}
-                onChange={handleChange}
-                error={errors.nomineeName}
-                required
-              />
+          {/* Nominee Name */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            <FaUser />
+            <input
+              type="text"
+              name="nomineeName"
+              placeholder="Nominee Name"
+              value={formData.nomineeName}
+              onChange={handleChange}
+              className="w-full bg-transparent outline-none"
+              required
+            />
+          </div>
 
-              <FormInput
-                label="Nominee Relation"
-                id="nomineeRelation"
-                name="nomineeRelation"
-                placeholder="e.g. Spouse, Child"
-                value={formData.nomineeRelation}
-                onChange={handleChange}
-                error={errors.nomineeRelation}
-                required
-              />
-            </div>
+          {/* Nominee Relation */}
+         {/* // <div className="col-span-2 flex items-center gap-3 p-4 rounded-xl bg-white/40">
+            //<FaUsers />
+            //<input
+              //type="text"
+             // name="nomineeRelation"
+             // placeholder="Nominee Relation"
+              //value={formData.nomineeRelation}
+              //onChange={handleChange}
+              //className="w-full bg-transparent outline-none"
+             // required
+           // />
+         // </div> */}
+         {/* Nominee Relation */}
+<div className="col-span-2 flex items-center gap-3 p-4 rounded-xl bg-white/40">
+  <FaUsers />
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/50 dark:border-slate-800">
-              <SecondaryButton
-                onClick={() => navigate("/customerdashboard")}
-                disabled={loading}
-                icon={FaArrowLeft}
-              >
-                Cancel
-              </SecondaryButton>
-              <PrimaryButton
-                type="submit"
-                loading={loading}
-                icon={FaSave}
-              >
-                Register Profile
-              </PrimaryButton>
-            </div>
-          </form>
-        </GlassCard>
-      </div>
-    </PageLayout>
+  <select
+    name="nomineeRelation"
+    value={formData.nomineeRelation}
+    onChange={handleChange}
+    className="w-full bg-transparent outline-none"
+    required
+  >
+    <option value="">Select Nominee Relation</option>
+
+    <option value="Father">Father</option>
+    <option value="Mother">Mother</option>
+    <option value="Husband">Husband</option>
+    <option value="Wife">Wife</option>
+    <option value="Son">Son</option>
+    <option value="Daughter">Daughter</option>
+    <option value="Brother">Brother</option>
+    <option value="Sister">Sister</option>
+    <option value="Grandfather">Grandfather</option>
+    <option value="Grandmother">Grandmother</option>
+    <option value="Uncle">Uncle</option>
+    <option value="Aunt">Aunt</option>
+    <option value="Friend">Friend</option>
+    <option value="Other">Other</option>
+  </select>
+</div>
+
+          <motion.button
+            type="submit"
+            disabled={loading}
+            className="col-span-2 h-14 rounded-xl text-lg font-semibold
+            bg-gradient-to-r from-[#d2e6ff] to-[#a7ccff]"
+            whileHover={{ scale: loading ? 1 : 1.03 }}
+            whileTap={{ scale: loading ? 1 : 0.95 }}
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+            ) : (
+              "Add Customer →"
+            )}
+          </motion.button>
+        </form>
+      </motion.div>
+
+      <style>{`
+        @keyframes float {
+          50% {
+            transform: translateY(-30px) rotate(10deg);
+          }
+        }
+
+        @keyframes spinSlow {
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        .animate-spin-slow {
+          animation: spinSlow 18s linear infinite;
+        }
+
+        .orb {
+          position: absolute;
+          border-radius: 9999px;
+          background: radial-gradient(circle at 30% 30%, #fff, #9cc8eb);
+          animation: float 8s ease-in-out infinite;
+        }
+
+        .orb1 {
+          width: 320px;
+          height: 320px;
+          top: -60px;
+          left: 30%;
+        }
+
+        .orb2 {
+          width: 150px;
+          height: 150px;
+          top: 15%;
+          right: 20%;
+          animation-delay: 2s;
+        }
+
+        .orb3 {
+          width: 220px;
+          height: 220px;
+          bottom: 15%;
+          left: 10%;
+          animation-delay: 1s;
+        }
+
+        .orb4 {
+          width: 180px;
+          height: 180px;
+          bottom: 10%;
+          right: 10%;
+          animation-delay: 3s;
+        }
+      `}</style>
+    </div>
   );
 };
 
