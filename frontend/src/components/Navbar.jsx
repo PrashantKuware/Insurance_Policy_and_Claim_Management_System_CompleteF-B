@@ -1,118 +1,134 @@
-import React, { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import "./style.css";
-
-const menuItems = ["Home", "About", "Service", "Contact"];
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaMoon,
+  FaSun,
+  FaSignOutAlt,
+  FaUserShield,
+} from "react-icons/fa";
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
-  const navRef = useRef(null);
-  const activeRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
-  const getOffsetLeft = (element) => {
-    const navRect = navRef.current.getBoundingClientRect();
-    const elRect = element.getBoundingClientRect();
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  const userName = localStorage.getItem("userName");
 
-    return (
-      elRect.left -
-      navRect.left +
-      (elRect.width - activeRef.current.offsetWidth) / 2
-    );
-  };
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userName");
 
-  const createSVG = (element) => {
-    element.innerHTML = `
-      <svg viewBox="0 0 116 5" preserveAspectRatio="none" class="beam">
-        <path d="M0.5 2.5L113 0.534929C114.099 0.515738 115 1.40113 115 2.5C115 3.59887 114.099 4.48426 113 4.46507L0.5 2.5Z" fill="url(#gradient-beam)"/>
-        <defs>
-          <linearGradient id="gradient-beam" x1="2" y1="2.5" x2="115" y2="2.5">
-            <stop stop-color="#0270ffff"/>
-            <stop offset="1" stop-color="white"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <div class="strike"></div>
-    `;
-  };
-
-  useEffect(() => {
-    const nav = navRef.current;
-    const activeElement = activeRef.current;
-
-    const buttons = nav.querySelectorAll("ul li button");
-    const activeButton = buttons[activeIndex];
-
-    document.fonts.ready.then(() => {
-      gsap.set(activeElement, {
-        x: getOffsetLeft(activeButton),
-      });
-
-      gsap.to(activeElement, {
-        opacity: 1,
-        duration: 0.2,
-      });
-    });
-  }, []);
-
-  const handleClick = (index) => {
-    const nav = navRef.current;
-    const activeElement = activeRef.current;
-
-    const buttons = nav.querySelectorAll("ul li button");
-    const oldButton = buttons[activeIndex];
-    const newButton = buttons[index];
-
-    if (index === activeIndex) return;
-
-    const x = getOffsetLeft(newButton);
-    const oldX = getOffsetLeft(oldButton);
-    const direction = index > activeIndex ? "after" : "before";
-
-    nav.classList.add(direction);
-
-    setActiveIndex(index);
-
-    gsap.to(activeElement, {
-      x,
-      duration: 0.6,
-      ease: "none",
-    });
-
-    gsap.to(activeElement, {
-      keyframes: [
-        {
-          width: Math.abs(x - oldX),
-          duration: 0.3,
-          onStart: () => {
-            createSVG(activeElement);
-            gsap.to(activeElement, { opacity: 1, duration: 0.1 });
-          },
-        },
-        {
-          width: 0,
-          scaleX: 0,
-          scaleY: 0.25,
-          duration: 0.3,
-          onComplete: () => {
-            activeElement.innerHTML = "";
-            nav.classList.remove("before", "after");
-          },
-        },
-      ],
-    });
+    navigate("/", { replace: true });
   };
 
   return (
-    <nav ref={navRef}>
-      <ul>
-        {menuItems.map((item, index) => (
-          <li key={item} className={index === activeIndex ? "active" : ""}>
-            <button onClick={() => handleClick(index)}>{item}</button>
-          </li>
-        ))}
-      </ul>
+    <nav
+      className="
+        bg-white
+        dark:bg-gray-900
+        border-b
+        border-gray-200
+        dark:border-gray-700
+        shadow-md
+      "
+    >
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Left Side - Username */}
+        {token ? (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
+              {userName ? userName.charAt(0).toUpperCase() : "U"}
+            </div>
 
-      <div className="active-element" ref={activeRef}></div>
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Welcome
+              </p>
+
+              <h2 className="font-semibold text-lg text-gray-800 dark:text-white">
+                {userName || "User"}
+              </h2>
+            </div>
+          </div>
+        ) : (
+          <div></div>
+        )}
+        {/* Everything aligned to the right */}
+
+        <div className="flex justify-end items-center gap-4">
+
+          {/* User Info */}
+          {token && (
+            <div className="hidden lg:flex items-center gap-2">
+              <FaUserShield className="text-blue-600 text-lg" />
+
+              <span
+                className="
+                  px-2 py-1
+                  text-xs
+                  rounded-full
+                  bg-blue-100
+                  text-blue-700
+                  dark:bg-blue-900
+                  dark:text-blue-200
+                "
+              >
+                {role || "USER"}
+              </span>
+            </div>
+          )}
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="
+              p-2
+              rounded-full
+              hover:bg-gray-200
+              dark:hover:bg-gray-700
+              transition
+            "
+          >
+            {theme === "light" ? (
+              <FaMoon
+                size={20}
+                className="text-black dark:text-white"
+              />
+            ) : (
+              <FaSun
+                size={20}
+                className="text-yellow-400"
+              />
+            )}
+          </button>
+
+          {/* Logout Button */}
+          {token && (
+            <button
+              onClick={handleLogout}
+              className="
+                flex
+                items-center
+                gap-2
+                px-4
+                py-2
+                rounded-lg
+                bg-red-500
+                hover:bg-red-600
+                text-white
+                transition-all
+                duration-300
+              "
+            >
+              <FaSignOutAlt />
+              Logout
+            </button>
+          )}
+        </div>
+      </div>
     </nav>
   );
 };

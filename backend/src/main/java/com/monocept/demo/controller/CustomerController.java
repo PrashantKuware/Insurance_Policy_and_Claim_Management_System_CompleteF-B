@@ -3,7 +3,9 @@ package com.monocept.demo.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -108,5 +110,16 @@ public class CustomerController {
 				.data(response)
 				.timestamp(LocalDateTime.now())
 				.build();
+	}
+	
+	@GetMapping("/exists")
+	public ResponseEntity<Boolean> customerExists(
+	        Authentication authentication) {
+
+	    return ResponseEntity.ok(
+	            customerService.customerExists(
+	                    authentication.getName()
+	            )
+	    );
 	}
 }

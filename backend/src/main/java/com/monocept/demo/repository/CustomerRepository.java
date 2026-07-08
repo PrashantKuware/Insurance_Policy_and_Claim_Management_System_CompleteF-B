@@ -7,14 +7,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.monocept.demo.entity.Customer;
+import com.monocept.demo.entity.User;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
 //	Page<Customer> findByAgentUserId(Long agentId, Pageable pageable);
-	
+
 	Optional<Customer> findByUserUserId(Long userId);
-	
+
 	boolean existsByUserUserId(Long userId);
-	
-	 Optional<Customer> findByUserEmail(String email);
+
+	Optional<Customer> findByUserEmail(String email);
+
+	boolean existsByUser(User user);
+
 }

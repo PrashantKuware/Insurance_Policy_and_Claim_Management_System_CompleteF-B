@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { loginService } from "../services/loginservice";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
 import { toast } from "react-toastify";
+import { customerExists } from "../services/CustomerService";
 
 const BackgroundOrbs = () => {
   return (
@@ -41,7 +42,9 @@ const Login = () => {
 
       const data = await loginService(email, pass);
       localStorage.setItem("token", data.token);
-
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("userName", data.fullName);
+      
       const decoded = jwtDecode(data.token);
 
       dispatch(
@@ -53,10 +56,31 @@ const Login = () => {
 
       toast.success("Login Successful ✅");
 
-      setTimeout(() => {
-        if (decoded.role === "ADMIN") navigate("/admindashboard");
-        else if (decoded.role === "AGENT") navigate("/agentdashboard");
-        else navigate("/customerdashboard");
+      setTimeout( async () =>{
+        if (decoded.role === "ADMIN") {
+
+          navigate("/admindashboard");
+
+        }
+        else if (decoded.role === "AGENT") {
+
+          navigate("/agentdashboard");
+
+        }
+        else if (decoded.role === "CUSTOMER") {
+
+          const exists = await customerExists();
+
+          if (exists) {
+
+            navigate("/customerdashboard");
+
+          } else {
+
+            navigate("/addCustomer");
+
+          }
+        }
       }, 800);
     } catch (error) {
       toast.error(
@@ -68,7 +92,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
+    <div className="relative text-gray-500 h-screen flex items-center justify-center bg-[#eceef2] overflow-hidden">
 
       {/* animated background layer */}
       <div className="absolute inset-0 animate-spin-slow opacity-40">
@@ -126,13 +150,14 @@ const Login = () => {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
+          <NavLink to={"/forget-password"} className="text-sm text-red-500 flex justify-end hover:text-gray-500 transition hover:scale-105">Forget Password?</NavLink>
 
           {/* Button */}
           <motion.button
             type="submit"
             disabled={loading}
             className="w-full h-15 rounded-xl text-lg font-semibold
-            bg-linear-to-r from-[#d2e6ff] to-[#a7ccff] relative overflow-hidden cursor-pointer"
+            bg-linear-to-r from-[#d2e6ff] to-[#a7ccff] relative overflow-hidden"
             whileHover={{ scale: loading ? 1 : 1.05 }}
             whileTap={{ scale: loading ? 1 : 0.95 }}
           >

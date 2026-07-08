@@ -9,4 +9,6 @@ import com.monocept.demo.entity.ClaimStatusHistory;
 public interface ClaimStatusHistoryRepository extends JpaRepository<ClaimStatusHistory, Long> {
 
 	List<ClaimStatusHistory> findByClaimClaimIdOrderByUpdatedDateAsc(Long claimId);
+
+	List<ClaimStatusHistory> findByClaimPolicyPolicyIdOrderByUpdatedDateAsc(Long policyId);
 }

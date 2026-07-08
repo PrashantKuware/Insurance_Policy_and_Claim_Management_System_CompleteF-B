@@ -13,12 +13,15 @@ import com.monocept.demo.dto.request.LoginRequestDto;
 import com.monocept.demo.dto.request.RegisterRequestDto;
 import com.monocept.demo.dto.request.UserStatusUpdateDto;
 import com.monocept.demo.dto.response.AuthResponseDto;
+import com.monocept.demo.dto.response.ResetPasswordDto;
 import com.monocept.demo.dto.response.UserResponseDto;
+import com.monocept.demo.entity.Customer;
 import com.monocept.demo.entity.OtpVerification;
 import com.monocept.demo.entity.User;
 import com.monocept.demo.enums.Role;
 import com.monocept.demo.exception.DuplicateResourceException;
 import com.monocept.demo.exception.ResourceNotFoundException;
+import com.monocept.demo.repository.CustomerRepository;
 import com.monocept.demo.repository.OtpRepository;
 import com.monocept.demo.repository.UserRepository;
 import com.monocept.demo.security.CustomUserDetails;
@@ -34,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthServiceImpl implements AuthService {
 
 	private final UserRepository userRepository;
+	private final CustomerRepository customerRepository;
 	private final AuthenticationManager authenticationManager;
 	private final JwtService jwtService;
 	private final PasswordEncoder passwordEncoder;
@@ -88,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 	    otpRepository.delete(emailOtp);
 	    otpRepository.delete(mobileOtp);
 
-	    return new AuthResponseDto(null, null, "User Registered Successfully", user.getRole());
+	    return new AuthResponseDto(null, null, "User Registered Successfully", user.getRole(), null, null);
 	}
 	@Override
 	public AuthResponseDto loginUser(LoginRequestDto loginRequestDto) {
@@ -99,8 +103,19 @@ public class AuthServiceImpl implements AuthService {
 		CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
 		String token = jwtService.generateToken(userDetails);
-
-		return new AuthResponseDto(token, "Bearer", userDetails.getUsername(), userDetails.getRole());
+		
+		User user = userRepository
+		        .findByEmail(loginRequestDto.getEmail())
+		        .orElseThrow(() ->
+		            new ResourceNotFoundException("User not found"));
+		
+		return AuthResponseDto.builder()
+		        .token(token)
+		        .tokenType("Bearer")
+		        .username(user.getEmail())
+		        .fullName(user.getFullName())
+		        .role(user.getRole())
+		        .build();
 	}
 
 	@Override
@@ -189,7 +204,7 @@ public class AuthServiceImpl implements AuthService {
 		    otpRepository.delete(emailOtp);
 		    otpRepository.delete(mobileOtp);
 
-		    return new AuthResponseDto(null, null, "Agent Registered Successfully", agent.getRole());
+		    return new AuthResponseDto(null, null, "Agent Registered Successfully", agent.getRole(), null, null);
 //		}
 	}
 
@@ -237,5 +252,97 @@ public class AuthServiceImpl implements AuthService {
 	    otpRepository.save(verification);
 
 	    smsService.sendOtp(mobileNumber, otp);
+	}
+	
+	@Override
+	public UserResponseDto getCurrentUser(String emailFromToken) {
+
+		User user = userRepository.findByEmail(emailFromToken)
+		        .orElseThrow(() ->
+		                new ResourceNotFoundException("User not found"));
+
+		Customer customer = customerRepository.findByUserEmail(emailFromToken)
+		        .orElse(null);
+
+		return UserResponseDto.builder()
+		        .userId(user.getUserId())
+		        .fullName(user.getFullName())
+		        .email(user.getEmail())
+		        .mobileNumber(user.getMobileNumber())
+		        .role(user.getRole())
+		        .emailVerified(user.isEmailVerified())
+		        .mobileVerified(user.isMobileVerified())
+		        .active(user.getActive())
+		        .createdDate(user.getCreatedDate())
+		        .updatedDate(
+		                customer != null && customer.getUpdatedDate() != null
+		                        ? customer.getUpdatedDate()
+		                        : user.getUpdatedDate()
+		        )
+		        .build();
+	}
+	
+	@Override
+	public void sendForgotPasswordOtp(String email) {
+
+	    User user = userRepository.findByEmail(email)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException("User not found"));
+
+	    String otp = String.valueOf(
+	            (int)((Math.random() * 900000) + 100000));
+
+	    OtpVerification verification =
+	            otpRepository.findByEmail(email)
+	                    .orElse(new OtpVerification());
+
+	    verification.setEmail(email);
+	    verification.setOtp(otp);
+	    verification.setExpiryTime(
+	            LocalDateTime.now().plusMinutes(5));
+
+	    otpRepository.save(verification);
+
+	    emailService.sendOtp(email, otp);
+	}
+	
+	@Override
+	public void verifyForgotPasswordOtp(String email, String otp) {
+
+	    OtpVerification verification = otpRepository.findByEmail(email)
+	            .orElseThrow(() ->
+	                    new RuntimeException("OTP not found"));
+
+	    if (!verification.getOtp().equals(otp)) {
+	        throw new RuntimeException("Invalid OTP");
+	    }
+
+	    if (verification.getExpiryTime()
+	            .isBefore(LocalDateTime.now())) {
+	        throw new RuntimeException("OTP expired");
+	    }
+	}
+	
+	@Override
+	public void resetPassword(ResetPasswordDto dto) {
+
+	    if (!dto.getNewPassword()
+	            .equals(dto.getConfirmPassword())) {
+
+	        throw new RuntimeException(
+	                "Password and Confirm Password do not match");
+	    }
+
+	    User user = userRepository.findByEmail(dto.getEmail())
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException("User not found"));
+
+	    user.setPassword(
+	            passwordEncoder.encode(dto.getNewPassword()));
+
+	    userRepository.save(user);
+
+	    otpRepository.findByEmail(dto.getEmail())
+	            .ifPresent(otpRepository::delete);
 	}
 }

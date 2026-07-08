@@ -23,7 +23,7 @@
   overflow: hidden;
   background: var(--bg);
 }
-label {
+.lightbulb-container label {
   position: absolute;
   opacity: 0.5;
   height: 100%;

@@ -22,6 +22,8 @@ public interface CustomerService {
 	CustomerResponseDto updateCustomer(CustomerRequestDto customerRequestDto);
 
 	void deleteCustomer(Long customerId);
+	
+	boolean customerExists(String email);
 
 //	Page<CustomerResponseDto> getCustomersByAgent(Long agentId, Pageable pageable);
 }

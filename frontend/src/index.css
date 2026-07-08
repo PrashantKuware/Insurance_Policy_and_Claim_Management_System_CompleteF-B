@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+/* Enable class-based dark mode
+/* @custom-variant dark (&:where(.dark, .dark *)); */
+
+/* * {
+  transition: all 0.2s ease-in-out;
+} */ 
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #06b6d4;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0891b2;
+}

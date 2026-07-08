@@ -8,8 +8,8 @@ import com.monocept.demo.dto.request.LoginRequestDto;
 import com.monocept.demo.dto.request.RegisterRequestDto;
 import com.monocept.demo.dto.request.UserStatusUpdateDto;
 import com.monocept.demo.dto.response.AuthResponseDto;
+import com.monocept.demo.dto.response.ResetPasswordDto;
 import com.monocept.demo.dto.response.UserResponseDto;
-import com.monocept.demo.entity.User;
 
 @Service
 public interface AuthService {
@@ -27,4 +27,12 @@ public interface AuthService {
 	void sendEmailOtp(String email);
 	
 	void sendMobileOtp(String mobileNumber);
+	
+	public UserResponseDto getCurrentUser(String emailFromToken);
+	
+	public void sendForgotPasswordOtp(String email);
+	
+	public void verifyForgotPasswordOtp(String email, String otp);
+	
+	public void resetPassword(ResetPasswordDto dto);
 }

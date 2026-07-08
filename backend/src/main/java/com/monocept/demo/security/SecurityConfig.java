@@ -38,9 +38,7 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.csrf(AbstractHttpConfigurer::disable);
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable);
 		http.csrf(AbstractHttpConfigurer::disable)
 
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -48,21 +46,20 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// AUTH
-						.requestMatchers(
-								"/api/auth/register",
-								"/api/auth/login",
-								"/api/auth/send-email-otp",
-								"/api/auth/send-mobile-otp",
-								"/swagger-ui.html",
-								"/swagger-ui/**",
-								"/v3/api-docs/**")
+						.requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/send-email-otp",
+								"/api/auth/send-mobile-otp", "/swagger-ui.html", "/swagger-ui/**", "/api/auth/forgot-password/send-otp",
+						        "/api/auth/forgot-password/verify-otp",
+						        "/api/auth/forgot-password/reset", "/v3/api-docs/**")
 						.permitAll().requestMatchers(HttpMethod.POST, "/api/auth/agent").hasRole("ADMIN")
 
 						.requestMatchers(HttpMethod.GET, "/api/auth/get/**").hasRole("ADMIN")
 
 						.requestMatchers(HttpMethod.PATCH, "/api/auth/status/**").hasRole("ADMIN")
 
+						.requestMatchers(HttpMethod.GET, "/api/auth/me").hasAnyRole("CUSTOMER", "AGENT", "ADMIN")
+
 						// CUSTOMER
+						.requestMatchers(HttpMethod.GET, "/api/customer/exists").hasRole("CUSTOMER")
 						.requestMatchers(HttpMethod.PUT, "/api/customer").hasRole("CUSTOMER")
 						.requestMatchers(HttpMethod.POST, "/api/customer/**").hasAnyRole("CUSTOMER")
 
@@ -71,6 +68,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/customer/**").hasAnyRole("ADMIN", "AGENT")
 
 						// INSURANCE PRODUCTS
+						.requestMatchers(HttpMethod.GET, "/api/products/producttype/**").hasAnyRole("CUSTOMER", "ADMIN", "AGENT")
 						.requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyRole("CUSTOMER", "ADMIN", "AGENT")
 
 						.requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
@@ -123,7 +121,7 @@ public class SecurityConfig {
 
 						// AGENT ACTIONS
 						.requestMatchers(HttpMethod.GET, "/api/claims/submitted").hasRole("AGENT")
-						
+
 						.requestMatchers(HttpMethod.PUT, "/api/claims/*/review").hasRole("AGENT")
 
 						.requestMatchers(HttpMethod.PUT, "/api/claims/*/recommend-approval").hasRole("AGENT")
@@ -136,7 +134,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/claims/*/reject").hasRole("ADMIN")
 
 						// CLAIM HISTORY
-						.requestMatchers(HttpMethod.GET, "/api/claim-history/**").hasAnyRole("ADMIN", "AGENT")
+						.requestMatchers(HttpMethod.GET, "/api/claim-history/**").hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
 
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint)
@@ -161,24 +159,20 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 
-	    CorsConfiguration configuration = new CorsConfiguration();
+		CorsConfiguration configuration = new CorsConfiguration();
 
-	    configuration.setAllowedOrigins(
-	            List.of("http://localhost:5173"));
+		configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
-	    configuration.setAllowedMethods(
-	            List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-	    configuration.setAllowedHeaders(
-	            List.of("*"));
+		configuration.setAllowedHeaders(List.of("*"));
 
-	    configuration.setAllowCredentials(true);
+		configuration.setAllowCredentials(true);
 
-	    UrlBasedCorsConfigurationSource source =
-	            new UrlBasedCorsConfigurationSource();
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-	    source.registerCorsConfiguration("/**", configuration);
+		source.registerCorsConfiguration("/**", configuration);
 
-	    return source;
+		return source;
 	}
 }

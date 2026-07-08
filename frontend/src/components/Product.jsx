@@ -1,293 +1,52 @@
-// import React from 'react';
-// import { NavLink } from 'react-router-dom';
-// import { motion } from "framer-motion";
-// import "./Product.css";
-// import useProducts from '../hooks/useGetAllProduct';
-// import { useSelector } from 'react-redux';
-// import { toast } from 'react-toastify';
-
-// const Product = () => {
-
-//     const {
-//     productData,
-//     loading,
-//     error,
-//     refreshProducts
-// } = useProducts();
-
-//     const role = useSelector(
-//         (state) => state.auth.role
-//     );
-
-//     const filteredProducts =
-//         role === "CUSTOMER"
-//             ? productData.filter((ele) => ele.active === true)
-//             : productData;
-
-//     if (loading) {
-//         return (
-//             <div className="container">
-
-//                 <div className="orb orb1"></div>
-//                 <div className="orb orb2"></div>
-//                 <div className="orb orb3"></div>
-//                 <div className="orb orb4"></div>
-
-//                 <div className="productWrapper">
-
-//                     <div className="pageHeader">
-//                         <div className="h-10 w-64 bg-gray-300 rounded animate-pulse"></div>
-//                     </div>
-
-//                     <div className="productGrid">
-
-//                         {Array.from({ length: 6 }).map((_, index) => (
-
-//                             <div
-//                                 key={index}
-//                                 className="productCard animate-pulse"
-//                             >
-
-//                                 <div className="h-6 w-24 bg-gray-300 rounded mb-4"></div>
-
-//                                 <div className="h-8 w-40 bg-gray-300 rounded mb-4"></div>
-
-//                                 <div className="h-4 w-full bg-gray-300 rounded mb-2"></div>
-
-//                                 <div className="h-4 w-4/5 bg-gray-300 rounded mb-4"></div>
-
-//                                 <div className="h-5 w-28 bg-gray-300 rounded mb-5"></div>
-
-//                                 <div className="flex gap-3">
-
-//                                     <div className="h-10 w-28 bg-gray-300 rounded"></div>
-
-//                                     <div className="h-10 w-28 bg-gray-300 rounded"></div>
-
-//                                 </div>
-
-//                             </div>
-
-//                         ))}
-
-//                     </div>
-
-//                 </div>
-
-//             </div>
-//         );
-//     }
-
-//     if (error) {
-
-//         toast.error(
-//             error?.message ||
-//             "Failed To Load Products ❌"
-//         );
-
-//         return (
-//             <div className="container">
-
-//                 <div className="flex justify-center items-center min-h-[60vh]">
-
-//                     <h2 className="text-2xl font-bold text-red-500">
-//                         Failed To Load Products
-//                     </h2>
-
-//                 </div>
-
-//             </div>
-//         );
-//     }
-
-//     return (
-//         <div className="container">
-
-//             <div className="orb orb1"></div>
-//             <div className="orb orb2"></div>
-//             <div className="orb orb3"></div>
-//             <div className="orb orb4"></div>
-
-//             <div className="productWrapper">
-
-//                 <div className="pageHeader">
-
-//                     <h1>
-//                         Insurance Products
-//                     </h1>
-
-//                     {
-//                         role === "ADMIN" && (
-
-//                             <NavLink
-//                                 to="/addProduct"
-//                                 className="addBtn"
-//                             >
-//                                 + Add Product
-//                             </NavLink>
-
-//                         )
-//                     }
-
-//                 </div>
-
-//                 <div className="productGrid">
-
-//                     {
-//                         filteredProducts.length > 0 ? (
-
-//                             filteredProducts.map((ele) => (
-
-//                                 <motion.div
-//                                     key={ele.productId}
-//                                     className="productCard"
-//                                     whileHover={{
-//                                         y: -10,
-//                                         scale: 1.03
-//                                     }}
-//                                 >
-
-//                                     <div className="badge">
-//                                         {ele.productType}
-//                                     </div>
-
-//                                     <h2>
-//                                         {ele.productName}
-//                                     </h2>
-
-//                                     <p>
-//                                         {ele.description}
-//                                     </p>
-
-//                                     <div className="status">
-
-//                                         Status :
-
-//                                         <span
-//                                             className={
-//                                                 ele.active
-//                                                     ? "text-green-500 font-semibold"
-//                                                     : "text-red-500 font-semibold"
-//                                             }
-//                                         >
-//                                             {
-//                                                 ele.active
-//                                                     ? " Active"
-//                                                     : " Inactive"
-//                                             }
-//                                         </span>
-
-//                                     </div>
-
-//                                     <div className="cardButtons">
-
-//                                         <NavLink
-//                                             to={`/viewallplan/${ele.productId}`}
-//                                             className="viewBtn"
-//                                         >
-//                                             View Plans
-//                                         </NavLink>
-
-//                                         {
-//                                             role === "ADMIN" && (
-
-//                                                 <NavLink
-//                                                     to={`/addplan/${ele.productId}`}
-//                                                     className="planBtn"
-//                                                 >
-//                                                     Add Plan
-//                                                 </NavLink>
-
-//                                             )
-//                                         }
-
-//                                     </div>
-
-//                                 </motion.div>
-
-//                             ))
-
-//                         ) : (
-
-//                             <div className="col-span-full text-center py-12">
-
-//                                 <h2 className="text-2xl font-semibold text-gray-600">
-//                                     No Products Found
-//                                 </h2>
-
-//                             </div>
-
-//                         )
-//                     }
-
-//                 </div>
-
-//             </div>
-
-//         </div>
-//     );
-// };
-
-// export default Product;
-
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import useProducts from "../hooks/useGetAllProduct";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
-const Orbs = () => (
-  <>
-    <div className="absolute w-[320px] h-[320px] rounded-full bg-gradient-radial from-white to-blue-200 top-[-60px] left-[30%] animate-float" />
-    <div className="absolute w-[150px] h-[150px] rounded-full bg-gradient-radial from-white to-blue-200 top-[15%] right-[20%] animate-float delay-2000" />
-    <div className="absolute w-[220px] h-[220px] rounded-full bg-gradient-radial from-white to-blue-200 bottom-[15%] left-[10%] animate-float delay-1000" />
-    <div className="absolute w-[180px] h-[180px] rounded-full bg-gradient-radial from-white to-blue-200 bottom-[10%] right-[10%] animate-float delay-3000" />
-  </>
-);
+import { Search, Plus, Eye, ListPlus, Briefcase } from "lucide-react";
 
 const Product = () => {
   const { productData, loading, error } = useProducts();
   const role = useSelector((state) => state.auth.role);
 
-  const filteredProducts =
-    role === "CUSTOMER"
-      ? productData.filter((p) => p.active === true)
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+
+  const filteredProducts = useMemo(() => {
+    // Preserve customer filter logic just in case
+    const baseData = role === "CUSTOMER" 
+      ? productData.filter((p) => p.active === true) 
       : productData;
+
+    return baseData.filter((product) => {
+      const matchesSearch = 
+        product.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesType = selectedType ? product.productType === selectedType : true;
+
+      return matchesSearch && matchesType;
+    });
+  }, [productData, role, searchQuery, selectedType]);
 
   if (loading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center bg-[#eef2f7] overflow-hidden">
-
-        <Orbs />
-
-        <div className="w-[90%] max-w-[1400px] z-10">
-
-          <div className="flex justify-between items-center mb-8">
-            <div className="h-10 w-64 bg-gray-300 rounded animate-pulse" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="backdrop-blur-xl bg-white/30 border border-white/30 rounded-2xl p-6 animate-pulse"
-              >
-                <div className="h-6 w-24 bg-gray-300 rounded mb-4" />
-                <div className="h-8 w-40 bg-gray-300 rounded mb-4" />
-                <div className="h-4 w-full bg-gray-300 rounded mb-2" />
-                <div className="h-4 w-4/5 bg-gray-300 rounded mb-4" />
-                <div className="h-5 w-28 bg-gray-300 rounded mb-5" />
-
-                <div className="flex gap-3">
-                  <div className="h-10 w-full bg-gray-300 rounded" />
-                  <div className="h-10 w-full bg-gray-300 rounded" />
-                </div>
-              </div>
-            ))}
-
-          </div>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded w-1/4 animate-pulse"></div>
+          <div className="h-10 bg-slate-200 dark:bg-slate-800 rounded w-32 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 animate-pulse space-y-4">
+              <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
+              <div className="h-7 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+              <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded w-full"></div>
+              <div className="h-10 bg-slate-200 dark:bg-slate-800 rounded w-full"></div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -295,126 +54,131 @@ const Product = () => {
 
   if (error) {
     toast.error(error?.message || "Failed To Load Products ❌");
-
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#eef2f7]">
-        <h2 className="text-2xl font-bold text-red-500">
-          Failed To Load Products
-        </h2>
+      <div className="py-12 text-center">
+        <h2 className="text-xl font-bold text-red-500">Failed To Load Products</h2>
+        <p className="text-xs text-slate-400 mt-1">Please check your network and try again.</p>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-[#eef2f7] p-10 overflow-hidden">
-
-      <Orbs />
-
-      <div className="relative z-10 w-[90%] max-w-[1400px] mx-auto">
-
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-4xl font-bold text-slate-800">
-            Insurance Products
-          </h1>
-
-          {role === "ADMIN" && (
-            <NavLink
-              to="/addProduct"
-              className="px-6 py-3 rounded-xl font-semibold text-slate-800
-              bg-gradient-to-r from-blue-200 to-blue-300
-              hover:-translate-y-1 transition"
-            >
-              + Add Product
-            </NavLink>
-          )}
+    <div className="space-y-6 text-slate-700 dark:text-slate-200">
+      
+      {/* HEADER SECTION */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-slate-850 dark:text-white">Insurance Products</h2>
+          <p className="text-xs text-slate-450 mt-0.5">Catalog of available coverage products</p>
         </div>
 
-        {/* GRID */}
+        {role === "ADMIN" && (
+          <NavLink
+            to="/addProduct"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/10 transition active:scale-97 self-start sm:self-center"
+          >
+            <Plus size={15} />
+            <span>Add New Product</span>
+          </NavLink>
+        )}
+      </div>
+
+      {/* FILTER & SEARCH BAR */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Search */}
+        <div className="relative flex items-center">
+          <Search size={18} className="absolute left-3.5 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search product name or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+          />
+        </div>
+
+        {/* Product Type Filter */}
+        <select
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+        >
+          <option value="">All Categories</option>
+          <option value="HEALTH">HEALTH</option>
+          <option value="TRAVEL">TRAVEL</option>
+          <option value="MOTOR">MOTOR</option>
+          <option value="LIFE">LIFE</option>
+        </select>
+      </div>
+
+      {/* GRID DISPLAY */}
+      {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((ele) => (
-              <motion.div
-                key={ele.productId}
-                className="backdrop-blur-xl bg-white/30 border border-white/30
-                rounded-3xl p-6 shadow-lg hover:shadow-xl transition"
-                whileHover={{ y: -10, scale: 1.03 }}
-              >
-
-                <span className="inline-block px-4 py-2 rounded-full bg-blue-100 text-sm font-semibold mb-4">
-                  {ele.productType}
-                </span>
-
-                <h2 className="text-xl font-bold text-slate-800 mb-2">
-                  {ele.productName}
-                </h2>
-
-                <p className="text-gray-600 min-h-[70px] leading-relaxed mb-4">
-                  {ele.description}
-                </p>
-
-                <div className="mb-4 font-semibold text-slate-700">
-                  Status:{" "}
-                  <span
-                    className={
-                      ele.active ? "text-green-600" : "text-red-500"
-                    }
-                  >
-                    {ele.active ? " Active" : " Inactive"}
+          {filteredProducts.map((ele) => (
+            <motion.div
+              key={ele.productId}
+              className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+              whileHover={{ y: -5 }}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="inline-block px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wide">
+                    {ele.productType}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    PID: #{ele.productId}
                   </span>
                 </div>
 
-                <div className="flex gap-3">
+                <h3 className="text-lg font-black text-slate-850 dark:text-white mb-2 leading-snug">
+                  {ele.productName}
+                </h3>
 
+                <p className="text-slate-450 dark:text-slate-450 text-xs leading-relaxed min-h-[50px] mb-4">
+                  {ele.description}
+                </p>
+              </div>
+
+              <div>
+                {/* Status indicator */}
+                <div className="flex items-center justify-between text-xs font-semibold mb-5 pb-3 border-b border-slate-100 dark:border-slate-800/60">
+                  <span className="text-slate-400 uppercase tracking-wider text-[10px]">Status</span>
+                  <span className={ele.active ? "text-emerald-600" : "text-rose-500"}>
+                    {ele.active ? "● Active" : "● Inactive"}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
                   <NavLink
                     to={`/viewallplan/${ele.productId}`}
-                    className="flex-1 text-center py-3 rounded-xl font-semibold
-                    bg-blue-100 text-slate-800 hover:-translate-y-1 transition"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 transition active:scale-97"
                   >
-                    View Plans
+                    <Eye size={14} />
+                    <span>View Plans</span>
                   </NavLink>
 
                   {role === "ADMIN" && (
                     <NavLink
                       to={`/addplan/${ele.productId}`}
-                      className="flex-1 text-center py-3 rounded-xl font-semibold
-                      bg-slate-800 text-white hover:-translate-y-1 transition"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white bg-slate-805 hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-700 transition active:scale-97"
                     >
-                      Add Plan
+                      <Plus size={14} />
+                      <span>Add Plan</span>
                     </NavLink>
                   )}
-
                 </div>
-
-              </motion.div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <h2 className="text-2xl font-semibold text-gray-600">
-                No Products Found
-              </h2>
-            </div>
-          )}
-
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </div>
-
-      {/* animations */}
-      <style>{`
-        @keyframes float {
-          50% { transform: translateY(-30px) rotate(10deg); }
-        }
-
-        .animate-float {
-          animation: float 8s ease-in-out infinite;
-        }
-
-        .delay-1000 { animation-delay: 1s; }
-        .delay-2000 { animation-delay: 2s; }
-        .delay-3000 { animation-delay: 3s; }
-      `}</style>
-
+      ) : (
+        <div className="text-center py-16 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+          <Briefcase size={32} className="mx-auto text-slate-300 dark:text-slate-650 mb-2" />
+          <h3 className="text-base font-bold text-slate-600 dark:text-slate-450">No Products Found</h3>
+          <p className="text-xs text-slate-400 mt-1">Try a different search keyword or category filter.</p>
+        </div>
+      )}
     </div>
   );
 };

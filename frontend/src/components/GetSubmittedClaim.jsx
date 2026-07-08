@@ -1,185 +1,260 @@
-import React, { useEffect, useState } from 'react';
-import { getSubmittedClaim } from '../services/claimService';
-import { NavLink } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import AgentClaimReview from "./AgentClaimReview";
 
-const GetSubmittedClaim = () => {
-
-    const [submitClaimData, setSubmitClaimData] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    const getSubmitClaim = async () => {
-
-        try {
-
-            setLoading(true);
-
-            const data = await getSubmittedClaim();
-
-            setSubmitClaimData(data || []);
-
-            console.log(data);
-
-        } catch (error) {
-
-            console.error(error);
-
-            toast.error(
-                error?.response?.data?.message ||
-                "Failed To Load Claims ❌"
-            );
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    };
-
-    useEffect(() => {
-        getSubmitClaim();
-    }, []);
+const GetSubmittedClaim = ({
+    onClose,
+    submitClaimData,
+    loading,
+    refreshClaims,
+    setShowReviewModal,
+    setSelectedClaimId
+}) => {
 
     if (loading) {
         return (
-            <div className="space-y-4 p-4">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-xl">
 
-                {Array.from({ length: 5 }).map((_, index) => (
+                <div className="w-[90%] max-w-6xl rounded-3xl bg-slate-900 border border-white/10 p-8">
 
-                    <div
-                        key={index}
-                        className="border rounded-lg p-4 animate-pulse"
-                    >
+                    <div className="space-y-4">
 
-                        <div className="flex gap-4 flex-wrap">
-
-                            <div className="h-5 w-24 bg-gray-300 rounded"></div>
-
-                            <div className="h-5 w-20 bg-gray-300 rounded"></div>
-
-                            <div className="h-5 w-32 bg-gray-300 rounded"></div>
-
-                            <div className="h-5 w-40 bg-gray-300 rounded"></div>
-
-                            <div className="h-5 w-24 bg-gray-300 rounded"></div>
-
-                            <div className="h-10 w-36 bg-gray-300 rounded"></div>
-
-                        </div>
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <div
+                                key={index}
+                                className="h-16 rounded-xl bg-white/10 animate-pulse"
+                            />
+                        ))}
 
                     </div>
 
-                ))}
+                </div>
 
             </div>
         );
     }
 
     return (
-        <div className="p-4">
+        <>
+            {/* <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-xl p-6"> */}
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-xl p-6">
+                <div
+                    className="
+                        w-full
+                        max-w-7xl
+                        max-h-[90vh]
+                        overflow-hidden
+                        rounded-[32px]
+                        border
+                        border-white/10
+                        bg-slate-900/90
+                        backdrop-blur-3xl
+                        shadow-2xl
+                    "
+                >
+                    {/* HEADER */}
 
-            {
-                submitClaimData.length > 0 ? (
+                    <div
+                        className="
+                            flex
+                            items-center
+                            justify-between
+                            p-6
+                            border-b
+                            border-white/10
+                        "
+                    >
+                        <div>
 
-                    <div className="space-y-4">
+                            <h2
+                                className="
+                                    text-3xl
+                                    font-bold
+                                    bg-gradient-to-r
+                                    from-cyan-400
+                                    to-indigo-400
+                                    bg-clip-text
+                                    text-transparent
+                                "
+                            >
+                                Submitted Claims
+                            </h2>
 
-                        {
-                            submitClaimData.map((ele) => (
+                            <p className="text-slate-400 mt-1">
+                                Review all submitted insurance claims
+                            </p>
 
-                                <div
-                                    key={ele.claimId}
-                                    className="border border-green-300 bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300"
-                                >
+                        </div>
 
-                                    <div className="grid md:grid-cols-5 gap-4 mb-4">
+                        <button
+                            onClick={onClose}
+                            className="
+                                w-11
+                                h-11
+                                rounded-full
+                                bg-gradient-to-r
+                                from-red-500
+                                to-rose-500
+                                text-white
+                                font-bold
+                                transition
+                                hover:scale-110
+                                hover:rotate-90
+                            "
+                        >
+                            ✕
+                        </button>
+                    </div>
 
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                Claim Amount
-                                            </p>
+                    {/* TABLE */}
 
-                                            <p className="font-semibold">
-                                                ₹{ele.claimAmount}
-                                            </p>
-                                        </div>
+                    <div className="overflow-auto max-h-[70vh]">
 
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                Claim ID
-                                            </p>
+                        {submitClaimData.length > 0 ? (
 
-                                            <p className="font-semibold">
-                                                {ele.claimId}
-                                            </p>
-                                        </div>
+                            <table className="w-full">
 
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                Claim Number
-                                            </p>
+                                <thead className="sticky top-0 bg-slate-900 z-10">
 
-                                            <p className="font-semibold">
-                                                {ele.claimNumber}
-                                            </p>
-                                        </div>
+                                    <tr className="border-b border-white/10">
 
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                Claim Reason
-                                            </p>
+                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                            Claim Number
+                                        </th>
 
-                                            <p className="font-semibold">
-                                                {ele.claimReason}
-                                            </p>
-                                        </div>
+                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                            Claim ID
+                                        </th>
 
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                Status
-                                            </p>
+                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                            Amount
+                                        </th>
 
-                                            <span
-                                                className={`font-semibold ${
-                                                    ele.claimStatus === "SUBMITTED"
-                                                        ? "text-yellow-600"
-                                                        : ele.claimStatus === "APPROVED"
-                                                        ? "text-green-600"
-                                                        : "text-red-600"
-                                                }`}
-                                            >
-                                                {ele.claimStatus}
-                                            </span>
-                                        </div>
+                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                            Status
+                                        </th>
 
-                                    </div>
+                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                            Reason
+                                        </th>
 
-                                    <NavLink
-                                        className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                                        to={`/${ele.claimId}/review`}
-                                    >
-                                        Review Claim
-                                    </NavLink>
+                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                            Action
+                                        </th>
 
-                                </div>
-                            ))
-                        }
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {submitClaimData.map((claim) => (
+
+                                        <tr
+                                            key={claim.claimId}
+                                            className="
+                                                border-b
+                                                border-white/5
+                                                hover:bg-white/5
+                                                transition
+                                            "
+                                        >
+                                            <td className="p-4 text-center text-white">
+                                                {claim.claimNumber}
+                                            </td>
+
+                                            <td className="p-4 text-center text-white">
+                                                {claim.claimId}
+                                            </td>
+
+                                            <td className="p-4 text-center text-white">
+                                                ₹{claim.claimAmount}
+                                            </td>
+
+                                            <td className="p-4 text-center">
+
+                                                <span
+                                                    className={`
+                                                        px-3
+                                                        py-1
+                                                        rounded-full
+                                                        text-xs
+                                                        font-semibold
+
+                                                        ${claim.claimStatus === "SUBMITTED"
+                                                            ? "bg-yellow-500/20 text-yellow-400"
+                                                            : claim.claimStatus === "APPROVED"
+                                                                ? "bg-green-500/20 text-green-400"
+                                                                : "bg-red-500/20 text-red-400"
+                                                        }
+                                                    `}
+                                                >
+                                                    {claim.claimStatus}
+                                                </span>
+
+                                            </td>
+
+                                            <td className="p-4 text-center text-slate-300">
+                                                {claim.claimReason}
+                                            </td>
+
+                                            <td className="p-4 text-center">
+
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedClaimId(claim.claimId);
+                                                        setShowReviewModal(true);
+                                                        onClose();
+                                                    }}
+                                                    className="
+        px-4
+        py-2
+        rounded-xl
+        text-white
+        font-semibold
+        bg-gradient-to-r
+        from-cyan-500
+        to-blue-600
+        hover:scale-105
+        transition
+    "
+                                                >
+                                                    Review Claim
+                                                </button>
+
+                                            </td>
+                                        </tr>
+                                    ))}
+
+                                </tbody>
+
+                            </table>
+
+                        ) : (
+
+                            <div className="p-16 text-center">
+
+                                <h2 className="text-2xl text-white font-bold mb-3">
+                                    No Submitted Claims
+                                </h2>
+
+                                <p className="text-slate-400">
+                                    There are currently no submitted claims available.
+                                </p>
+
+                            </div>
+
+                        )}
 
                     </div>
 
-                ) : (
+                </div>
 
-                    <div className="text-center py-10">
+            </div>
 
-                        <h2 className="text-2xl font-semibold text-gray-600">
-                            No Submitted Claims Yet
-                        </h2>
+            {/* NESTED REVIEW MODAL */}
 
-                    </div>
-
-                )
-            }
-
-        </div>
+        </>
     );
 };
 

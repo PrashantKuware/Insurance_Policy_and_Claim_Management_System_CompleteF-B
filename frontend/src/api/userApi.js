@@ -6,10 +6,22 @@ const userApi = axios.create({
 
 userApi.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const publicRoutes = [
+      "/send-email-otp",
+      "/send-mobile-otp",
+      "/register",
+    ];
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const isPublicRoute = publicRoutes.some((route) =>
+      config.url?.startsWith(route)
+    );
+
+    if (!isPublicRoute) {
+      const token = localStorage.getItem("token");
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     return config;

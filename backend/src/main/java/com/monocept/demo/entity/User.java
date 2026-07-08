@@ -57,6 +57,7 @@ public class User {
     @Column(updatable = false)
     private LocalDateTime createdDate;
 
+    @Column(updatable = false)
     private LocalDateTime updatedDate;
     
     @PrePersist

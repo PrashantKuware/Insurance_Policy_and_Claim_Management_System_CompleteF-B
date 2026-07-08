@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +25,7 @@ import com.monocept.demo.dto.response.DocumentResponse;
 import com.monocept.demo.entity.Claim;
 import com.monocept.demo.entity.ClaimDocument;
 import com.monocept.demo.entity.Policy;
+import com.monocept.demo.entity.User;
 import com.monocept.demo.enums.ClaimStatus;
 import com.monocept.demo.enums.PolicyStatus;
 import com.monocept.demo.exception.BadRequestException;
@@ -33,6 +36,7 @@ import com.monocept.demo.exception.ResourceNotFoundException;
 import com.monocept.demo.repository.ClaimDocumentRepository;
 import com.monocept.demo.repository.ClaimRepository;
 import com.monocept.demo.repository.PolicyRepository;
+import com.monocept.demo.repository.UserRepository;
 import com.monocept.demo.service.ClaimService;
 import com.monocept.demo.service.ClaimStatusHistoryService;
 import com.monocept.demo.service.DocumentService;
@@ -42,6 +46,9 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Autowired
 	private ClaimRepository claimRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private PolicyRepository policyRepository;
@@ -58,11 +65,83 @@ public class ClaimServiceImpl implements ClaimService {
 	@Autowired
 	private ClaimDocumentRepository claimDocumentRepository;
 
+	private ClaimResponseDto mapToDto(Claim claim) {
+
+	    ClaimResponseDto dto = new ClaimResponseDto();
+
+	    dto.setClaimId(claim.getClaimId());
+	    dto.setClaimNumber(claim.getClaimNumber());
+	    
+	    dto.setClaimReason(claim.getClaimReason());
+
+	    if (claim.getClaimAmount() != null) {
+	        dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+	    }
+
+	    dto.setClaimReason(claim.getClaimReason());
+
+	    if (claim.getClaimStatus() != null) {
+	        dto.setClaimStatus(claim.getClaimStatus().name());
+	    }
+
+	    // Agent
+	    if (claim.getReviewedBy() != null) {
+
+	        dto.setAgentName(
+	                claim.getReviewedBy().getFullName());
+
+	        dto.setAgentEmail(
+	                claim.getReviewedBy().getEmail());
+	    }
+
+	    // Admin
+	    if (claim.getDecisionBy() != null) {
+
+	        dto.setAdminName(
+	                claim.getDecisionBy().getFullName());
+	    }
+
+	    dto.setAgentRemark(claim.getAgentRemarks());
+
+	    dto.setAdminRemark(claim.getAdminRemarks());
+
+	    dto.setApprovedDate(claim.getDecisionDate());
+
+	    if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_APPROVAL) {
+
+	        dto.setAgentRecommendation(
+	                "Recommended For Approval");
+	    }
+	    else if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_REJECTION) {
+
+	        dto.setAgentRecommendation(
+	                "Recommended For Rejection");
+	    }
+	    else if (claim.getClaimStatus() == ClaimStatus.APPROVED) {
+
+	        dto.setAgentRecommendation("Approved");
+	    }
+	    else if (claim.getClaimStatus() == ClaimStatus.REJECTED) {
+
+	        dto.setAgentRecommendation("Rejected");
+	    }
+
+	    return dto;
+	}
+	
 	@Override
 	public ClaimResponseDto recommendClaimForApproval(Long claimId, ClaimRecommendationRequestDto requestDto) {
-
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Claim claim = getClaimEntity(claimId);
+		
+		String email = authentication.getName();
 
+		User agent = userRepository.findByEmail(email).orElseThrow(() ->
+		                new ResourceNotFoundException("Agent not found"));
+
+		claim.setReviewedBy(agent);
+		
 		if (claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
 			throw new InvalidClaimStatusException("Claim must be under review");
 		}
@@ -80,14 +159,22 @@ public class ClaimServiceImpl implements ClaimService {
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.RECOMMENDED_FOR_APPROVAL,
 				requestDto.getRemarks());
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		return mapToDto(claim);
 	}
 
 	@Override
 	public ClaimResponseDto recommendClaimForRejection(Long claimId, ClaimRecommendationRequestDto requestDto) {
-
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		Claim claim = getClaimEntity(claimId);
+		
+		String email = authentication.getName();
 
+		User agent = userRepository.findByEmail(email).orElseThrow(() ->
+		                new ResourceNotFoundException("Agent not found"));
+
+		claim.setReviewedBy(agent);
+		
 		if (claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
 			throw new InvalidClaimStatusException("Claim must be under review");
 		}
@@ -110,10 +197,30 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	public ClaimResponseDto submitClaim(Long policyId, ClaimRequestDto requestDto) {
+		Authentication authentication =
+	            SecurityContextHolder.getContext()
+	                    .getAuthentication();
+
+	    String email = authentication.getName();
+
+	    User cusUser = userRepository
+	            .findByEmail(email)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Customer not found"
+	                    ));
+
+	    if (!cusUser.getActive()) {
+
+	        throw new BadRequestException(
+	                "Your account is inactive. You cannot buy policy."
+	        );
+	    }
 
 		Policy policy = policyRepository.findById(policyId)
 				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
 
+		
 		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
 			throw new InvalidPolicyStatusException("Claim can only be raised for active policies");
 		}
@@ -136,6 +243,20 @@ public class ClaimServiceImpl implements ClaimService {
 		if (requestDto.getClaimAmount().compareTo(coverageAmount) > 0) {
 
 			throw new BadRequestException("Claim amount cannot exceed policy coverage amount");
+		}
+		
+		BigDecimal alreadyClaimed =
+		        claimRepository.getTotalApprovedClaimAmount(policyId);
+
+		BigDecimal remainingCoverage =
+		        coverageAmount.subtract(alreadyClaimed);
+
+		if (requestDto.getClaimAmount()
+		        .compareTo(remainingCoverage) > 0) {
+
+		    throw new BadRequestException(
+		            "Remaining coverage amount is only ₹"
+		                    + remainingCoverage);
 		}
 
 		Claim claim = new Claim();
@@ -160,45 +281,148 @@ public class ClaimServiceImpl implements ClaimService {
 
 		historyService.saveStatusHistory(claim.getClaimId(), null, ClaimStatus.SUBMITTED, "Claim Submitted");
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		return mapToDto(claim);
 	}
-
+	
 	@Override
-	public ClaimResponseDto reviewClaim(Long claimId, ClaimReviewRequestDto requestDto) {
+	public ClaimResponseDto reviewClaim( Long claimId, ClaimReviewRequestDto requestDto) {
 
-		Claim claim = getClaimEntity(claimId);
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    Claim claim = getClaimEntity(claimId);
+	    String email = authentication.getName();
+	    
+	    User agent = userRepository.findByEmail(email).orElseThrow(() ->
+	                    new ResourceNotFoundException("Agent not found"));
+	    claim.setReviewedBy(agent);
+	    
+	    User agentUser = userRepository
+	            .findByEmail(email)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Agent not found"
+	                    ));
 
-		validateClaimNotFinalized(claim);
+	    if (!agentUser.getActive()) {
 
-		if (claim.getClaimStatus() != ClaimStatus.SUBMITTED) {
-			throw new InvalidClaimStatusException("Only submitted claims can be reviewed");
-		}
+	        throw new BadRequestException(
+	                "Your account is inactive. You cannot review claims."
+	        );
+	    }
+	    
+	    User customerUser = claim.getPolicy()
+	            .getCustomer()
+	            .getUser();
 
-		ClaimStatus oldStatus = claim.getClaimStatus();
+	    if (!customerUser.getActive()) {
 
-		claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
+	        throw new BadRequestException(
+	                "This claim cannot be reviewed because the customer account is inactive."
+	        );
+	    }
+	    validateClaimNotFinalized(claim);
 
-		claim.setAgentRemarks(requestDto.getRemarks());
+	    if (claim.getClaimStatus() != ClaimStatus.SUBMITTED) {
 
-		claim.setUpdatedDate(LocalDateTime.now());
+	        throw new InvalidClaimStatusException(
+	                "Only submitted claims can be reviewed"
+	        );
+	    }
 
-		claimRepository.save(claim);
+	    ClaimStatus oldStatus = claim.getClaimStatus();
 
-		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.UNDER_REVIEW, requestDto.getRemarks());
+	    claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
 
-		return mapper.map(claim, ClaimResponseDto.class);
+	    claim.setAgentRemarks(
+	            requestDto.getRemarks()
+	    );
+
+	    claim.setUpdatedDate(
+	            LocalDateTime.now()
+	    );
+
+	    claimRepository.save(claim);
+
+	    historyService.saveStatusHistory(
+	            claimId,
+	            oldStatus,
+	            ClaimStatus.UNDER_REVIEW,
+	            requestDto.getRemarks()
+	    );
+
+	    return buildFullClaimDto(claim);
+	}
+	
+	private ClaimResponseDto buildFullClaimDto(Claim claim) {
+
+	    ClaimResponseDto dto = new ClaimResponseDto();
+
+	    dto.setClaimId(claim.getClaimId());
+	    dto.setClaimNumber(claim.getClaimNumber());
+	    dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+	    dto.setClaimStatus(claim.getClaimStatus().name());
+	    dto.setClaimReason(claim.getClaimReason());
+
+	    Policy policy = claim.getPolicy();
+
+	    dto.setPolicyId(policy.getPolicyId());
+
+	    dto.setCustomerName(
+	        policy.getCustomer()
+	              .getUser()
+	              .getFullName()
+	    );
+
+	    dto.setCustomerEmail(
+	        policy.getCustomer()
+	              .getUser()
+	              .getEmail()
+	    );
+
+	    dto.setPlanName(
+	        policy.getPolicyPlan()
+	              .getPlanName()
+	    );
+
+	    dto.setCoverageAmount(
+	        policy.getPolicyPlan()
+	              .getCoverageAmount()
+	    );
+
+	    dto.setPremiumAmount(
+	        policy.getPolicyPlan()
+	              .getPremiumAmount()
+	    );
+
+	    dto.setPolicyStartDate(policy.getStartDate());
+	    dto.setPolicyEndDate(policy.getEndDate());
+
+	    return dto;
 	}
 
 	@Override
 	public ClaimResponseDto approveClaim(Long claimId, ClaimDecisionRequestDto requestDto) {
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+		String email = authentication.getName();
+		
 		Claim claim = getClaimEntity(claimId);
-
+		
+		User admin = userRepository
+		        .findByEmail(email)
+		        .orElseThrow(() ->
+		            new ResourceNotFoundException("Admin not found"));
+		
 		validateClaimNotFinalized(claim);
 
-		if (claim.getClaimStatus() != ClaimStatus.RECOMMENDED_FOR_APPROVAL) {
-			throw new InvalidClaimStatusException("Claim must be RECOMMENDED_FOR_APPROVAL or UNDER_REVIEW");
-		}
+		if (claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW &&
+			    claim.getClaimStatus() != ClaimStatus.RECOMMENDED_FOR_APPROVAL &&
+			    claim.getClaimStatus() != ClaimStatus.RECOMMENDED_FOR_REJECTION) {
+
+			    throw new InvalidClaimStatusException(
+			        "Claim is not ready for decision"
+			    );
+			}
 
 		ClaimStatus oldStatus = claim.getClaimStatus();
 
@@ -208,23 +432,41 @@ public class ClaimServiceImpl implements ClaimService {
 
 		claim.setUpdatedDate(LocalDateTime.now());
 
+		claim.setDecisionBy(admin);
+
+		claim.setDecisionDate(LocalDateTime.now());
+
 		claimRepository.save(claim);
 
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.APPROVED, requestDto.getRemarks());
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		 return mapToDto(claim);
 	}
 
 	@Override
 	public ClaimResponseDto rejectClaim(Long claimId, ClaimDecisionRequestDto requestDto) {
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+		String email = authentication.getName();
+
+		User admin = userRepository
+		        .findByEmail(email)
+		        .orElseThrow(() ->
+		            new ResourceNotFoundException("Admin not found"));
+		
 		Claim claim = getClaimEntity(claimId);
 
 		validateClaimNotFinalized(claim);
 
-		if (claim.getClaimStatus() != ClaimStatus.RECOMMENDED_FOR_REJECTION) {
-			throw new InvalidClaimStatusException("Claim must be under review");
-		}
+		if (claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW &&
+			    claim.getClaimStatus() != ClaimStatus.RECOMMENDED_FOR_APPROVAL &&
+			    claim.getClaimStatus() != ClaimStatus.RECOMMENDED_FOR_REJECTION) {
+
+			    throw new InvalidClaimStatusException(
+			        "Claim is not ready for decision"
+			    );
+			}
 
 		ClaimStatus oldStatus = claim.getClaimStatus();
 
@@ -233,21 +475,84 @@ public class ClaimServiceImpl implements ClaimService {
 		claim.setAdminRemarks(requestDto.getRemarks());
 
 		claim.setUpdatedDate(LocalDateTime.now());
+		
+		claim.setDecisionBy(admin);
+
+		claim.setDecisionDate(LocalDateTime.now());
 
 		claimRepository.save(claim);
 
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.REJECTED, requestDto.getRemarks());
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		 return mapToDto(claim);
 	}
 
-	@Override
-	public ClaimResponseDto getClaimById(Long claimId) {
+@Override
+public ClaimResponseDto getClaimById(Long claimId) {
 
-		Claim claim = getClaimEntity(claimId);
+//<<<<<<< HEAD
+	    Claim claim = getClaimEntity(claimId);
 
-		return mapper.map(claim, ClaimResponseDto.class);
-	}
+	    return mapToDto(claim);
+	
+//=======
+//    Claim claim = getClaimEntity(claimId);
+//    
+//
+//    ClaimResponseDto dto = new ClaimResponseDto();
+//
+//    dto.setClaimId(claim.getClaimId());
+//    dto.setClaimNumber(claim.getClaimNumber());
+//    dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+//    dto.setClaimStatus(claim.getClaimStatus().name());
+//    dto.setClaimReason(claim.getClaimReason());
+//    dto.setAdminName();
+//
+//    Policy policy = claim.getPolicy();
+//
+//    dto.setPolicyId(policy.getPolicyId());
+//    
+//    dto.setAgentName(
+//    		policy.get);
+//    
+//    dto.setCustomerName(
+//        policy.getCustomer()
+//              .getUser()
+//              .getFullName()
+//    );
+//
+//    dto.setCustomerEmail(
+//        policy.getCustomer()
+//              .getUser()
+//              .getEmail()
+//    );
+//
+//    dto.setPlanName(
+//        policy.getPolicyPlan()
+//              .getPlanName()
+//    );
+//
+//    dto.setCoverageAmount(
+//        policy.getPolicyPlan()
+//              .getCoverageAmount()
+//    );
+//
+//    dto.setPremiumAmount(
+//        policy.getPolicyPlan()
+//              .getPremiumAmount()
+//    );
+//
+//    dto.setPolicyStartDate(
+//        policy.getStartDate()
+//    );
+//
+//    dto.setPolicyEndDate(
+//        policy.getEndDate()
+//    );
+//
+//    return dto;
+}
+//>>>>>>> origin/mayank
 
 	@Override
 	public ClaimResponseDto getClaimByClaimNumber(String claimNumber) {
@@ -255,20 +560,20 @@ public class ClaimServiceImpl implements ClaimService {
 		Claim claim = claimRepository.findByClaimNumber(claimNumber)
 				.orElseThrow(() -> new ResourceNotFoundException("Claim not found"));
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		 return mapToDto(claim);
 	}
 
 	@Override
 	public Page<ClaimResponseDto> getClaimsByCustomer(Long customerId, Pageable pageable) {
 
 		return claimRepository.findByPolicy_Customer_CustomerId(customerId, pageable)
-				.map(claim -> mapper.map(claim, ClaimResponseDto.class));
+				.map(this::mapToDto);
 	}
 
 	@Override
 	public Page<ClaimResponseDto> getAllClaims(Pageable pageable) {
 
-		return claimRepository.findAll(pageable).map(claim -> mapper.map(claim, ClaimResponseDto.class));
+		return claimRepository.findAll(pageable).map(this::mapToDto);
 	}
 
 	private Claim getClaimEntity(Long claimId) {
@@ -280,7 +585,7 @@ public class ClaimServiceImpl implements ClaimService {
 	public Page<ClaimResponseDto> getClaimsByPolicy(Long policyId, Pageable pageable) {
 
 		return claimRepository.findByPolicyPolicyId(policyId, pageable)
-				.map(claim -> mapper.map(claim, ClaimResponseDto.class));
+				.map(this::mapToDto);
 	}
 
 	@Override
@@ -305,7 +610,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 		historyService.saveStatusHistory(claimId, oldStatus, ClaimStatus.WITHDRAWN, "Claim Withdrawn");
 
-		return mapper.map(claim, ClaimResponseDto.class);
+		return mapToDto(claim);
 	}
 
 	private void validateClaimNotFinalized(Claim claim) {
@@ -378,6 +683,11 @@ public class ClaimServiceImpl implements ClaimService {
 
 	    return claimRepository.findByClaimStatus(ClaimStatus.SUBMITTED)
 	            .stream()
+	            .filter(claim ->
+	                    claim.getPolicy()
+	                         .getCustomer()
+	                         .getUser()
+	                         .getActive())
 	            .map(claim -> {
 
 	                ClaimResponseDto dto = new ClaimResponseDto();

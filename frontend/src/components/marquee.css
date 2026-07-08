@@ -1,0 +1,30 @@
+.marquee-wrapper {
+  width: 100%;
+  overflow: hidden;   /* 🔥 MOST IMPORTANT FIX */
+  padding: 10px 0;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: scroll 18s linear infinite;
+}
+
+/* 🔥 THIS FIXES YOUR BREAKING ISSUE */
+.marquee-track > * {
+  flex: 0 0 auto;     /* no shrink, no stretch */
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.group:hover .marquee-track {
+  animation-play-state: paused;
+}

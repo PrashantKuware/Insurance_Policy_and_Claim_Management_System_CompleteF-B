@@ -2,7 +2,9 @@ package com.monocept.demo.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,6 +19,7 @@ import com.monocept.demo.dto.request.LoginRequestDto;
 import com.monocept.demo.dto.request.RegisterRequestDto;
 import com.monocept.demo.dto.request.UserStatusUpdateDto;
 import com.monocept.demo.dto.response.AuthResponseDto;
+import com.monocept.demo.dto.response.ResetPasswordDto;
 import com.monocept.demo.dto.response.UserResponseDto;
 import com.monocept.demo.entity.User;
 import com.monocept.demo.service.AuthService;
@@ -96,5 +99,43 @@ public class AuthController {
 		authService.updateUserStatus(userId, dto);
 
 		return "User status updated";
+	}
+	
+	@GetMapping("/me")
+	public ResponseEntity<UserResponseDto> getCurrentUser(
+	        Authentication authentication) {
+
+	    String email = authentication.getName();
+
+	    return ResponseEntity.ok(
+	            authService.getCurrentUser(email)
+	    );
+	}
+	
+	@PostMapping("/forgot-password/send-otp")
+	public ResponseEntity<String> sendForgotPasswordOtp(
+	        @RequestParam String email) {
+
+	    authService.sendForgotPasswordOtp(email);
+	    return ResponseEntity.ok("OTP sent successfully");
+	}
+	
+	@PostMapping("/forgot-password/verify-otp")
+	public ResponseEntity<String> verifyOtp(
+	        @RequestParam String email,
+	        @RequestParam String otp) {
+
+	    authService.verifyForgotPasswordOtp(email, otp);
+
+	    return ResponseEntity.ok("OTP verified successfully");
+	}
+	
+	@PostMapping("/forgot-password/reset")
+	public ResponseEntity<String> resetPassword(
+	        @RequestBody ResetPasswordDto dto) {
+
+	    authService.resetPassword(dto);
+
+	    return ResponseEntity.ok("Password changed successfully");
 	}
 }
