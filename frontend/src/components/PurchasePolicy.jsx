@@ -5,8 +5,10 @@ import { getPolicyByPlanId } from '../services/PlanServices';
 import { purchasePolicy } from '../services/policyService';
 import { payForPolicy, createPaymentOrder } from '../services/paymentService';
 import { toast } from 'react-toastify';
+import { FileText } from "lucide-react";
 import { FaArrowLeft, FaShoppingCart, FaCreditCard, FaRegCheckCircle, FaShieldAlt, FaCalendarAlt, FaMoneyBillWave } from 'react-icons/fa';
 import { getAllReviewByPlanId, getAverageRating } from '../services/reviewService';
+import usePolicyPayment from "../hooks/usePolicyPayment";
 
 // Glowing Cyber Ambient Effects
 const Orbs = () => (
@@ -28,7 +30,10 @@ const PurchasePolicy = () => {
 
     const [loading, setLoading] = useState(true);
     const [purchaseLoading, setPurchaseLoading] = useState(false);
-    const [paymentLoading, setPaymentLoading] = useState(false);
+    const {
+        payPolicy,
+        paymentLoading
+    } = usePolicyPayment();
 
     useEffect(() => {
         getPolicyById();
@@ -40,6 +45,7 @@ const PurchasePolicy = () => {
         try {
             setLoading(true);
             const data = await getPolicyByPlanId(planId);
+            console.log(data)
             setPlanData(data);
         } catch (error) {
             console.error(error);
@@ -98,70 +104,6 @@ const PurchasePolicy = () => {
         }
     };
 
-    const purchasiingPolicyPayment = async () => {
-        try {
-            setPaymentLoading(true);
-            const order =
-                await createPaymentOrder(policyId);
-            const options = {
-                key:
-                    order.razorpayKey,
-                amount:
-                    planData.premiumAmount * 100,
-                currency: "INR",
-                name: "INSUREX",
-                description: "Policy Premium Payment",
-                order_id:
-                    order.razorpayOrderId,
-                handler: async function (response) {
-                    try {
-                        await payForPolicy(
-                            policyId,
-                            planData.premiumAmount,
-                            "UPI",
-                            response
-                        );
-                        toast.success(
-                            "Payment Successful ✅"
-                        );
-                        setTimeout(() => {
-                            navigate("/customerdashboard")
-                        }, 1000);
-                    } catch (error) {
-                        console.log(error);
-                        toast.error(
-                            "Payment Save Failed ❌"
-                        );
-                    }
-                },
-                prefill: {
-                    name: "Mayank",
-                    email: "test@example.com",
-                    contact: "9999999999"
-                },
-                method: {
-                    upi: true,
-                    card: true,
-                    netbanking: true
-                },
-                theme: {
-                    color: "#06b6d4"
-                }
-            };
-            const razor =
-                new window.Razorpay(options);
-            razor.open();
-        }
-        catch (error) {
-            console.log(error);
-            toast.error(
-                "Payment Failed ❌"
-            )
-        }
-        finally {
-            setPaymentLoading(false);
-        }
-    }
 
     // --- 1. CYBER SKELETON SHIMMER LOADING ---
     if (loading) {
@@ -266,6 +208,15 @@ const PurchasePolicy = () => {
                                 <div>
                                     <p className="text-slate-500 text-[11px] uppercase tracking-wider mb-0.5">Premium Modality</p>
                                     <h3 className="text-lg font-black text-slate-200">{planData.premiumType}</h3>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-slate-950/40 border w-[49vw] border-slate-900 rounded-2xl flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                    <FileText size={25} className="text-blue-500" />
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 text-[11px] uppercase tracking-wider mb-0.5">Term and Conditions</p>
+                                    <h3 className="text-lg font-black text-slate-200">{planData.termsConditions}</h3>
                                 </div>
                             </div>
                         </div>
@@ -374,7 +325,14 @@ const PurchasePolicy = () => {
 
                                     <div className="pt-2 border-t border-slate-900/60">
                                         <button
-                                            onClick={purchasiingPolicyPayment}
+                                            onClick={() =>
+                                                payPolicy(
+                                                    policyId,
+                                                    planData.premiumAmount,
+                                                    navigate
+                                                )
+                                            }
+                                            disabled={paymentLoading}
                                             disabled={paymentLoading}
                                             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-cyan-400 bg-cyan-500/10 hover:bg-cyan-600 hover:text-white border border-cyan-500/20 hover:border-transparent transition-all duration-200 disabled:opacity-40"
                                         >

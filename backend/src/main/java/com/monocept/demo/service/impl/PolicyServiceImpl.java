@@ -92,6 +92,7 @@ public class PolicyServiceImpl implements PolicyService {
 				.customerName(policy.getCustomer().getUser().getFullName())
 				.planName(policy.getPolicyPlan().getPlanName()).startDate(policy.getStartDate())
 				.endDate(policy.getEndDate()).policyStatus(policy.getPolicyStatus())
+				.planId(policy.getPolicyPlan().getPlanId()) // ye line 
 				.totalPremiumPaid(policy.getTotalPremiumPaid()).build();
 	}
 
@@ -133,7 +134,9 @@ public class PolicyServiceImpl implements PolicyService {
 		Policy policy = policyRepository.findById(policyId)
 				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
 
+		
 		validatePolicyAccess(policy);
+		
 
 		return mapToResponse(policy);
 	}

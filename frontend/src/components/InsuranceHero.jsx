@@ -147,7 +147,7 @@ const InsuranceHero = () => {
                         whileTap={{ scale: 0.98 }}
                         className="group relative w-full sm:w-auto overflow-hidden rounded-full bg-zinc-900 px-8 py-4 font-bold text-white shadow-xl"
                     >
-                        <span className="relative z-10">Get Started</span>
+                        <span className="relative z-10 cursor-pointer" onClick={() => navigate("/login")}>Get Started</span>
                         <motion.div
                             initial={{ x: "-120%" }}
                             whileHover={{ x: "120%" }}
@@ -404,7 +404,8 @@ const InsuranceHero = () => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.98 }}
-                        className="mt-8 rounded-full bg-white px-8 py-4 font-extrabold text-zinc-950 shadow-lg transition hover:bg-zinc-50"
+                        className="mt-8 rounded-full cursor-pointer bg-white px-8 py-4 font-extrabold text-zinc-950 shadow-lg transition hover:bg-zinc-50"
+                        onClick={() => navigate("/login")}
                     >
                         Get Started Today
                     </motion.button>

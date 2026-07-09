@@ -179,3 +179,19 @@ export const adminRejectClaim = async (claimId, remarks) => {
 //     throw error;
 //   }
 // };
+
+export const getClaimById = async (claimId) => {
+
+    try {
+
+        const res = await claimApi.get(`/${claimId}`);
+
+        return res.data;
+
+    } catch(error){
+
+        handleError(error);
+
+    }
+
+};

@@ -65,66 +65,241 @@ public class ClaimServiceImpl implements ClaimService {
 	@Autowired
 	private ClaimDocumentRepository claimDocumentRepository;
 
+//	private ClaimResponseDto mapToDto(Claim claim) {
+//
+//	    ClaimResponseDto dto = new ClaimResponseDto();
+//
+//	    dto.setClaimId(claim.getClaimId());
+//	    dto.setClaimNumber(claim.getClaimNumber());
+//	    
+//	    dto.setClaimReason(claim.getClaimReason());
+//
+//	    if (claim.getClaimAmount() != null) {
+//	        dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+//	    }
+//
+//	    dto.setClaimReason(claim.getClaimReason());
+//
+//	    if (claim.getClaimStatus() != null) {
+//	        dto.setClaimStatus(claim.getClaimStatus().name());
+//	    }
+//
+//	    // Agent
+//	    if (claim.getReviewedBy() != null) {
+//
+//	        dto.setAgentName(
+//	                claim.getReviewedBy().getFullName());
+//
+//	        dto.setAgentEmail(
+//	                claim.getReviewedBy().getEmail());
+//	    }
+//
+//	    // Admin
+//	    if (claim.getDecisionBy() != null) {
+//
+//	        dto.setAdminName(
+//	                claim.getDecisionBy().getFullName());
+//	    }
+//
+//	    dto.setAgentRemark(claim.getAgentRemarks());
+//
+//	    dto.setAdminRemark(claim.getAdminRemarks());
+//
+//	    dto.setApprovedDate(claim.getDecisionDate());
+//
+//	    if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_APPROVAL) {
+//
+//	        dto.setAgentRecommendation(
+//	                "Recommended For Approval");
+//	    }
+//	    else if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_REJECTION) {
+//
+//	        dto.setAgentRecommendation(
+//	                "Recommended For Rejection");
+//	    }
+//	    else if (claim.getClaimStatus() == ClaimStatus.APPROVED) {
+//
+//	        dto.setAgentRecommendation("Approved");
+//	    }
+//	    else if (claim.getClaimStatus() == ClaimStatus.REJECTED) {
+//
+//	        dto.setAgentRecommendation("Rejected");
+//	    }
+//
+//	    return dto;
+//	}
+	
 	private ClaimResponseDto mapToDto(Claim claim) {
 
 	    ClaimResponseDto dto = new ClaimResponseDto();
 
+
 	    dto.setClaimId(claim.getClaimId());
-	    dto.setClaimNumber(claim.getClaimNumber());
-	    
-	    dto.setClaimReason(claim.getClaimReason());
 
-	    if (claim.getClaimAmount() != null) {
-	        dto.setClaimAmount(claim.getClaimAmount().doubleValue());
+	    dto.setClaimNumber(
+	            claim.getClaimNumber()
+	    );
+
+
+	    dto.setClaimAmount(
+	            claim.getClaimAmount() != null
+	            ? claim.getClaimAmount().doubleValue()
+	            : null
+	    );
+
+
+	    dto.setClaimReason(
+	            claim.getClaimReason()
+	    );
+
+
+	    dto.setClaimStatus(
+	            claim.getClaimStatus() != null
+	            ? claim.getClaimStatus().name()
+	            : null
+	    );
+
+
+	    Policy policy = claim.getPolicy();
+
+
+	    if(policy != null){
+
+	        dto.setPolicyId(
+	                policy.getPolicyId()
+	        );
+
+
+	        if(policy.getCustomer()!=null 
+	            && policy.getCustomer().getUser()!=null){
+
+
+	            dto.setCustomerName(
+	                policy.getCustomer()
+	                      .getUser()
+	                      .getFullName()
+	            );
+
+
+	            dto.setCustomerEmail(
+	                policy.getCustomer()
+	                      .getUser()
+	                      .getEmail()
+	            );
+	        }
+
+
+	        if(policy.getPolicyPlan()!=null){
+
+	            dto.setPlanName(
+	                policy.getPolicyPlan()
+	                      .getPlanName()
+	            );
+
+
+	            dto.setCoverageAmount(
+	                policy.getPolicyPlan()
+	                      .getCoverageAmount()
+	            );
+
+
+	            dto.setPremiumAmount(
+	                policy.getPolicyPlan()
+	                      .getPremiumAmount()
+	            );
+
+	        }
+
+
+	        dto.setPolicyStartDate(
+	                policy.getStartDate()
+	        );
+
+
+	        dto.setPolicyEndDate(
+	                policy.getEndDate()
+	        );
 	    }
 
-	    dto.setClaimReason(claim.getClaimReason());
 
-	    if (claim.getClaimStatus() != null) {
-	        dto.setClaimStatus(claim.getClaimStatus().name());
-	    }
 
-	    // Agent
-	    if (claim.getReviewedBy() != null) {
+	    // Agent Details
+
+	    if(claim.getReviewedBy()!=null){
+
 
 	        dto.setAgentName(
-	                claim.getReviewedBy().getFullName());
+	            claim.getReviewedBy()
+	                 .getFullName()
+	        );
+
 
 	        dto.setAgentEmail(
-	                claim.getReviewedBy().getEmail());
+	            claim.getReviewedBy()
+	                 .getEmail()
+	        );
+
 	    }
 
-	    // Admin
-	    if (claim.getDecisionBy() != null) {
+
+
+	    // Admin Details
+
+	    if(claim.getDecisionBy()!=null){
 
 	        dto.setAdminName(
-	                claim.getDecisionBy().getFullName());
+	            claim.getDecisionBy()
+	                 .getFullName()
+	        );
+
 	    }
 
-	    dto.setAgentRemark(claim.getAgentRemarks());
 
-	    dto.setAdminRemark(claim.getAdminRemarks());
+	    dto.setAgentRemark(
+	            claim.getAgentRemarks()
+	    );
 
-	    dto.setApprovedDate(claim.getDecisionDate());
 
-	    if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_APPROVAL) {
+	    dto.setAdminRemark(
+	            claim.getAdminRemarks()
+	    );
 
-	        dto.setAgentRecommendation(
-	                "Recommended For Approval");
+
+	    dto.setApprovedDate(
+	            claim.getDecisionDate()
+	    );
+
+
+
+	    switch(claim.getClaimStatus()){
+
+	        case RECOMMENDED_FOR_APPROVAL ->
+	            dto.setAgentRecommendation(
+	                "Recommended For Approval"
+	            );
+
+
+	        case RECOMMENDED_FOR_REJECTION ->
+	            dto.setAgentRecommendation(
+	                "Recommended For Rejection"
+	            );
+
+
+	        case APPROVED ->
+	            dto.setAgentRecommendation(
+	                "Approved"
+	            );
+
+
+	        case REJECTED ->
+	            dto.setAgentRecommendation(
+	                "Rejected"
+	            );
+
+	        default -> {}
+
 	    }
-	    else if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_FOR_REJECTION) {
 
-	        dto.setAgentRecommendation(
-	                "Recommended For Rejection");
-	    }
-	    else if (claim.getClaimStatus() == ClaimStatus.APPROVED) {
-
-	        dto.setAgentRecommendation("Approved");
-	    }
-	    else if (claim.getClaimStatus() == ClaimStatus.REJECTED) {
-
-	        dto.setAgentRecommendation("Rejected");
-	    }
 
 	    return dto;
 	}
@@ -681,25 +856,26 @@ public ClaimResponseDto getClaimById(Long claimId) {
 	@Override
 	public List<ClaimResponseDto> getSubmittedClaims() {
 
-	    return claimRepository.findByClaimStatus(ClaimStatus.SUBMITTED)
+
+	    List<ClaimStatus> agentPendingStatuses = List.of(
+	            ClaimStatus.SUBMITTED,
+	            ClaimStatus.UNDER_REVIEW
+	    );
+
+
+	    return claimRepository
+	            .findByClaimStatusIn(agentPendingStatuses)
 	            .stream()
+
 	            .filter(claim ->
 	                    claim.getPolicy()
 	                         .getCustomer()
 	                         .getUser()
-	                         .getActive())
-	            .map(claim -> {
+	                         .getActive()
+	            )
 
-	                ClaimResponseDto dto = new ClaimResponseDto();
+	            .map(this::mapToDto)
 
-	                dto.setClaimId(claim.getClaimId());
-	                dto.setClaimNumber(claim.getClaimNumber());
-	                dto.setClaimAmount(claim.getClaimAmount().doubleValue());
-	                dto.setClaimReason(claim.getClaimReason());
-	                dto.setClaimStatus(claim.getClaimStatus().name());
-
-	                return dto;
-	            })
 	            .toList();
 	}
 }

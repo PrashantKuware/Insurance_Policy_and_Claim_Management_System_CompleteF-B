@@ -19,6 +19,7 @@ public class PolicyResponseDto {
     private String customerName;
 
     private String planName;
+    private Long planId; // yeline 
 
     private LocalDate startDate;
 

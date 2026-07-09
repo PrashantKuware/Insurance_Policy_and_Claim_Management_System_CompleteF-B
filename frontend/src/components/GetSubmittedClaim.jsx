@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import AgentClaimReview from "./AgentClaimReview";
+import { agentClaimReview } from "../services/claimService";
 
 const GetSubmittedClaim = ({
     onClose,
@@ -200,26 +201,22 @@ const GetSubmittedClaim = ({
 
                                             <td className="p-4 text-center">
 
-                                                <button
-                                                    onClick={() => {
+                                                <button onClick={async () => {
+                                                    try {
+                                                        if (claim.claimStatus === "SUBMITTED") {
+                                                            await agentClaimReview(claim.claimId);
+                                                        }
                                                         setSelectedClaimId(claim.claimId);
                                                         setShowReviewModal(true);
                                                         onClose();
-                                                    }}
-                                                    className="
-        px-4
-        py-2
-        rounded-xl
-        text-white
-        font-semibold
-        bg-gradient-to-r
-        from-cyan-500
-        to-blue-600
-        hover:scale-105
-        transition
-    "
-                                                >
-                                                    Review Claim
+                                                    } catch (error) {
+                                                        toast.error(
+                                                            "Unable to open claim"
+                                                        );
+                                                    }
+                                                }}
+                                                    className="px-4 py-2 rounded-xl text-white font-semibold bg-gradient-to-r from-cyan-500 to-blue-600">
+                                                    {claim.claimStatus === "SUBMITTED" ? "Start Review" : "Continue Review"}
                                                 </button>
 
                                             </td>

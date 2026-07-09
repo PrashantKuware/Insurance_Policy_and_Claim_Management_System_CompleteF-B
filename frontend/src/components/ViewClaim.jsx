@@ -11,21 +11,31 @@ import { downloadClaimHistoryPdf } from '../services/claimHistoryService';
 import {
     FaShieldAlt, FaFileInvoiceDollar, FaFolderOpen,
     FaDownload, FaHistory, FaPlusCircle, FaTimesCircle, FaFileAlt,
-    FaArrowLeft // बैक आइकॉन इम्पोर्ट किया
+    FaArrowLeft, // बैक आइकॉन इम्पोर्ट किया
+    FaCreditCard
 } from 'react-icons/fa';
 import { checkReviewExists, submitReviewByCustomer } from '../services/reviewService';
 import HoverRating from './HoverRating';
+import { getPolicyByPlanId } from '../services/PlanServices';
+import usePolicyPayment from '../hooks/usePolicyPayment';
 
 const ViewClaim = () => {
     const { policyId } = useParams();
     const navigate = useNavigate(); // Navigation ट्रिगर करने के लिए
 
     const [planData, setPlanData] = useState({});
+    const [planDataForPay, setPlanDataForPay] = useState({});
+
     const [claimData, setClaimData] = useState(null);
     const [claimDocuData, setClaimDocuData] = useState([]);
     const [ratingValue, setRatingValue] = useState(0)
     const [alreadyReviewed, setAlreadyReviewed] = useState(false);
     const [claimId, setClaimId] = useState(null);
+    const [policyDataExist, setPolicyDataExist] = useState(false)
+    const {
+    payPolicy,
+    paymentLoading
+} = usePolicyPayment();
     const [formData, setFormData] = useState({
         policyId: "",
         rating: "",
@@ -38,6 +48,8 @@ const ViewClaim = () => {
     const getPolicyById = async () => {
         try {
             const data = await getPolicyByPolicyId(policyId);
+            setPolicyDataExist(true)
+            console.log(data)
             setPlanData(data);
         } catch (error) {
             console.error(error);
@@ -46,40 +58,41 @@ const ViewClaim = () => {
     };
 
     const submitReview = async () => {
-    try {
-        const reviewData = {
-            ...formData,
-            rating: ratingValue,
-            policyId: planData.policyId
-        };
+        try {
+            const reviewData = {
+                ...formData,
+                rating: ratingValue,
+                policyId: planData.policyId
+            };
 
-        await submitReviewByCustomer(reviewData);
+            await submitReviewByCustomer(reviewData);
 
-        toast.success("Review Submitted Successfully ✅");
-        setAlreadyReviewed(true);
-
-        setFormData({
-            policyId: "",
-            rating: "",
-            comment: ""
-        });
-
-    } catch (error) {
-        if (
-            error?.response?.data?.message?.includes("already reviewed")
-        ) {
+            toast.success("Review Submitted Successfully ✅");
             setAlreadyReviewed(true);
-        }
 
-        toast.error(
-            error?.response?.data?.message ||
-            "Failed to Submit Review ❌"
-        );
-    }
-};
+            setFormData({
+                policyId: "",
+                rating: "",
+                comment: ""
+            });
+
+        } catch (error) {
+            if (
+                error?.response?.data?.message?.includes("already reviewed")
+            ) {
+                setAlreadyReviewed(true);
+            }
+
+            toast.error(
+                error?.response?.data?.message ||
+                "Failed to Submit Review ❌"
+            );
+        }
+    };
     const getClaimData = async () => {
         try {
             const data = await getClaimByPolicyId(policyId);
+            console.log(data)
             const claims = data?.content || [];
             if (claims.length > 0) {
                 const latestClaim = claims[claims.length - 1];
@@ -124,6 +137,23 @@ const ViewClaim = () => {
         }
     };
 
+    const getPolicyByIdForPay = async () => {
+        try {
+            setLoading(true);
+            const data = await getPolicyByPlanId(planData.planId);
+            console.log(data)
+            setPlanDataForPay(data);
+        } catch (error) {
+            console.error(error);
+            toast.error(
+                error?.response?.data?.message ||
+                "Failed To Load Plan Details ❌"
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
@@ -136,6 +166,13 @@ const ViewClaim = () => {
             loadReviewStatus();
         }
     }, [policyId]);
+
+
+    useEffect(() => {
+        if (policyDataExist && planData?.planId) {
+            getPolicyByIdForPay();
+        }
+    }, [policyDataExist, planData]);
 
     useEffect(() => {
         if (claimId) {
@@ -194,7 +231,7 @@ const ViewClaim = () => {
                             <FaShieldAlt />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white tracking-wide">Policy Specification Overview</h2>
+                            <h2 className="text-xl font-bold text-white tracking-wide">Purchase Policy</h2>
                             <p className="text-slate-500 text-xs mt-0.5">Primary policy terms and balance ledgers</p>
                         </div>
                     </div>
@@ -209,6 +246,28 @@ const ViewClaim = () => {
                                 <FaPlusCircle /> Submit New Claim
                             </NavLink>
                         )}
+
+                    {planData.policyStatus === "PENDING_PAYMENT" && <button
+                       onClick={() =>{
+                         console.log("Payment Policy ID:", planData.policyId);
+            console.log("Plan Data:", planData);
+            console.log("Plan Data For Pay:", planDataForPay);
+                        
+         payPolicy(
+            planData.policyId,
+            planDataForPay.premiumAmount,
+            navigate
+        )}
+        
+    }
+    
+    disabled={paymentLoading}
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-cyan-400 bg-cyan-500/10 hover:bg-cyan-600 hover:text-white border border-cyan-500/20 hover:border-transparent transition-all duration-200 disabled:opacity-40"
+                    >
+                        
+                                <FaCreditCard size={13} /> Finalize Payment (₹{planDataForPay.premiumAmount?.toLocaleString('en-IN')})
+                            
+                    </button>}
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4 text-sm bg-[#070d19]/40 p-5 rounded-2xl border border-slate-800/50">

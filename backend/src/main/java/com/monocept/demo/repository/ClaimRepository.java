@@ -16,24 +16,46 @@ import com.monocept.demo.enums.ClaimStatus;
 
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
 
-	Optional<Claim> findByClaimNumber(String claimNumber);
 
-	Page<Claim> findByPolicy_Customer_CustomerId(Long customerId, Pageable pageable);
+    Optional<Claim> findByClaimNumber(String claimNumber);
 
-	Page<Claim> findByPolicyPolicyId(Long policyId, Pageable pageable);
 
-	boolean existsByPolicyPolicyIdAndIncidentDate(Long policyId, LocalDate incidentDate);
+    Page<Claim> findByPolicy_Customer_CustomerId(
+            Long customerId,
+            Pageable pageable
+    );
 
-	boolean existsByPolicyPolicyIdAndClaimStatusIn(Long policyId, List<ClaimStatus> statuses);
 
-	List<Claim> findByClaimStatus(ClaimStatus claimStatus);
-	
-	 @Query("""
-	            SELECT COALESCE(SUM(c.claimAmount), 0)
-	            FROM Claim c
-	            WHERE c.policy.policyId = :policyId
-	            AND c.claimStatus = 'APPROVED'
-	            """)
-	    BigDecimal getTotalApprovedClaimAmount(
-	            @Param("policyId") Long policyId);
+    Page<Claim> findByPolicyPolicyId(
+            Long policyId,
+            Pageable pageable
+    );
+
+
+    boolean existsByPolicyPolicyIdAndIncidentDate(
+            Long policyId,
+            LocalDate incidentDate
+    );
+
+
+    boolean existsByPolicyPolicyIdAndClaimStatusIn(
+            Long policyId,
+            List<ClaimStatus> statuses
+    );
+
+
+    List<Claim> findByClaimStatusIn(
+            List<ClaimStatus> statuses
+    );
+
+
+    @Query("""
+            SELECT COALESCE(SUM(c.claimAmount),0)
+            FROM Claim c
+            WHERE c.policy.policyId = :policyId
+            AND c.claimStatus = 'APPROVED'
+            """)
+    BigDecimal getTotalApprovedClaimAmount(
+            @Param("policyId") Long policyId
+    );
 }
