@@ -47,9 +47,9 @@ public class SecurityConfig {
 
 						// AUTH
 						.requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/send-email-otp",
-								"/api/auth/send-mobile-otp", "/swagger-ui.html", "/swagger-ui/**", "/api/auth/forgot-password/send-otp",
-						        "/api/auth/forgot-password/verify-otp",
-						        "/api/auth/forgot-password/reset", "/v3/api-docs/**")
+								"/api/auth/send-mobile-otp", "/swagger-ui.html", "/swagger-ui/**",
+								"/api/auth/forgot-password/send-otp", "/api/auth/forgot-password/verify-otp",
+								"/api/auth/forgot-password/reset", "/v3/api-docs/**")
 						.permitAll().requestMatchers(HttpMethod.POST, "/api/auth/agent").hasRole("ADMIN")
 
 						.requestMatchers(HttpMethod.GET, "/api/auth/get/**").hasRole("ADMIN")
@@ -67,9 +67,21 @@ public class SecurityConfig {
 
 						.requestMatchers(HttpMethod.GET, "/api/customer/**").hasAnyRole("ADMIN", "AGENT")
 
+						// COMPLAINT
+
+						// Customer Submit Complaint
+						.requestMatchers(HttpMethod.POST, "/api/complaints").hasRole("CUSTOMER")
+
+						// Customer View Own Complaints
+						.requestMatchers(HttpMethod.GET, "/api/complaints/customer/**").hasRole("CUSTOMER")
+
+						// Admin View All Complaints
+						.requestMatchers(HttpMethod.GET, "/api/complaints").hasRole("ADMIN")
+
 						// INSURANCE PRODUCTS
-						.requestMatchers(HttpMethod.GET, "/api/products/producttype/**").hasAnyRole("CUSTOMER", "ADMIN", "AGENT")
-						.requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyRole("CUSTOMER", "ADMIN", "AGENT")
+						.requestMatchers(HttpMethod.GET, "/api/products/producttype/**")
+						.hasAnyRole("CUSTOMER", "ADMIN", "AGENT").requestMatchers(HttpMethod.GET, "/api/products/**")
+						.hasAnyRole("CUSTOMER", "ADMIN", "AGENT")
 
 						.requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
 
@@ -134,7 +146,8 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/claims/*/reject").hasRole("ADMIN")
 
 						// CLAIM HISTORY
-						.requestMatchers(HttpMethod.GET, "/api/claim-history/**").hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
+						.requestMatchers(HttpMethod.GET, "/api/claim-history/**")
+						.hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
 
 						.anyRequest().authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint)

@@ -1,12 +1,14 @@
 import { NavLink } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  FileText, 
-  UserPlus, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  UserPlus,
   ShieldCheck,
   X
 } from "lucide-react";
+import { MdReportProblem } from "react-icons/md";
+
 
 const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
@@ -14,20 +16,25 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "Add Product", path: "/addProduct", icon: Briefcase },
     { name: "Claims Queue", path: "/viewallclaim", icon: FileText },
     { name: "Add Agent", path: "/addagent", icon: UserPlus },
+    {
+      name: "Complaints/Feedback",
+      path: "/allcomplaints",
+      icon: MdReportProblem ,
+    }
   ];
 
   return (
     <>
       {/* Mobile Sidebar Overlay */}
       {isOpen && (
-        <div 
+        <div
           onClick={onClose}
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden transition-opacity duration-300"
         />
       )}
 
       {/* Sidebar Container */}
-      <aside 
+      <aside
         className={`fixed md:sticky top-0 left-0 z-50 h-screen w-72 bg-slate-900 border-r border-slate-800/80 text-slate-200 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
@@ -42,7 +49,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             </span>
           </div>
 
-          <button 
+          <button
             onClick={onClose}
             className="md:hidden p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 transition"
           >
@@ -65,8 +72,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                 }}
                 className={({ isActive }) =>
                   `flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 group border
-                  ${isActive 
-                    ? "bg-blue-600/10 border-blue-500/30 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.05)]" 
+                  ${isActive
+                    ? "bg-blue-600/10 border-blue-500/30 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.05)]"
                     : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-850"}`
                 }
               >

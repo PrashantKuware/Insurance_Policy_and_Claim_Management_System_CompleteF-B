@@ -38,6 +38,9 @@ import CustomerProduct from './components/CustomerProduct'
 import CustomerViewPolicyPlan from './components/CustomerViewPolicyPlan'
 import UpdateCustomer from './components/UpdateCustomer'
 import ForgetPassword from '../ForgetPassword'
+import CustomerCompliant from './components/CustomerCompliant'
+import AddComplaint from './components/AddComplaint'
+import AdminCompliant from './components/AdminCompliant'
 
 
 const App = () => {
@@ -133,6 +136,17 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+         <Route
+          path="/allcomplaints"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminLayout>
+                <AdminCompliant />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/customer/policies"
           element={
@@ -170,6 +184,26 @@ const App = () => {
               <CustomerLayout>
                 <CustomerProfile />
               </CustomerLayout>
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="/customer/complaints"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerLayout>
+                <CustomerCompliant />
+              </CustomerLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customer/complaint/add"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+                <AddComplaint />
             </ProtectedRoute>
           }
         />
