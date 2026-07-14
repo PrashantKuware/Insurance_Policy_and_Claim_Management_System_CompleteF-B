@@ -1,6 +1,9 @@
 package com.monocept.demo.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.monocept.demo.dto.request.ProductRequestDto;
 import com.monocept.demo.dto.response.ProductResponseDto;
 import com.monocept.demo.entity.InsuranceProduct;
+import com.monocept.demo.enums.ProductType;
 import com.monocept.demo.exception.DuplicateResourceException;
 import com.monocept.demo.exception.ResourceNotFoundException;
 import com.monocept.demo.repository.InsuranceProductRepository;
@@ -83,15 +87,21 @@ public class ProductServiceImpl implements ProductService {
 		repository.save(product);
 	}
 
-    @Override
-    public Page<ProductResponseDto> getAllProducts(
-            int pageNo,
-            int pageSize) {
+	@Override
+	public Page<ProductResponseDto> getAllProducts(int pageNo, int pageSize) {
 
-        Pageable pageable =
-                PageRequest.of(pageNo, pageSize);
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
 
-        return repository.findAll(pageable)
-                .map(this::mapToResponse);
-    }
+		return repository.findAll(pageable).map(this::mapToResponse);
+	}
+	
+	@Override
+	public List<ProductResponseDto> getProductByProductType(ProductType productType) {
+
+	    List<InsuranceProduct> products = repository.findByProductType(productType);
+
+	    return products.stream()
+	            .map(this::mapToResponse)
+	            .collect(Collectors.toList());
+	}
 }

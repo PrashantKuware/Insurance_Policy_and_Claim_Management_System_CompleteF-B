@@ -37,3 +37,15 @@ export const getPolicyByPolicyId = async (policyId) => {
     handleError(error);
   }
 };
+
+
+export const getAllPolicies = async (page = 0, size = 1000) => {
+  try {
+    const res = await policyApi.get("", {
+      params: { pageNo: page, pageSize: size },
+    });
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
+};

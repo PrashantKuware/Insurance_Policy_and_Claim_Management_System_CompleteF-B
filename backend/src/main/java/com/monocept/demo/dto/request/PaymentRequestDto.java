@@ -17,4 +17,10 @@ public class PaymentRequestDto {
     private PaymentMode paymentMode;
 
     private PaymentStatus paymentStatus;
+    
+    private String razorpayPaymentId;
+
+    private String razorpayOrderId;
+
+    private String razorpaySignature;
 }

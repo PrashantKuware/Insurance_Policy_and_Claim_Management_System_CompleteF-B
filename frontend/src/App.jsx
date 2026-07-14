@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
 import Login from './components/Login'
 import { Route, Routes } from 'react-router-dom'
-import AdminDashboard from './pages/AdminDashboard'
+import AdminDashboard from './pages/admin/AdminDashboard'
 import AgentDashboard from './pages/AgentDashboard'
 import CustomerDashboard from './pages/CustomerDashboard'
-import AddProduct from './components/AddProduct'
-import ViewPolicyPlan from './components/ViewPolicyPlan'
-import AddPolicyPlan from './components/AddPolicyPlan'
+import AddProduct from './components/forms/AddProduct'
+import ViewPolicyPlan from './components/tables/ViewPolicyPlan'
+import AddPolicyPlan from './components/forms/AddPolicyPlan'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useDispatch } from 'react-redux'
 import { jwtDecode } from 'jwt-decode'
@@ -15,15 +15,15 @@ import PurchasePolicy from './components/PurchasePolicy'
 import ViewClaim from './components/ViewClaim'
 import SubmitClaim from './components/SubmitClaim'
 import AgentClaimReview from './components/AgentClaimReview'
-import ViewAllClaimADMIN from './components/ViewAllClaimADMIN'
+import ViewAllClaimADMIN from './components/tables/ViewAllClaimADMIN'
 import Forbidden from './components/Forbidden'
 import ImpossibleLightbulb from './components/ImpossibleLightbulb'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AddAgent from './components/AddAgent'
+import AddAgent from './components/forms/AddAgent'
 import RegisterCustomer from './components/RegisterCustomer'
 import AddCustomer from './components/AddCustomer'
-import AdminLayout from './components/AdminLayout'
+import AdminLayout from './components/layout/AdminLayout'
 import ViewClaimHistory from './components/ViewClaimHistory'
 import AgentLayout from './components/AgentLayout'
 import Navbar from './components/Navbar'
@@ -33,7 +33,7 @@ import CustomerLayout from './components/CustomerLayaout'
 import MyPolicies from './components/MyPolicies'
 import ViewAllPolicies from './components/ViewAllPolicy'
 import CustomerProfile from './components/CustomerProfile'
-import Product from './components/Product'
+import Product from './components/tables/Product'
 import CustomerProduct from './components/CustomerProduct'
 import CustomerViewPolicyPlan from './components/CustomerViewPolicyPlan'
 import UpdateCustomer from './components/UpdateCustomer'
@@ -72,6 +72,8 @@ const App = () => {
       dark:to-black
       text-gray-900
       dark:text-white
+      transition-colors
+      duration-300
     ">
       <Routes>
         <Route path="/" element={<InsuranceHero />} />

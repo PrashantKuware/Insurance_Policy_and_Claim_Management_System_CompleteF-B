@@ -1,8 +1,6 @@
 package com.monocept.demo.service;
 
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,4 +27,6 @@ public interface PaymentService {
     PaymentResponseDto updatePaymentStatus(
             Long paymentId,
             String status);
+    
+    PaymentResponseDto createOrder(Long policyId);
 }

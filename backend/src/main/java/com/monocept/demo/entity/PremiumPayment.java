@@ -55,4 +55,11 @@ public class PremiumPayment {
     private PaymentStatus paymentStatus;
 
     private LocalDateTime createdDate;
+    
+    @Column(unique = true)
+    private String razorpayPaymentId;
+
+    private String razorpayOrderId;
+
+    private String razorpaySignature;
 }

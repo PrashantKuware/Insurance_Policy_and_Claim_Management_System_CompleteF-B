@@ -1,11 +1,7 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode
-/* @custom-variant dark (&:where(.dark, .dark *)); */
-
-/* * {
-  transition: all 0.2s ease-in-out;
-} */ 
+@custom-variant dark (&:where(.dark, .dark *));
+@variant dark (&:where(.dark, .dark *));
 
 ::-webkit-scrollbar {
   width: 6px;

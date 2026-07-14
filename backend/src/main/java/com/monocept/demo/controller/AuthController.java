@@ -19,6 +19,7 @@ import com.monocept.demo.dto.request.LoginRequestDto;
 import com.monocept.demo.dto.request.RegisterRequestDto;
 import com.monocept.demo.dto.request.UserStatusUpdateDto;
 import com.monocept.demo.dto.response.AuthResponseDto;
+import com.monocept.demo.dto.response.ResetPasswordDto;
 import com.monocept.demo.dto.response.UserResponseDto;
 import com.monocept.demo.entity.User;
 import com.monocept.demo.service.AuthService;
@@ -109,5 +110,32 @@ public class AuthController {
 	    return ResponseEntity.ok(
 	            authService.getCurrentUser(email)
 	    );
+	}
+	
+	@PostMapping("/forgot-password/send-otp")
+	public ResponseEntity<String> sendForgotPasswordOtp(
+	        @RequestParam String email) {
+
+	    authService.sendForgotPasswordOtp(email);
+	    return ResponseEntity.ok("OTP sent successfully");
+	}
+	
+	@PostMapping("/forgot-password/verify-otp")
+	public ResponseEntity<String> verifyOtp(
+	        @RequestParam String email,
+	        @RequestParam String otp) {
+
+	    authService.verifyForgotPasswordOtp(email, otp);
+
+	    return ResponseEntity.ok("OTP verified successfully");
+	}
+	
+	@PostMapping("/forgot-password/reset")
+	public ResponseEntity<String> resetPassword(
+	        @RequestBody ResetPasswordDto dto) {
+
+	    authService.resetPassword(dto);
+
+	    return ResponseEntity.ok("Password changed successfully");
 	}
 }

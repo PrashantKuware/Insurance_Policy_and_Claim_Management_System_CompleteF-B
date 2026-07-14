@@ -27,60 +27,56 @@ import jakarta.validation.Valid;
 @CrossOrigin("http://localhost:5173/")
 public class PaymentController {
 
-    @Autowired
-    private PaymentService paymentService;
+	@Autowired
+	private PaymentService paymentService;
 
-    // CUSTOMER + AGENT
-    @PreAuthorize("hasAnyRole('CUSTOMER')")
-    @PostMapping("/policy/{policyId}")
-    public ResponseEntity<PaymentResponseDto> payPremium(
-            @PathVariable Long policyId,
-            @Valid @RequestBody PaymentRequestDto requestDto) {
+	// CUSTOMER + AGENT
+	@PreAuthorize("hasAnyRole('CUSTOMER')")
+	@PostMapping("/policy/{policyId}")
+	public ResponseEntity<PaymentResponseDto> payPremium(@PathVariable Long policyId,
+			@Valid @RequestBody PaymentRequestDto requestDto) {
 
-        return new ResponseEntity<>(
-                paymentService.payPremium(policyId, requestDto),
-                HttpStatus.CREATED);
-    }
+		return new ResponseEntity<>(paymentService.payPremium(policyId, requestDto), HttpStatus.CREATED);
+	}
 
-    // CUSTOMER + ADMIN + AGENT
-    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
-    @GetMapping("/{paymentId}")
-    public ResponseEntity<PaymentResponseDto> getPaymentById(
-            @PathVariable Long paymentId) {
+	// CUSTOMER + ADMIN + AGENT
+	@PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
+	@GetMapping("/{paymentId}")
+	public ResponseEntity<PaymentResponseDto> getPaymentById(@PathVariable Long paymentId) {
 
-        return ResponseEntity.ok(
-                paymentService.getPaymentById(paymentId));
-    }
+		return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
+	}
 
-    // CUSTOMER + ADMIN + AGENT
-    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
-    @GetMapping("/policy/{policyId}")
-    public ResponseEntity<Page<PaymentResponseDto>> getPaymentsByPolicy(
-            @PathVariable Long policyId,
-            Pageable pageable) {
+	// CUSTOMER + ADMIN + AGENT
+	@PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
+	@GetMapping("/policy/{policyId}")
+	public ResponseEntity<Page<PaymentResponseDto>> getPaymentsByPolicy(@PathVariable Long policyId,
+			Pageable pageable) {
 
-        return ResponseEntity.ok(
-                paymentService.getPaymentsByPolicy(policyId, pageable));
-    }
+		return ResponseEntity.ok(paymentService.getPaymentsByPolicy(policyId, pageable));
+	}
 
-    // CUSTOMER + ADMIN + AGENT
-    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
-    @GetMapping
-    public ResponseEntity<Page<PaymentResponseDto>> getAllPayments(
-            Pageable pageable) {
+	// CUSTOMER + ADMIN + AGENT
+	@PreAuthorize("hasAnyRole('CUSTOMER','ADMIN','AGENT')")
+	@GetMapping
+	public ResponseEntity<Page<PaymentResponseDto>> getAllPayments(Pageable pageable) {
 
-        return ResponseEntity.ok(
-                paymentService.getAllPayments(pageable));
-    }
+		return ResponseEntity.ok(paymentService.getAllPayments(pageable));
+	}
 
-    // ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{paymentId}/status")
-    public ResponseEntity<PaymentResponseDto> updatePaymentStatus(
-            @PathVariable Long paymentId,
-            @RequestParam String status) {
+	// ADMIN
+	@PreAuthorize("hasRole('ADMIN')")
+	@PatchMapping("/{paymentId}/status")
+	public ResponseEntity<PaymentResponseDto> updatePaymentStatus(@PathVariable Long paymentId,
+			@RequestParam String status) {
 
-        return ResponseEntity.ok(
-                paymentService.updatePaymentStatus(paymentId, status));
-    }
+		return ResponseEntity.ok(paymentService.updatePaymentStatus(paymentId, status));
+	}
+
+	@PostMapping("/create-order/{policyId}")
+	public ResponseEntity<PaymentResponseDto> createOrder(@PathVariable Long policyId) {
+
+		return ResponseEntity.ok(paymentService.createOrder(policyId));
+
+	}
 }

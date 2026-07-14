@@ -102,7 +102,7 @@ public class PolicyPlanServiceImpl implements PolicyPlanService {
 		return PolicyPlanResponseDto.builder().planId(plan.getPlanId()).productName(plan.getProduct().getProductName())
 				.planName(plan.getPlanName()).coverageAmount(plan.getCoverageAmount())
 				.premiumAmount(plan.getPremiumAmount()).premiumType(plan.getPremiumType()).duration(plan.getDuration())
-				.active(plan.getActive()).build();
+				 .termsConditions(plan.getTermsConditions()).active(plan.getActive()).build();
 	}
 
 	@Override

@@ -96,6 +96,9 @@ public class CustomerServiceImpl implements CustomerService {
 		customer.setCity(customerRequestDto.getCity());
 		customer.setState(customerRequestDto.getState());
 		customer.setPinCode(customerRequestDto.getPinCode());
+		if (customer.getPinCode().length() != 6) {
+			throw new ValidationException("Pin Code Must be of 6 Digit");
+		}
 		customer.setNomineeName(customerRequestDto.getNomineeName());
 		customer.setNomineeRelation(customerRequestDto.getNomineeRelation());
 
@@ -157,7 +160,9 @@ public class CustomerServiceImpl implements CustomerService {
 		customer.setState(customerRequestDto.getState());
 
 		customer.setPinCode(customerRequestDto.getPinCode());
-
+		if (customer.getPinCode().length() != 6) {
+			throw new ValidationException("Pin Code Must be of 6 Digit");
+		}
 		customer.setNomineeName(customerRequestDto.getNomineeName());
 
 		customer.setNomineeRelation(customerRequestDto.getNomineeRelation());
@@ -166,15 +171,14 @@ public class CustomerServiceImpl implements CustomerService {
 
 		return customerToDto(customer);
 	}
-	
+
 	@Override
 	public boolean customerExists(String email) {
 
-	    User user = userRepository.findByEmail(email)
-	            .orElseThrow(() ->
-	                    new ResourceNotFoundException("User not found"));
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-	    return customerRepository.existsByUser(user);
+		return customerRepository.existsByUser(user);
 	}
 
 }

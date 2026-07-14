@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -28,6 +30,8 @@ import com.monocept.demo.repository.PolicyRepository;
 import com.monocept.demo.repository.PremiumPaymentRepository;
 import com.monocept.demo.repository.UserRepository;
 import com.monocept.demo.service.PaymentService;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -37,150 +41,119 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Autowired
 	private PolicyRepository policyRepository;
-	
+
 	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
 	private ModelMapper mapper;
 
+	@Autowired
+	private RazorpayClient razorpayClient;
+
+	@Value("${razorpay.key.id}")
+	private String razorpayKeyId;
+
 	@Override
-	public PaymentResponseDto payPremium(
-	        Long policyId,
-	        PaymentRequestDto requestDto) {
+	public PaymentResponseDto payPremium(Long policyId, PaymentRequestDto requestDto) {
 
-	    Policy policy = policyRepository.findById(policyId)
-	            .orElseThrow(() ->
-	                    new ResourceNotFoundException(
-	                            "Policy not found"));
+		Policy policy = policyRepository.findById(policyId)
+				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
 
-	    if (requestDto.getAmount() == null
-	            || requestDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+		if (requestDto.getAmount() == null || requestDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
 
-	        throw new ValidationException(
-	                "Payment amount must be greater than zero");
-	    }
+			throw new ValidationException("Payment amount must be greater than zero");
+		}
 
-	    BigDecimal premiumAmount =
-	            policy.getPolicyPlan()
-	                    .getPremiumAmount();
+		BigDecimal premiumAmount = policy.getPolicyPlan().getPremiumAmount();
 
-	    PremiumType premiumType =
-	            policy.getPolicyPlan()
-	                    .getPremiumType();
+		PremiumType premiumType = policy.getPolicyPlan().getPremiumType();
 
-	    // ==========================
-	    // ONE TIME POLICY
-	    // ==========================
-	    if (premiumType == PremiumType.ONE_TIME) {
+		// ==========================
+		// ONE TIME POLICY
+		// ==========================
+		if (premiumType == PremiumType.ONE_TIME) {
 
-	        if (policy.getPolicyStatus()
-	                == PolicyStatus.ACTIVE) {
+			if (policy.getPolicyStatus() == PolicyStatus.ACTIVE) {
 
-	            throw new ValidationException(
-	                    "Premium already paid for this policy");
-	        }
+				throw new ValidationException("Premium already paid for this policy");
+			}
 
-	        if (requestDto.getAmount()
-	                .compareTo(premiumAmount) != 0) {
+			if (requestDto.getAmount().compareTo(premiumAmount) != 0) {
 
-	            throw new ValidationException(
-	                    "One time policy requires exact payment of "
-	                            + premiumAmount);
-	        }
-	    }
+				throw new ValidationException("One time policy requires exact payment of " + premiumAmount);
+			}
+		}
 
-	    // ==========================
-	    // ANNUAL POLICY
-	    // ==========================
-	    if (premiumType == PremiumType.ANNUAL) {
+		// ==========================
+		// ANNUAL POLICY
+		// ==========================
+		if (premiumType == PremiumType.ANNUAL) {
 
-	        PremiumPayment lastPayment =
-	                paymentRepository
-	                        .findTopByPolicyPolicyIdOrderByPaymentDateDesc(
-	                                policyId)
-	                        .orElse(null);
+			PremiumPayment lastPayment = paymentRepository.findTopByPolicyPolicyIdOrderByPaymentDateDesc(policyId)
+					.orElse(null);
 
-	        if (lastPayment != null) {
+			if (lastPayment != null) {
 
-	            LocalDateTime nextAllowedDate =
-	                    lastPayment.getPaymentDate()
-	                            .plusYears(1);
+				LocalDateTime nextAllowedDate = lastPayment.getPaymentDate().plusYears(1);
 
-	            if (LocalDateTime.now()
-	                    .isBefore(nextAllowedDate)) {
+				if (LocalDateTime.now().isBefore(nextAllowedDate)) {
 
-	                throw new ValidationException(
-	                        "Next premium payment allowed after "
-	                                + nextAllowedDate);
-	            }
-	        }
+					throw new ValidationException("Next premium payment allowed after " + nextAllowedDate);
+				}
+			}
 
-	        if (requestDto.getAmount()
-	                .compareTo(premiumAmount) != 0) {
+			if (requestDto.getAmount().compareTo(premiumAmount) != 0) {
 
-	            throw new ValidationException(
-	                    "Annual premium must be exactly "
-	                            + premiumAmount);
-	        }
-	    }
+				throw new ValidationException("Annual premium must be exactly " + premiumAmount);
+			}
+		}
 
-	    String transactionReference =
-	            "TXN-" + System.currentTimeMillis();
+		String transactionReference = "TXN-" + System.currentTimeMillis();
 
-	    PremiumPayment payment =
-	            new PremiumPayment();
+		PremiumPayment payment = new PremiumPayment();
 
-	    payment.setPolicy(policy);
-	    payment.setAmount(requestDto.getAmount());
-	    payment.setPaymentMode(
-	            requestDto.getPaymentMode());
-	    payment.setPaymentDate(
-	            LocalDateTime.now());
-	    payment.setTransactionReference(
-	            transactionReference);
-	    payment.setPaymentStatus(
-	            PaymentStatus.SUCCESS);
+		payment.setPolicy(policy);
+		payment.setAmount(requestDto.getAmount());
+		payment.setPaymentMode(requestDto.getPaymentMode());
+		payment.setPaymentDate(LocalDateTime.now());
+		payment.setTransactionReference(transactionReference);
+		payment.setRazorpayPaymentId(
+			    requestDto.getRazorpayPaymentId()
+			);
 
-	    payment = paymentRepository.save(payment);
+			payment.setRazorpayOrderId(
+			    requestDto.getRazorpayOrderId()
+			);
 
-	    BigDecimal totalPaid =
-	            policy.getTotalPremiumPaid() == null
-	            ? BigDecimal.ZERO
-	            : policy.getTotalPremiumPaid();
+			payment.setRazorpaySignature(
+			    requestDto.getRazorpaySignature()
+			);
+		payment.setPaymentStatus(PaymentStatus.SUCCESS);
 
-	    totalPaid =
-	            totalPaid.add(
-	                    requestDto.getAmount());
+		payment = paymentRepository.save(payment);
 
-	    policy.setTotalPremiumPaid(
-	            totalPaid);
+		BigDecimal totalPaid = policy.getTotalPremiumPaid() == null ? BigDecimal.ZERO : policy.getTotalPremiumPaid();
 
-	    // First successful payment activates policy
-	    if (policy.getPolicyStatus()
-	            != PolicyStatus.ACTIVE) {
+		totalPaid = totalPaid.add(requestDto.getAmount());
 
-	        policy.setPolicyStatus(
-	                PolicyStatus.ACTIVE);
+		policy.setTotalPremiumPaid(totalPaid);
 
-	        policy.setStartDate(
-	                LocalDate.now());
+		// First successful payment activates policy
+		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
 
-	        policy.setEndDate(
-	                LocalDate.now()
-	                        .plusYears(
-	                                policy.getPolicyPlan()
-	                                        .getDuration()));
-	    }
+			policy.setPolicyStatus(PolicyStatus.ACTIVE);
 
-	    policyRepository.save(policy);
+			policy.setStartDate(LocalDate.now());
 
-	    return mapper.map(
-	            payment,
-	            PaymentResponseDto.class);
+			policy.setEndDate(LocalDate.now().plusYears(policy.getPolicyPlan().getDuration()));
+		}
+
+		policyRepository.save(policy);
+
+		return mapper.map(payment, PaymentResponseDto.class);
 	}
-	
-	
+
 	@Override
 	public PaymentResponseDto getPaymentById(Long paymentId) {
 
@@ -203,21 +176,14 @@ public class PaymentServiceImpl implements PaymentService {
 		return paymentRepository.findByPolicyPolicyId(policyId, pageable)
 				.map(payment -> mapper.map(payment, PaymentResponseDto.class));
 	}
-	
+
 	private User getLoggedInUser() {
 
-	    Authentication authentication =
-	            SecurityContextHolder
-	                    .getContext()
-	                    .getAuthentication();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-	    String email =
-	            authentication.getName();
+		String email = authentication.getName();
 
-	    return userRepository.findByEmail(email)
-	            .orElseThrow(() ->
-	                    new ResourceNotFoundException(
-	                            "User not found"));
+		return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 	}
 
 	@Override
@@ -238,53 +204,115 @@ public class PaymentServiceImpl implements PaymentService {
 
 		return mapper.map(payment, PaymentResponseDto.class);
 	}
-	
-	private void validatePaymentAccess(
-	        PremiumPayment payment) {
 
-	    User loggedInUser =
-	            getLoggedInUser();
+	private void validatePaymentAccess(PremiumPayment payment) {
 
-	    if (loggedInUser.getRole() == Role.ADMIN
-	            || loggedInUser.getRole() == Role.AGENT) {
-	        return;
-	    }
+		User loggedInUser = getLoggedInUser();
 
-	    Long ownerId =
-	            payment.getPolicy()
-	                    .getCustomer()
-	                    .getUser()
-	                    .getUserId();
+		if (loggedInUser.getRole() == Role.ADMIN || loggedInUser.getRole() == Role.AGENT) {
+			return;
+		}
 
-	    if (!ownerId.equals(
-	            loggedInUser.getUserId())) {
+		Long ownerId = payment.getPolicy().getCustomer().getUser().getUserId();
 
-	        throw new ForbiddenAccessException(
-	                "You can view only your own payments");
-	    }
+		if (!ownerId.equals(loggedInUser.getUserId())) {
+
+			throw new ForbiddenAccessException("You can view only your own payments");
+		}
 	}
-	
-	private void validatePolicyAccess(
-	        Policy policy) {
 
-	    User loggedInUser =
-	            getLoggedInUser();
+	private void validatePolicyAccess(Policy policy) {
 
-	    if (loggedInUser.getRole() == Role.ADMIN
-	            || loggedInUser.getRole() == Role.AGENT) {
-	        return;
-	    }
+		User loggedInUser = getLoggedInUser();
 
-	    Long ownerId =
-	            policy.getCustomer()
-	                    .getUser()
-	                    .getUserId();
+		if (loggedInUser.getRole() == Role.ADMIN || loggedInUser.getRole() == Role.AGENT) {
+			return;
+		}
 
-	    if (!ownerId.equals(
-	            loggedInUser.getUserId())) {
+		Long ownerId = policy.getCustomer().getUser().getUserId();
 
-	        throw new ForbiddenAccessException(
-	                "You can access only your own payments");
-	    }
+		if (!ownerId.equals(loggedInUser.getUserId())) {
+
+			throw new ForbiddenAccessException("You can access only your own payments");
+		}
+	}
+
+	@Override
+	public PaymentResponseDto createOrder(Long policyId) {
+
+		Policy policy = policyRepository.findById(policyId)
+				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
+
+		BigDecimal premiumAmount = policy.getPolicyPlan().getPremiumAmount();
+
+		PremiumType premiumType = policy.getPolicyPlan().getPremiumType();
+
+		// ==========================
+		// ONE TIME POLICY VALIDATION
+		// ==========================
+		if (premiumType == PremiumType.ONE_TIME) {
+
+			if (policy.getPolicyStatus() == PolicyStatus.ACTIVE) {
+
+				throw new ValidationException("Premium already paid for this policy");
+			}
+
+		}
+
+		// ==========================
+		// ANNUAL POLICY VALIDATION
+		// ==========================
+		if (premiumType == PremiumType.ANNUAL) {
+
+			PremiumPayment lastPayment = paymentRepository.findTopByPolicyPolicyIdOrderByPaymentDateDesc(policyId)
+					.orElse(null);
+
+			if (lastPayment != null) {
+
+				LocalDateTime nextAllowedDate = lastPayment.getPaymentDate().plusYears(1);
+
+				if (LocalDateTime.now().isBefore(nextAllowedDate)) {
+
+					throw new ValidationException("Next premium payment allowed after " + nextAllowedDate);
+
+				}
+
+			}
+
+		}
+
+		try {
+
+			JSONObject orderRequest = new JSONObject();
+
+			// Razorpay accepts amount in paisa
+			int amount = premiumAmount.multiply(BigDecimal.valueOf(100)).intValue();
+
+			orderRequest.put("amount", amount);
+
+			orderRequest.put("currency", "INR");
+
+			orderRequest.put("receipt", "policy_" + policyId);
+
+			Order order = razorpayClient.orders.create(orderRequest);
+
+			PaymentResponseDto response = new PaymentResponseDto();
+
+			response.setRazorpayOrderId(order.get("id"));
+
+			response.setRazorpayKey(razorpayKeyId);
+
+			response.setAmount(premiumAmount);
+
+			response.setPolicyId(policyId);
+
+			return response;
+
+		} catch (Exception e) {
+
+			throw new RuntimeException("Razorpay order creation failed");
+
+		}
+
 	}
 }

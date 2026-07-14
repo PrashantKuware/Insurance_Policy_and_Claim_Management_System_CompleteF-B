@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import com.monocept.demo.enums.PremiumType;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ public class PolicyPlanRequestDto {
     @NotNull(message = "Product Id can't be null")
     private Long productId;
 
-    @NotNull(message = "Product Name can't be null")
+    @NotBlank(message = "Product Name can't be null")
     private String planName;
 
     @NotNull(message = "Product coverage Amount can't be null")
@@ -28,7 +29,7 @@ public class PolicyPlanRequestDto {
     @NotNull(message = "Product duration can't be null")
     private Integer duration;
 
-    @NotNull(message = "Product terms and Conditions can't be null")
+    @NotBlank(message = "Product terms and Conditions can't be null")
     private String termsConditions;
     
     private boolean active;
