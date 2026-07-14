@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPolicyByPlanId } from '../services/PlanServices';
 import { purchasePolicy } from '../services/policyService';
-import { payForPolicy } from '../services/paymentService';
+import { payForPolicy, createPaymentOrder } from '../services/paymentService';
 import { toast } from 'react-toastify';
+import { FileText } from "lucide-react";
 import { FaArrowLeft, FaShoppingCart, FaCreditCard, FaRegCheckCircle, FaShieldAlt, FaCalendarAlt, FaMoneyBillWave } from 'react-icons/fa';
 import { getAllReviewByPlanId, getAverageRating } from '../services/reviewService';
+import usePolicyPayment from "../hooks/usePolicyPayment";
 
 // Glowing Cyber Ambient Effects
 const Orbs = () => (
@@ -28,7 +30,10 @@ const PurchasePolicy = () => {
 
     const [loading, setLoading] = useState(true);
     const [purchaseLoading, setPurchaseLoading] = useState(false);
-    const [paymentLoading, setPaymentLoading] = useState(false);
+    const {
+        payPolicy,
+        paymentLoading
+    } = usePolicyPayment();
 
     useEffect(() => {
         getPolicyById();
@@ -40,6 +45,7 @@ const PurchasePolicy = () => {
         try {
             setLoading(true);
             const data = await getPolicyByPlanId(planId);
+            console.log(data)
             setPlanData(data);
         } catch (error) {
             console.error(error);
@@ -98,24 +104,6 @@ const PurchasePolicy = () => {
         }
     };
 
-    const purchasiingPolicyPayment = async () => {
-        try {
-            setPaymentLoading(true);
-            await payForPolicy(policyId, planData.premiumAmount);
-            toast.success("Payment Successful ✅");
-            setTimeout(() => {
-                navigate("/customerdashboard");
-            }, 1000);
-        } catch (error) {
-            console.error(error);
-            toast.error(
-                error?.response?.data?.message ||
-                "Payment Failed ❌"
-            );
-        } finally {
-            setPaymentLoading(false);
-        }
-    };
 
     // --- 1. CYBER SKELETON SHIMMER LOADING ---
     if (loading) {
@@ -220,6 +208,15 @@ const PurchasePolicy = () => {
                                 <div>
                                     <p className="text-slate-500 text-[11px] uppercase tracking-wider mb-0.5">Premium Modality</p>
                                     <h3 className="text-lg font-black text-slate-200">{planData.premiumType}</h3>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-slate-950/40 border w-[49vw] border-slate-900 rounded-2xl flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                    <FileText size={25} className="text-blue-500" />
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 text-[11px] uppercase tracking-wider mb-0.5">Term and Conditions</p>
+                                    <h3 className="text-lg font-black text-slate-200">{planData.termsConditions}</h3>
                                 </div>
                             </div>
                         </div>
@@ -328,7 +325,14 @@ const PurchasePolicy = () => {
 
                                     <div className="pt-2 border-t border-slate-900/60">
                                         <button
-                                            onClick={purchasiingPolicyPayment}
+                                            onClick={() =>
+                                                payPolicy(
+                                                    policyId,
+                                                    planData.premiumAmount,
+                                                    navigate
+                                                )
+                                            }
+                                            disabled={paymentLoading}
                                             disabled={paymentLoading}
                                             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-cyan-400 bg-cyan-500/10 hover:bg-cyan-600 hover:text-white border border-cyan-500/20 hover:border-transparent transition-all duration-200 disabled:opacity-40"
                                         >

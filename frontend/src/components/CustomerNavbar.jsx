@@ -136,17 +136,16 @@ const CustomerNavbar = () => {
       sticky top-0 z-30
       flex items-center justify-between
       h-20 px-6 md:px-8
-      bg-white/85 dark:bg-[#070d19]/40 backdrop-blur-xl
-      border-b border-slate-200 dark:border-slate-800/60
-      transition-colors duration-300
+      bg-[#070d19]/40 backdrop-blur-xl
+      border-b border-slate-800/60
       "
     >
       <div>
-        <h2 className="text-2xl font-bold text-slate-850 dark:text-white tracking-wide">
+        <h2 className="text-2xl font-bold text-white tracking-wide">
           Welcome Back 👋
         </h2>
 
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-slate-400">
           Manage your insurance portfolio
         </p>
       </div>
@@ -154,7 +153,7 @@ const CustomerNavbar = () => {
       <div className="flex items-center gap-4">
 
         {/* Notification Bell with Red Dot Counter */}
-        <button className="relative h-11 w-11 rounded-xl bg-slate-100 dark:bg-[#111c30] border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-850 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-slate-800 transition-all shadow-md group cursor-pointer">
+        <button className="relative h-11 w-11 rounded-xl bg-[#111c30] border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all shadow-md group">
           <FaBell className="text-lg group-hover:rotate-12 transition-transform" />
 
           {/* Glowing Red Dot */}
@@ -162,18 +161,18 @@ const CustomerNavbar = () => {
         </button>
 
         {/* Profile Card Frame */}
-        <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#111c30] border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-xl shadow-sm">
+        <div className="flex items-center gap-3 bg-[#111c30] border border-slate-800 px-4 py-2 rounded-xl shadow-md">
           <FaUserCircle
             size={32}
-            className="text-blue-600 dark:text-blue-400"
+            className="text-blue-400"
           />
 
           <div className="hidden sm:block">
-            <p className="font-semibold text-xs text-slate-800 dark:text-white leading-tight">
+            <p className="font-semibold text-xs text-white leading-tight">
               Customer
             </p>
 
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+            <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
               Insurance User
             </p>
           </div>

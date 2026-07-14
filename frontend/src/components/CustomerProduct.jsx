@@ -22,7 +22,7 @@ const containerVariants = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08 
+      staggerChildren: 0.08 // हर कार्ड के आने में मामूली डिले (Cascade Effect)
     }
   }
 };

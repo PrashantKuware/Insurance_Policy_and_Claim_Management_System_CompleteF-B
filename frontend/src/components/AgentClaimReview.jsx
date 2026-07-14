@@ -1,322 +1,8 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//     agentClaimReview,
-//     agentRecommendClaimForApproval,
-//     agentRecommendClaimForRejection,
-//     getClaimDocument
-// } from "../services/claimService";
-
-// import { useNavigate, useParams } from "react-router-dom";
-// import { toast } from "react-toastify";
-
-// const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) => {
-
-//     const params = useParams();
-//     const navigate = useNavigate();
-//     const claimId = modalClaimId || params.claimId;
-//     const [claimData, setClaimData] = useState({});
-//     const [claimDocuData, setClaimDocuData] = useState([]);
-//     const [agentRemark, setAgentRemark] = useState("");
-//     const [pageLoading, setPageLoading] = useState(true);
-//     const [actionLoading, setActionLoading] = useState(false);
-
-//     const loadClaimData = async () => {
-//         try {
-//             const claim = await agentClaimReview(claimId);
-//             setClaimData(claim);
-//         } catch (error) {
-//             toast.error(
-//                 error?.response?.data?.message ||
-//                 "Failed To Load Claim ❌"
-//             );
-//         }
-//     };
-
-//     const loadDocuments = async () => {
-//         try {
-//             const docs = await getClaimDocument(claimId);
-//             setClaimDocuData(docs || []);
-//         } catch (error) {
-//             toast.error(
-//                 error?.response?.data?.message ||
-//                 "Failed To Load Documents ❌"
-//             );
-//         }
-//     };
-
-//     useEffect(() => {
-//         const loadData = async () => {
-//             try {
-//                 setPageLoading(true);
-//                 await Promise.all([
-//                     loadClaimData(),
-//                     loadDocuments()
-//                 ]);
-//             } finally {
-//                 setPageLoading(false);
-//             }
-//         };
-//         loadData();
-//     }, [claimId]);
-
-//     const handleApprove = async () => {
-//         if (!agentRemark.trim()) {
-//             toast.warning("Please Enter Agent Remark");
-//             return;
-//         }
-
-//         try {
-//             setActionLoading(true);
-//             await agentRecommendClaimForApproval(claimId, agentRemark);
-//             toast.success("Recommended For Approval ✅");
-//             if (isModal) {
-//                 onClose?.();
-//             } else {
-//                 setTimeout(() => {
-//                     navigate("/agentdashboard");
-//                 }, 1000);
-
-//             }
-//         } catch (error) {
-//             toast.error(
-//                 error?.response?.data?.message ||
-//                 "Failed To Recommend Claim ❌"
-//             );
-//         } finally {
-//             setActionLoading(false);
-//         }
-//     };
-
-//     const handleReject = async () => {
-//         if (!agentRemark.trim()) {
-//             toast.warning("Please Enter Agent Remark");
-//             return;
-//         }
-//         try {
-//             setActionLoading(true);
-//             await agentRecommendClaimForRejection(claimId, agentRemark);
-//             toast.success("Recommended For Rejection ❌");
-//             if (isModal) {
-//                 onClose?.();
-//             } else {
-//                 setTimeout(() => {
-//                     navigate("/agentdashboard");
-//                 }, 1000);
-//             }
-
-//         } catch (error) {
-//             toast.error(
-//                 error?.response?.data?.message ||
-//                 "Failed To Reject Claim ❌"
-//             );
-//         } finally {
-//             setActionLoading(false);
-//         }
-//     };
-
-//     if (pageLoading) {
-
-//         return (
-//             <div className="flex justify-center items-center min-h-[400px]">
-//                 <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-//             </div>
-//         );
-//     }
-
-//     const content = (
-//         <div className="space-y-6">
-
-//             {/* CLAIM DETAILS */}
-
-//             <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-//                 <h2 className="text-2xl font-bold text-white mb-5">
-//                     Claim Details
-//                 </h2>
-
-//                 <div className="grid md:grid-cols-2 gap-4 text-slate-300">
-//                     <p>
-//                         <strong>Customer:</strong>{" "}
-//                         {claimData.customerName}
-//                     </p>
-
-//                     <p>
-//                         <strong>Email:</strong>{" "}
-//                         {claimData.customerEmail}
-//                     </p>
-
-//                     <p>
-//                         <strong>Status:</strong>{" "}
-//                         {claimData.claimStatus}
-//                     </p>
-
-//                     <p>
-//                         <strong>Claim Number:</strong>{" "}
-//                         {claimData.claimNumber}
-//                     </p>
-
-//                     <p>
-//                         <strong>Claim ID:</strong>{" "}
-//                         {claimData.claimId}
-//                     </p>
-
-//                     <p>
-//                         <strong>Policy ID:</strong>{" "}
-//                         {claimData.policyId}
-//                     </p>
-
-//                     <p>
-//                         <strong>Plan:</strong>{" "}
-//                         {claimData.planName}
-//                     </p>
-
-//                     <p>
-//                         <strong>Coverage:</strong>{" "}
-//                         ₹{claimData.coverageAmount}
-//                     </p>
-
-//                     <p>
-//                         <strong>Premium:</strong>{" "}
-//                         ₹{claimData.premiumAmount}
-//                     </p>
-
-//                     <p>
-//                         <strong>Claim Amount:</strong>{" "}
-//                         ₹{claimData.claimAmount}
-//                     </p>
-
-//                     <p>
-//                         <strong>Start:</strong>{" "}
-//                         {claimData.policyStartDate}
-//                     </p>
-
-//                     <p>
-//                         <strong>End:</strong>{" "}
-//                         {claimData.policyEndDate}
-//                     </p>
-
-//                 </div>
-
-//                 <div className="mt-5">
-//                     <strong className="text-white">
-//                         Claim Reason:
-//                     </strong>
-//                     <p className="text-slate-300 mt-2">
-//                         {claimData.claimReason}
-//                     </p>
-
-//                 </div>
-
-//             </div>
-
-//             {/* DOCUMENTS */}
-
-//             <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-//                 <h2 className="text-2xl font-bold text-white mb-5">
-//                     Documents
-//                 </h2>
-//                 {claimDocuData.length > 0 ? (
-//                     <div className="grid md:grid-cols-2 gap-5">
-//                         {claimDocuData.map((doc) => (
-//                             <div key={doc.documentId}
-//                                 className="rounded-2xl border border-white/10 p-4">
-//                                 <p className="text-slate-300">
-//                                     <strong>ID:</strong>{" "}
-//                                     {doc.documentId}
-//                                 </p>
-
-//                                 <p className="text-slate-300">
-//                                     <strong>Name:</strong>{" "}
-//                                     {doc.originalFileName}
-//                                 </p>
-
-//                                 <p className="text-slate-300">
-//                                     <strong>Type:</strong>{" "}
-//                                     {doc.contentType}
-//                                 </p>
-
-//                                 {doc.resourceType ===
-//                                     "image" && (
-//                                         <img
-//                                             src={doc.cloudinaryUrl}
-//                                             alt=""
-//                                             className="w-full h-52 object-cover rounded-xl mt-4"
-//                                         />
-//                                     )}
-
-//                                 <a
-//                                     href={doc.cloudinaryUrl} target="_blank" rel="noreferrer"
-//                                     className="inline-block mt-4 text-cyan-400 hover:text-cyan-300">
-//                                     View Document
-//                                 </a>
-//                             </div>
-//                         ))}
-//                     </div>
-//                 ) : (
-
-//                     <p className="text-slate-400">
-//                         No Documents Found
-//                     </p>
-
-//                 )}
-
-//             </div>
-
-//             {/* REMARK */}
-
-//             <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-
-//                 <h2 className="text-xl font-bold text-white mb-4">
-//                     Agent Remark
-//                 </h2>
-
-//                 <textarea
-//                     rows="5" value={agentRemark} onChange={(e) => setAgentRemark(e.target.value)}
-//                     className=" w-full rounded-2xl bg-slate-800 border border-white/10 p-4 text-white outline-none" placeholder="Enter remark..." />
-
-//                 <div className="flex flex-wrap gap-4 mt-6">
-//                     <button disabled={actionLoading} onClick={handleApprove} className="px-6 py-3 rounded-xl bg-green-600 text-white font-semibold">
-//                         Recommend Approval
-//                     </button>
-
-//                     <button disabled={actionLoading} onClick={handleReject} className=" px-6 py-3 rounded-xl bg-red-600 text-white font-semibold ">
-//                         Recommend Rejection
-//                     </button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-
-//     if (!isModal) {
-
-//         return (
-//             <div className="min-h-screen bg-slate-950 p-6">
-//                 {content}
-//             </div>
-//         );
-//     }
-
-//     return (
-//         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-6">
-//             <div className=" w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-[32px] border border-white/10 bg-slate-900 p-6" >
-//                 <div className="flex justify-between items-center mb-6">
-//                     <h2 className="text-3xl font-bold text-white">
-//                         Claim Review
-//                     </h2>
-//                     <button onClick={onClose} className=" w-11 h-11 rounded-full bg-red-500 text-white " >
-//                         ✕
-//                     </button>
-//                 </div>
-//                 {content}
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default AgentClaimReview;
 
 import React, { useEffect, useState } from "react";
 import {
     agentClaimReview,
+    getClaimById,
     agentRecommendClaimForApproval,
     agentRecommendClaimForRejection,
     getClaimDocument
@@ -341,14 +27,22 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
     const [pageLoading, setPageLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
 
-    const loadClaimData = async () => {
-        try {
-            const claim = await agentClaimReview(claimId);
-            setClaimData(claim);
-        } catch (error) {
-            toast.error(error?.response?.data?.message || "Failed To Load Claim ❌");
-        }
-    };
+const loadClaimData = async () => {
+    try {
+
+        const claim = await getClaimById(claimId);
+
+        setClaimData(claim);
+
+    } catch(error){
+
+        toast.error(
+          error?.response?.data?.message ||
+          "Failed To Load Claim"
+        );
+
+    }
+};
 
     const loadDocuments = async () => {
         try {
@@ -423,93 +117,93 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
 
     // MAIN CONTENT INTERFACE
     const content = (
-        <div className="space-y-6 text-slate-700 dark:text-slate-300">
+        <div className="space-y-6 text-slate-300">
             
             {/* BACK BUTTON (Only shows when it's rendered as a standalone page) */}
             {!isModal && (
                 <div className="flex items-center justify-start mb-2">
                     <button
                         onClick={() => navigate(-1)}
-                        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#111c30] hover:bg-slate-200 dark:hover:bg-[#1b2a47] border border-slate-200 dark:border-slate-800/80 px-4 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+                        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white bg-[#111c30] hover:bg-[#1b2a47] border border-slate-800/80 px-4 py-2.5 rounded-xl transition-all shadow-md"
                     >
-                        <FaArrowLeft className="text-blue-600 dark:text-blue-400" /> Back
+                        <FaArrowLeft className="text-blue-400" /> Back
                     </button>
                 </div>
             )}
 
             {/* --- SECTION 1: CLAIM SPECIFICATION DETAILS --- */}
-            <div className="bg-white dark:bg-[#111c30] border border-slate-200 dark:border-slate-800/90 rounded-3xl shadow-md dark:shadow-2xl p-6 md:p-8 relative overflow-hidden transition-colors duration-300">
+            <div className="bg-[#111c30] border border-slate-800/90 rounded-3xl shadow-2xl p-6 md:p-8 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 to-indigo-500" />
                 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-slate-205 dark:border-slate-800/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-slate-800/60">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                             <FaShieldAlt />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-wide">Claim Metrics Assessment</h2>
-                            <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Comprehensive audit overview of the client pipeline</p>
+                            <h2 className="text-xl font-bold text-white tracking-wide">Claim Metrics Assessment</h2>
+                            <p className="text-slate-500 text-xs mt-0.5">Comprehensive audit overview of the client pipeline</p>
                         </div>
                     </div>
 
-                    <span className={`text-xs px-3 py-1.5 rounded-xl font-black tracking-wider uppercase border bg-slate-50 dark:bg-[#070d19]/80
-                        ${claimData.claimStatus === 'APPROVED' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 
-                          claimData.claimStatus === 'SUBMITTED' ? 'text-blue-605 dark:text-blue-400 border-blue-500/30' : 'text-amber-600 dark:text-amber-400 border-amber-500/30'}`}>
+                    <span className={`text-xs px-3 py-1.5 rounded-xl font-black tracking-wider uppercase border bg-[#070d19]/80
+                        ${claimData.claimStatus === 'APPROVED' ? 'text-emerald-400 border-emerald-500/30' : 
+                          claimData.claimStatus === 'SUBMITTED' ? 'text-blue-400 border-blue-500/30' : 'text-amber-400 border-amber-500/30'}`}>
                         {claimData.claimStatus}
                     </span>
                 </div>
 
                 {/* Info Data Matrix Grid */}
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 text-sm bg-slate-50 dark:bg-[#070d19]/40 p-5 rounded-2xl border border-slate-200 dark:border-slate-800/50">
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaUser className="text-slate-400 dark:text-slate-600 text-xs"/> Customer:</span> <span className="font-semibold text-slate-850 dark:text-white">{claimData.customerName}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaEnvelope className="text-slate-400 dark:text-slate-600 text-xs"/> Email:</span> <span className="font-semibold text-slate-600 dark:text-slate-350 truncate max-w-[180px]">{claimData.customerEmail}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaFileContract className="text-slate-400 dark:text-slate-600 text-xs"/> Claim No:</span> <span className="font-mono text-xs text-slate-850 dark:text-white tracking-wide">{claimData.claimNumber}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaInfoCircle className="text-slate-400 dark:text-slate-600 text-xs"/> Claim ID:</span> <span className="font-mono text-xs text-slate-600 dark:text-slate-400">#{claimData.claimId}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaInfoCircle className="text-slate-400 dark:text-slate-600 text-xs"/> Policy ID:</span> <span className="font-mono text-xs text-slate-600 dark:text-slate-400">#{claimData.policyId}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaShieldAlt className="text-slate-400 dark:text-slate-600 text-xs"/> Plan Name:</span> <span className="font-semibold text-slate-850 dark:text-white">{claimData.planName}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaRupeeSign className="text-slate-400 dark:text-slate-600 text-xs"/> Coverage:</span> <span className="font-bold text-slate-700 dark:text-slate-200">₹{claimData.coverageAmount}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaRupeeSign className="text-slate-400 dark:text-slate-600 text-xs"/> Premium:</span> <span className="font-bold text-slate-700 dark:text-slate-200">₹{claimData.premiumAmount}</span></p>
-                    <p className="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/30"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaRupeeSign className="text-slate-400 dark:text-slate-600 text-xs"/> Request Liquidation:</span> <span className="font-black text-emerald-600 dark:text-emerald-400">₹{claimData.claimAmount}</span></p>
-                    <p className="flex items-center justify-between py-1.5 sm:border-none"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaCalendarAlt className="text-slate-400 dark:text-slate-600 text-xs"/> Policy Commenced:</span> <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">{claimData.policyStartDate}</span></p>
-                    <p className="flex items-center justify-between py-1.5"><span className="text-slate-500 dark:text-slate-400 font-medium inline-flex items-center gap-2"><FaCalendarAlt className="text-slate-400 dark:text-slate-600 text-xs"/> Policy Expiry:</span> <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">{claimData.policyEndDate}</span></p>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-4 text-sm bg-[#070d19]/40 p-5 rounded-2xl border border-slate-800/50">
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaUser className="text-slate-600 text-xs"/> Customer:</span> <span className="font-semibold text-white">{claimData.customerName}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaEnvelope className="text-slate-600 text-xs"/> Email:</span> <span className="font-semibold text-slate-400 truncate max-w-[180px]">{claimData.customerEmail}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaFileContract className="text-slate-600 text-xs"/> Claim No:</span> <span className="font-mono text-xs text-white tracking-wide">{claimData.claimNumber}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaInfoCircle className="text-slate-600 text-xs"/> Claim ID:</span> <span className="font-mono text-xs text-slate-400">#{claimData.claimId}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaInfoCircle className="text-slate-600 text-xs"/> Policy ID:</span> <span className="font-mono text-xs text-slate-400">#{claimData.policyId}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaShieldAlt className="text-slate-600 text-xs"/> Plan Name:</span> <span className="font-semibold text-white">{claimData.planName}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaRupeeSign className="text-slate-600 text-xs"/> Coverage:</span> <span className="font-bold text-slate-200">₹{claimData.coverageAmount}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaRupeeSign className="text-slate-600 text-xs"/> Premium:</span> <span className="font-bold text-slate-200">₹{claimData.premiumAmount}</span></p>
+                    <p className="flex items-center justify-between py-1.5 border-b border-slate-800/30"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaRupeeSign className="text-slate-600 text-xs"/> Request Liquidation:</span> <span className="font-black text-emerald-400">₹{claimData.claimAmount}</span></p>
+                    <p className="flex items-center justify-between py-1.5 sm:border-none"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaCalendarAlt className="text-slate-600 text-xs"/> Policy Commenced:</span> <span className="text-slate-400 text-xs font-medium">{claimData.policyStartDate}</span></p>
+                    <p className="flex items-center justify-between py-1.5"><span className="text-slate-500 font-medium inline-flex items-center gap-2"><FaCalendarAlt className="text-slate-600 text-xs"/> Policy Expiry:</span> <span className="text-slate-400 text-xs font-medium">{claimData.policyEndDate}</span></p>
                 </div>
 
-                <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800/40">
+                <div className="mt-5 pt-4 border-t border-slate-800/40">
                     <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Incident Root Cause Statement</span>
-                    <p className="text-xs text-slate-700 dark:text-slate-400 leading-relaxed font-serif bg-slate-50 dark:bg-[#070d19]/50 p-4 rounded-xl border border-slate-200 dark:border-slate-900">{claimData.claimReason}</p>
+                    <p className="text-xs text-slate-400 leading-relaxed font-serif bg-[#070d19]/50 p-4 rounded-xl border border-slate-900">{claimData.claimReason}</p>
                 </div>
             </div>
 
             {/* --- SECTION 2: VERIFICATION EVIDENCE ASSETS --- */}
-            <div className="bg-white dark:bg-[#111c30] border border-slate-200 dark:border-slate-800/90 rounded-3xl shadow-md dark:shadow-2xl p-6 md:p-8 transition-colors duration-300">
-                <div className="flex items-center gap-3 mb-5 pb-4 border-b border-slate-200 dark:border-slate-800/60">
-                    <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+            <div className="bg-[#111c30] border border-slate-800/90 rounded-3xl shadow-2xl p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-5 pb-4 border-b border-slate-800/60">
+                    <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                         <FaFileAlt />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-wide">Verification Dossier</h2>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">Uploaded file architecture for claim authenticity</p>
+                        <h2 className="text-xl font-bold text-white tracking-wide">Verification Dossier</h2>
+                        <p className="text-slate-500 text-xs mt-0.5">Uploaded file architecture for claim authenticity</p>
                     </div>
                 </div>
 
                 {claimDocuData.length > 0 ? (
                     <div className="grid sm:grid-cols-2 gap-5">
                         {claimDocuData.map((doc) => (
-                            <div key={doc.documentId} className="bg-slate-50 dark:bg-[#070d19]/40 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between group hover:border-slate-350 dark:hover:border-slate-700/80 transition-all">
+                            <div key={doc.documentId} className="bg-[#070d19]/40 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between group hover:border-slate-700/80 transition-all">
                                 <div className="space-y-2 text-xs">
                                     <div className="flex items-start justify-between gap-2">
-                                        <div className="text-slate-500 dark:text-slate-400 font-medium truncate w-4/5">
-                                            <span className="text-slate-500 dark:text-slate-600 block text-[10px] font-bold uppercase tracking-wider mb-0.5">File Label</span>
-                                            <span className="text-slate-800 dark:text-slate-200 font-mono text-xs">{doc.originalFileName}</span>
-                                        </div>
-                                        <span className="text-[10px] bg-slate-100 dark:bg-[#111c30] px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-mono uppercase shrink-0">
+                                        <p className="text-slate-400 font-medium truncate w-4/5">
+                                            <span className="text-slate-600 block text-[10px] font-bold uppercase tracking-wider mb-0.5">File Label</span>
+                                            <span className="text-slate-200 font-mono text-xs">{doc.originalFileName}</span>
+                                        </p>
+                                        <span className="text-[10px] bg-[#111c30] px-2 py-0.5 rounded border border-slate-800 text-slate-400 font-mono uppercase shrink-0">
                                             {doc.contentType?.split('/')?.[1] || 'Doc'}
                                         </span>
                                     </div>
-                                    <p className="text-slate-500 font-mono text-[11px]">System ID: <span className="text-slate-600 dark:text-slate-400">#{doc.documentId}</span></p>
+                                    <p className="text-slate-500 font-mono text-[11px]">System ID: <span className="text-slate-400">#{doc.documentId}</span></p>
 
                                     {doc.resourceType === "image" && (
-                                        <div className="relative mt-3 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-900 bg-slate-100 dark:bg-slate-950">
+                                        <div className="relative mt-3 rounded-xl overflow-hidden border border-slate-900 bg-slate-950">
                                             <img
                                                 src={doc.cloudinaryUrl}
                                                 alt={doc.originalFileName}
@@ -523,7 +217,7 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
                                     href={doc.cloudinaryUrl}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="mt-4 w-full py-2 text-center bg-slate-100 hover:bg-blue-600 dark:bg-[#111c30] border border-slate-200 dark:border-slate-800 hover:border-transparent text-slate-600 dark:text-slate-400 hover:text-white rounded-xl font-bold text-xs tracking-wide transition-all block cursor-pointer"
+                                    className="mt-4 w-full py-2 text-center bg-[#111c30] hover:bg-blue-600 border border-slate-800 hover:border-transparent text-slate-400 hover:text-white rounded-xl font-bold text-xs tracking-wide transition-all block"
                                 >
                                     View Full Asset
                                 </a>
@@ -531,22 +225,22 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
                         ))}
                     </div>
                 ) : (
-                    <div className="p-5 bg-slate-50 dark:bg-[#070d19]/30 rounded-2xl border border-slate-200 dark:border-slate-800/40 text-center">
-                        <p className="text-slate-555 dark:text-slate-500 text-sm">No validation documents accompanied this claim manifest.</p>
+                    <div className="p-5 bg-[#070d19]/30 rounded-2xl border border-slate-800/40 text-center">
+                        <p className="text-slate-500 text-sm">No validation documents accompanied this claim manifest.</p>
                     </div>
                 )}
             </div>
 
             {/* --- SECTION 3: AGENT REVIEW & SUBMISSION REMARK --- */}
-            <div className="bg-white dark:bg-[#111c30] border border-slate-200 dark:border-slate-800/90 rounded-3xl shadow-md dark:shadow-2xl p-6 md:p-8 transition-colors duration-300">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-wide mb-2">Agent Evaluation Desk</h2>
-                <p className="text-slate-555 dark:text-slate-500 text-xs mb-4">Mandatory analytical log required before operational routing decision</p>
+            <div className="bg-[#111c30] border border-slate-800/90 rounded-3xl shadow-2xl p-6 md:p-8">
+                <h2 className="text-xl font-bold text-white tracking-wide mb-2">Agent Evaluation Desk</h2>
+                <p className="text-slate-500 text-xs mb-4">Mandatory analytical log required before operational routing decision</p>
 
                 <textarea
                     rows="4"
                     value={agentRemark}
                     onChange={(e) => setAgentRemark(e.target.value)}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-[#070d19]/60 border border-slate-200 dark:border-slate-800 text-sm p-4 text-slate-800 dark:text-slate-250 outline-none focus:border-blue-500/50 placeholder-slate-400 dark:placeholder-slate-600 resize-none transition-all"
+                    className="w-full rounded-xl bg-[#070d19]/60 border border-slate-800 text-sm p-4 text-slate-200 outline-none focus:border-blue-500/50 placeholder-slate-600 resize-none transition-all"
                     placeholder="Enter thorough analysis logs and metrics breakdown..."
                 />
 
@@ -554,7 +248,7 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
                     <button
                         disabled={actionLoading}
                         onClick={handleApprove}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600/10 hover:bg-emerald-600 border border-emerald-500/20 hover:border-transparent text-emerald-700 dark:text-emerald-400 hover:text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-40 shadow-md cursor-pointer"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600/10 hover:bg-emerald-600 border border-emerald-500/20 hover:border-transparent text-emerald-400 hover:text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-40 shadow-lg shadow-emerald-950/20"
                     >
                         {actionLoading ? (
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -566,7 +260,7 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
                     <button
                         disabled={actionLoading}
                         onClick={handleReject}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-rose-600/10 hover:bg-rose-600 border border-rose-500/20 hover:border-transparent text-rose-700 dark:text-rose-400 hover:text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-40 shadow-md cursor-pointer"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-rose-600/10 hover:bg-rose-600 border border-rose-500/20 hover:border-transparent text-rose-400 hover:text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-40 shadow-lg shadow-rose-950/20"
                     >
                         {actionLoading ? (
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -582,7 +276,7 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
     // RENDER: STANDALONE FULL PAGE
     if (!isModal) {
         return (
-            <div className="min-h-screen bg-slate-50 dark:bg-[#070d19] p-4 md:p-8 transition-colors duration-300">
+            <div className="min-h-screen bg-[#070d19] p-4 md:p-8">
                 <div className="max-w-5xl mx-auto">
                     {content}
                 </div>
@@ -593,17 +287,17 @@ const AgentClaimReview = ({ claimId: modalClaimId, isModal = false, onClose }) =
     // RENDER: DIALOG MODAL FRAMEWAY
     return (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/75 backdrop-blur-md p-4 sm:p-6 animate-fadeIn">
-            <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-205 dark:border-slate-800 bg-white dark:bg-[#070d19] shadow-2xl p-6 relative text-slate-850 dark:text-slate-200 transition-colors duration-300" >
+            <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-800 bg-[#070d19] shadow-2xl p-6 relative" >
                 
                 {/* Modal Header Controls */}
-                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-200 dark:border-slate-800/60">
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-800/60">
                     <div>
-                        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-wide">Claim Pipeline Workspace</h2>
-                        <p className="text-xs text-slate-550 dark:text-slate-500 mt-0.5">Execute systematic evaluation and validation protocols</p>
+                        <h2 className="text-2xl font-black text-white tracking-wide">Claim Pipeline Workspace</h2>
+                        <p className="text-xs text-slate-500 mt-0.5">Execute systematic evaluation and validation protocols</p>
                     </div>
                     <button 
                         onClick={onClose} 
-                        className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-rose-600/20 hover:border-rose-500/30 transition-all flex items-center justify-center cursor-pointer"
+                        className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-rose-600/20 hover:border-rose-500/30 transition-all flex items-center justify-center"
                     >
                         <FaTimes className="text-sm" />
                     </button>

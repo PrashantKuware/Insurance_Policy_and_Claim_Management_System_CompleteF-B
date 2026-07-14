@@ -167,27 +167,6 @@ export const adminRejectClaim = async (claimId, remarks) => {
   }
 };
 
-
-export const getClaimsByCustomer = async (customerId, page = 0, size = 1000) => {
-  try {
-    const res = await claimApi.get(`/customer/${customerId}`, {
-      params: { page, size },
-    });
-    return res.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const getClaimDocuments = async (claimId) => {
-  try {
-    const res = await claimApi.get(`/${claimId}/documents`);
-    return res.data;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
 // export const getAllClaims = async (page = 0, size = 10) => {
 //   try {
 //     const res = await claimApi.get(
@@ -200,3 +179,19 @@ export const getClaimDocuments = async (claimId) => {
 //     throw error;
 //   }
 // };
+
+export const getClaimById = async (claimId) => {
+
+    try {
+
+        const res = await claimApi.get(`/${claimId}`);
+
+        return res.data;
+
+    } catch(error){
+
+        handleError(error);
+
+    }
+
+};

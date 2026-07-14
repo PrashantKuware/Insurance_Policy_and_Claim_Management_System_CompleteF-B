@@ -137,26 +137,26 @@ const AgentSidebar = () => {
 
     // NavLink active state style classes handler
     const linkActionStyles = ({ isActive }) => 
-        `flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm tracking-wide transition-all duration-200 border group cursor-pointer
+        `flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm tracking-wide transition-all duration-200 border group
         ${isActive
-            ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-600 dark:text-cyan-400 shadow-sm"
-            : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900"
+            ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.05)]"
+            : "border-transparent text-slate-400 hover:text-white hover:bg-slate-900"
         }`;
 
     return (
-        <aside className="h-screen w-72 bg-white dark:bg-slate-950/40 backdrop-blur-xl border-r border-slate-200 dark:border-slate-900 text-slate-800 dark:text-slate-200 hidden md:flex flex-col select-none transition-colors duration-300">
+        <aside className="h-screen w-72 bg-slate-950/40 backdrop-blur-xl border-r border-slate-900 text-slate-200 hidden md:flex flex-col select-none">
             
             {/* BRAND HEADER LAYER */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-900/60">
+            <div className="p-6 border-b border-slate-900/60">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/10 dark:shadow-cyan-950/50">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-950/50">
                         <ShieldAlert size={18} />
                     </div>
-                    <h1 className="text-xl font-black bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent tracking-wide">
+                    <h1 className="text-xl font-black bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent tracking-wide">
                         Agent Panel
                     </h1>
                 </div>
-                <p className="text-slate-400 dark:text-slate-500 text-[11px] font-medium tracking-wider uppercase mt-2 pl-0.5">
+                <p className="text-slate-500 text-[11px] font-medium tracking-wider uppercase mt-2 pl-0.5">
                     Claim Review System
                 </p>
             </div>
@@ -185,10 +185,10 @@ const AgentSidebar = () => {
             </nav>
 
             {/* SECURE SESSION DESTRUCTION CONTROL */}
-            <div className="p-4 border-t border-slate-200 dark:border-slate-900/60 bg-slate-50 dark:bg-slate-950/20">
+            <div className="p-4 border-t border-slate-900/60 bg-slate-950/20">
                 <button
                     onClick={handleLogout}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-rose-500/5 hover:bg-rose-600 border border-rose-500/10 dark:border-rose-500/10 hover:border-transparent text-rose-600 dark:text-rose-400 hover:text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-md cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-rose-500/5 hover:bg-rose-600 border border-rose-500/10 hover:border-transparent text-rose-400 hover:text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-rose-950/10"
                 >
                     <LogOut size={14} />
                     <span>Terminate Session</span>

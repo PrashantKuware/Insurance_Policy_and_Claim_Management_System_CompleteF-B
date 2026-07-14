@@ -131,21 +131,21 @@ import CustomerNavbar from "./CustomerNavbar";
 
 const CustomerLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070d19] text-slate-800 dark:text-white relative overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-[#070d19] text-white relative overflow-x-hidden">
 
       {/* --- PREMIUM DEEP AMBIENT DARK GLOW BACKGROUND --- */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         
         {/* Neon Royal Blue Orb */}
-        <div className="absolute top-[-10%] left-[20%] h-[450px] w-[450px] rounded-full bg-blue-600/5 dark:bg-blue-600/15 blur-[120px] animate-pulse" 
+        <div className="absolute top-[-10%] left-[20%] h-[450px] w-[450px] rounded-full bg-blue-600/15 blur-[120px] animate-pulse" 
              style={{ animationDuration: '8s' }}></div>
 
         {/* Deep Indigo/Purple Orb */}
-        <div className="absolute top-[30%] right-[-5%] h-[400px] w-[400px] rounded-full bg-indigo-600/5 dark:bg-indigo-600/10 blur-[100px] animate-pulse"
+        <div className="absolute top-[30%] right-[-5%] h-[400px] w-[400px] rounded-full bg-indigo-600/10 blur-[100px] animate-pulse"
              style={{ animationDuration: '12s' }}></div>
 
         {/* Cyber Cyan Bottom Orb */}
-        <div className="absolute bottom-[-10%] left-[-5%] h-[350px] w-[350px] rounded-full bg-cyan-500/5 dark:bg-cyan-500/10 blur-[90px] animate-pulse"
+        <div className="absolute bottom-[-10%] left-[-5%] h-[350px] w-[350px] rounded-full bg-cyan-500/10 blur-[90px] animate-pulse"
              style={{ animationDuration: '10s' }}></div>
              
       </div>
@@ -157,13 +157,13 @@ const CustomerLayout = ({ children }) => {
         <CustomerSidebar />
 
         {/* Dynamic Content Stream Area */}
-        <div className="flex-1 lg:ml-72 flex flex-col min-h-screen bg-slate-50/50 dark:bg-transparent transition-colors duration-300">
+        <div className="flex-1 lg:ml-72 flex flex-col min-h-screen">
 
           {/* Context Application Navbar */}
           <CustomerNavbar />
 
           {/* Injected Active Customer Dashboard / Policy Components */}
-          <main className="p-4 md:p-8 flex-1 relative z-10">
+          <main className="p-4 md:p-8 flex-1">
             {children}
           </main>
 
