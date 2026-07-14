@@ -77,12 +77,14 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void deactivateProduct(Long productId) {
+	public void changeProductStatus(Long productId) {
 
 		InsuranceProduct product = repository.findById(productId)
 				.orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
-		product.setActive(false);
+		product.setActive(!product.getActive());
+
+		product.setUpdatedDate(LocalDateTime.now());
 
 		repository.save(product);
 	}
@@ -94,14 +96,12 @@ public class ProductServiceImpl implements ProductService {
 
 		return repository.findAll(pageable).map(this::mapToResponse);
 	}
-	
+
 	@Override
 	public List<ProductResponseDto> getProductByProductType(ProductType productType) {
 
-	    List<InsuranceProduct> products = repository.findByProductType(productType);
+		List<InsuranceProduct> products = repository.findByProductType(productType);
 
-	    return products.stream()
-	            .map(this::mapToResponse)
-	            .collect(Collectors.toList());
+		return products.stream().map(this::mapToResponse).collect(Collectors.toList());
 	}
 }

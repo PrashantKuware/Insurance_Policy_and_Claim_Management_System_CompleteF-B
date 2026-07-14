@@ -50,3 +50,35 @@ export const getProductBtProductType = async (productType) => {
     handleError(error);
   }
 };
+
+export const changeProductStatus = async (productId) => {
+  try {
+
+    const res = await productApi.patch(`/${productId}/status`);
+
+    return res.data;
+
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const updateProduct = async (
+  productId,
+  productName,
+  productType,
+  description
+) => {
+  try {
+    const res = await productApi.put(`/${productId}`, {
+      productName,
+      productType,
+      description,
+      status: true
+    });
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
+
+}

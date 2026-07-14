@@ -5,8 +5,10 @@ import useProducts from "../../hooks/useGetAllProduct";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Search, Plus, Eye, ListPlus, Briefcase, Edit, Trash2, ShieldAlert, X, Save } from "lucide-react";
-import { updateProduct, deactivateProduct } from "../../services/ProductService";
-
+import { 
+  updateProduct, 
+  changeProductStatus 
+} from "../../services/ProductService";
 const Product = () => {
   const { productData, loading, error, refreshProducts } = useProducts();
   const role = useSelector((state) => state.auth.role) || localStorage.getItem("role");
@@ -90,57 +92,61 @@ const Product = () => {
     }
   };
 
-  const handleDeactivate = async (productId) => {
-    const confirm = window.confirm(
-      "Are you sure you want to deactivate this product? New customer purchases will be blocked. Existing policies will remain active."
-    );
-    if (!confirm) return;
+const handleDeactivate = async(productId)=>{
 
-    try {
-      await deactivateProduct(productId).catch(e => console.error("Database deactivation failed", e));
-      
-      const deactivated = JSON.parse(localStorage.getItem("deactivated_products") || "[]");
-      if (!deactivated.includes(productId)) {
-        deactivated.push(productId);
-        localStorage.setItem("deactivated_products", JSON.stringify(deactivated));
-      }
-      
-      const activated = JSON.parse(localStorage.getItem("activated_products") || "[]");
-      const filteredActivated = activated.filter(id => id !== productId);
-      localStorage.setItem("activated_products", JSON.stringify(filteredActivated));
+ const confirm = window.confirm(
+ "Are you sure you want to deactivate this product?"
+ );
 
-      toast.success("Product deactivated successfully ⚠️");
-      refreshProducts();
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Deactivation failed ❌");
-    }
-  };
+ if(!confirm) return;
 
-  const handleActivate = (productId) => {
-    const confirm = window.confirm(
-      "Are you sure you want to activate this product? Customers will be able to purchase plans associated with it."
-    );
-    if (!confirm) return;
 
-    try {
-      const activated = JSON.parse(localStorage.getItem("activated_products") || "[]");
-      if (!activated.includes(productId)) {
-        activated.push(productId);
-        localStorage.setItem("activated_products", JSON.stringify(activated));
-      }
-      
-      const deactivated = JSON.parse(localStorage.getItem("deactivated_products") || "[]");
-      const filteredDeactivated = deactivated.filter(id => id !== productId);
-      localStorage.setItem("deactivated_products", JSON.stringify(filteredDeactivated));
-      
-      toast.success("Product activated successfully ✅");
-      refreshProducts();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to activate product");
-    }
-  };
+ try{
+
+   await changeProductStatus(productId);
+
+   toast.success("Product deactivated successfully ⚠️");
+
+   refreshProducts();
+ }catch(error){
+
+   toast.error(
+   error?.response?.data?.message || 
+   "Failed to deactivate product"
+   );
+
+ }
+
+}
+
+  const handleActivate = async(productId)=>{
+
+ const confirm = window.confirm(
+ "Are you sure you want to activate this product?"
+ );
+
+ if(!confirm) return;
+
+
+ try{
+
+   await changeProductStatus(productId);
+
+   toast.success("Product activated successfully ✅");
+
+   refreshProducts();
+
+
+ }catch(error){
+
+   toast.error(
+   error?.response?.data?.message ||
+   "Failed to activate product"
+   );
+
+ }
+
+}
 
   const handleDelete = (productId) => {
     const confirm = window.confirm(

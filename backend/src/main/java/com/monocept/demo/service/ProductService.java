@@ -18,7 +18,7 @@ public interface ProductService {
 
 	Page<ProductResponseDto> getAllProducts(int pageNo, int pageSize);
 
-	void deactivateProduct(Long productId);
+	void changeProductStatus(Long productId);
 	
 	List<ProductResponseDto> getProductByProductType(ProductType productType);
 }

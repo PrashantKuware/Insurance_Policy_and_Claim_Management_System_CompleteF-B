@@ -3,7 +3,7 @@ import { getAllCustomers } from "../../services/CustomerService";
 import { getAllUsers } from "../../services/userService";
 import { getAllPolicy } from "../../services/PlanServices";
 import { getAllProduct } from "../../services/ProductService";
-import { getAllPolicies } from "../../services/policyService";
+import { getAllPoliciesByCustomer } from "../../services/policyService";
 import { getClaimsByCustomer } from "../../services/claimService";
 import { toast } from "react-toastify";
 import { Search, MapPin, Mail, User, Shield, ChevronLeft, ChevronRight, X, Info, ShieldCheck, FileClock, Phone, Calendar, UserCheck, Activity, DollarSign } from "lucide-react";

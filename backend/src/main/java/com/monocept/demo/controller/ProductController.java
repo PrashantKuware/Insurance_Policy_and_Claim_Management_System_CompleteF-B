@@ -65,13 +65,13 @@ public class ProductController {
 	}
 
 	// ADMIN
-	@PatchMapping("/{id}/deactivate")
+	@PatchMapping("/{id}/status")
 	@PreAuthorize("hasRole('ADMIN')")
-	public String deactivateProduct(@PathVariable Long id) {
+	public String changeProductStatus(@PathVariable Long id) {
 
-		productService.deactivateProduct(id);
+	    productService.changeProductStatus(id);
 
-		return "Product deactivated successfully";
+	    return "Product status updated successfully";
 	}
 
 	@GetMapping("/producttype")
