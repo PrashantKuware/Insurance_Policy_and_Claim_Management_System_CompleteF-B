@@ -129,7 +129,7 @@ const AddAgent = () => {
                 required: "Full Name is required",
               })}
               placeholder="e.g. John Doe"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
             />
             {errors.fullName && (
               <p className="text-red-500 text-xs mt-1 ml-1">{errors.fullName.message}</p>
@@ -146,8 +146,10 @@ const AddAgent = () => {
                 {...register("email", {
                   required: "Email is required",
                 })}
+                type="email"
+                autoComplete="off"
                 placeholder="e.g. agent@insurance.com"
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/40 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
               />
               <button
                 type="button"
@@ -173,7 +175,7 @@ const AddAgent = () => {
                 required: "Email OTP is required",
               })}
               placeholder="Enter 6-digit Email OTP"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
             />
             {errors.emailOtp && (
               <p className="text-red-500 text-xs mt-1 ml-1">{errors.emailOtp.message}</p>
@@ -191,7 +193,7 @@ const AddAgent = () => {
                   required: "Mobile Number is required",
                 })}
                 placeholder="e.g. 9876543210"
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/40 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
               />
               <button
                 type="button"
@@ -217,7 +219,7 @@ const AddAgent = () => {
                 required: "Mobile OTP is required",
               })}
               placeholder="Enter 6-digit Mobile OTP"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
             />
             {errors.mobileOtp && (
               <p className="text-red-500 text-xs mt-1 ml-1">{errors.mobileOtp.message}</p>
@@ -238,8 +240,9 @@ const AddAgent = () => {
                   message: "Password must be at least 6 characters",
                 },
               })}
+              autoComplete="new-password"
               placeholder="••••••••"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/40 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-850 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400"
             />
             {errors.password && (
               <p className="text-red-500 text-xs mt-1 ml-1">{errors.password.message}</p>

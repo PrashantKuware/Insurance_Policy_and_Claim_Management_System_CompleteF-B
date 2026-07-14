@@ -64,15 +64,15 @@ const AgentDashboard = () => {
     }, []);
 
     return (
-        <div>
+        <div className="space-y-8 text-slate-800 dark:text-slate-200">
 
             <div className="mb-8">
 
-                <h1 className="text-4xl font-bold text-white">
+                <h1 className="text-4xl font-bold text-slate-800 dark:text-white">
                     Welcome {agentData?.fullName} 👋
                 </h1>
 
-                <p className="text-slate-400 mt-2">
+                <p className="text-slate-500 dark:text-slate-400 mt-2">
                     Review customer claims and manage recommendations.
                 </p>
 
@@ -84,28 +84,32 @@ const AgentDashboard = () => {
                     className="
                         rounded-3xl
                         border
-                        border-white/10
-                        bg-white/5
-                        backdrop-blur-xl
+                        border-slate-200/80
+                        dark:border-slate-800/80
+                        bg-white
+                        dark:bg-slate-900
                         p-6
+                        shadow-sm
+                        transition-all
+                        duration-300
                     "
                 >
                     <div className="flex gap-2">
                         <ClipboardCheck
                             size={40}
-                            className="text-cyan-400 mb-4"
+                            className="text-cyan-600 dark:text-cyan-400 mb-4"
                         />
-                        <p className="text-3xl font-bold text-white">
+                        <p className="text-3xl font-bold text-slate-900 dark:text-white">
                             {submitClaimData.length}
                         </p>
                     </div>
 
 
-                    <h3 className="text-white text-xl font-bold">
+                    <h3 className="text-slate-800 dark:text-white text-xl font-bold">
                         Submitted Claims
                     </h3>
 
-                    <p className="text-slate-400 mt-2">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">
                         Claims waiting for review.
                     </p>
                 </div>
@@ -114,27 +118,31 @@ const AgentDashboard = () => {
                     className="
                         rounded-3xl
                         border
-                        border-white/10
-                        bg-white/5
-                        backdrop-blur-xl
+                        border-slate-200/80
+                        dark:border-slate-800/80
+                        bg-white
+                        dark:bg-slate-900
                         p-6
+                        shadow-sm
+                        transition-all
+                        duration-300
                     "
                 >
                     <div className="flex gap-2">
                         <Clock3
                             size={40}
-                            className="text-yellow-400 mb-4"
+                            className="text-yellow-600 dark:text-yellow-405 mb-4"
                         />
-                        <p className="text-3xl font-bold text-white">
+                        <p className="text-3xl font-bold text-slate-900 dark:text-white">
                             {submitClaimData.length}
                         </p>
                     </div>
 
-                    <h3 className="text-white text-xl font-bold">
+                    <h3 className="text-slate-800 dark:text-white text-xl font-bold">
                         Pending Reviews
                     </h3>
 
-                    <p className="text-slate-400 mt-2">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">
                         Claims awaiting recommendation.
                     </p>
                 </div>
@@ -143,18 +151,22 @@ const AgentDashboard = () => {
                     className="
                         rounded-3xl
                         border
-                        border-white/10
-                        bg-white/5
-                        backdrop-blur-xl
+                        border-slate-200/80
+                        dark:border-slate-800/80
+                        bg-white
+                        dark:bg-slate-900
                         p-6
+                        shadow-sm
+                        transition-all
+                        duration-300
                     "
                 >
                     <div className="flex gap-2 ">
                         <BadgeCheck
                             size={40}
-                            className="text-green-400 mb-4"
+                            className="text-green-600 dark:text-green-400 mb-4"
                         />
-                        <p className="text-3xl font-bold text-white">
+                        <p className="text-3xl font-bold text-slate-900 dark:text-white">
                             {
                                 claims.filter(
                                     claim =>
@@ -164,11 +176,11 @@ const AgentDashboard = () => {
                         </p>
                     </div>
 
-                    <h3 className="text-white text-xl font-bold">
+                    <h3 className="text-slate-800 dark:text-white text-xl font-bold">
                         Approved Recommendations
                     </h3>
 
-                    <p className="text-slate-400 mt-2">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">
                         Successfully reviewed claims.
                     </p>
                 </div>
@@ -179,17 +191,21 @@ const AgentDashboard = () => {
                 className="
                     rounded-3xl
                     border
-                    border-white/10
-                    bg-white/5
-                    backdrop-blur-xl
+                    border-slate-200/80
+                    dark:border-slate-800/80
+                    bg-white
+                    dark:bg-slate-900
                     p-8
+                    shadow-sm
+                    transition-all
+                    duration-300
                 "
             >
-                <h2 className="text-2xl text-white font-bold mb-3">
+                <h2 className="text-2xl text-slate-900 dark:text-white font-bold mb-3">
                     Claim Review Portal
                 </h2>
 
-                <p className="text-slate-400 mb-6">
+                <p className="text-slate-500 dark:text-slate-400 mb-6">
                     Open submitted claims and start reviewing.
                 </p>
 
@@ -210,6 +226,7 @@ const AgentDashboard = () => {
                             to-blue-600
                             hover:scale-105
                             transition
+                            cursor-pointer
                         "
                     >
                         Review Submitted Claims
@@ -223,8 +240,8 @@ const AgentDashboard = () => {
                             px-6
                             py-3
                             rounded-xl
-                            bg-gray-600
-                            text-white
+                            bg-slate-300 dark:bg-gray-600
+                            text-slate-500 dark:text-slate-400
                             cursor-not-allowed
                         "
                     >

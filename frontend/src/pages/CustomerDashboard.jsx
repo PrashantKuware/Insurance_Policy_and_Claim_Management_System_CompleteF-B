@@ -191,20 +191,20 @@ const CustomerDashboard = () => {
   }, []);
   return (
     <CustomerLayout>
-      {/* Container Wrapper with full dark mode card tint matching the image reference */}
+      {/* Container Wrapper with full dark/light mode card tint */}
       <motion.div
-        className="space-y-10 p-8 rounded-[35px] bg-[#0b1426] text-white border border-slate-900 shadow-[0_25px_60px_rgba(0,0,0,0.4)]"
+        className="space-y-10 p-8 rounded-[35px] bg-white dark:bg-[#0b1426] text-slate-800 dark:text-white border border-slate-200 dark:border-slate-900 shadow-[0_25px_60px_rgba(0,0,0,0.05)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.4)] transition-all duration-300"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
       >
         {/* Dashboard Heading Header layout */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800/60 pb-6 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 dark:border-slate-800/60 pb-6 gap-4">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-905 dark:text-white">
               Customer Dashboard
             </h1>
-            <p className="text-slate-400 mt-2 text-sm font-medium">
+            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium">
               Manage your active portfolio, tracks claims & discover protective measures.
             </p>
           </div>
@@ -213,57 +213,57 @@ const CustomerDashboard = () => {
         {/* Stats Grid Matrix */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          <div className="bg-[#121e36] rounded-2xl p-6 border border-slate-800/80 hover:border-blue-500/30 transition-all duration-300">
+          <div className="bg-slate-50 dark:bg-[#121e36] rounded-2xl p-6 border border-slate-200 dark:border-slate-800/80 hover:border-blue-500/30 transition-all duration-300">
             <div className="flex gap-3">
-              <FaShieldAlt className="text-blue-400 text-3xl mb-4" />
-            <p className="text-slate-400 text-2xl">Active Policies</p>
+              <FaShieldAlt className="text-blue-600 dark:text-blue-400 text-3xl mb-4" />
+              <p className="text-slate-500 dark:text-slate-400 text-2xl">Active Policies</p>
             </div>
-            <h2 className="text-4xl font-bold text-white mt-2">
+            <h2 className="text-4xl font-bold text-slate-800 dark:text-white mt-2">
               {stats.activePolicies}
             </h2>
           </div>
 
-         <div className="bg-[#121e36] rounded-2xl p-6 border border-slate-800/80 hover:border-indigo-500/30 transition-all duration-300">
+          <div className="bg-slate-50 dark:bg-[#121e36] rounded-2xl p-6 border border-slate-200 dark:border-slate-800/80 hover:border-indigo-500/30 transition-all duration-300">
             <div className="flex gap-3">
-              <FaFileInvoiceDollar className="text-indigo-400 text-3xl mb-4" />
-            <p className="text-slate-400 text-2xl">Approved Claims</p>
+              <FaFileInvoiceDollar className="text-indigo-650 dark:text-indigo-400 text-3xl mb-4" />
+              <p className="text-slate-500 dark:text-slate-400 text-2xl">Approved Claims</p>
             </div>
-            <h2 className="text-4xl font-bold text-emerald-400 mt-2">
+            <h2 className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
               {stats.approvedClaims}
             </h2>
           </div>
 
-          <div className="bg-[#121e36] rounded-2xl p-6 border border-slate-800/80 hover:border-emerald-500/30 transition-all duration-300">
+          <div className="bg-slate-50 dark:bg-[#121e36] rounded-2xl p-6 border border-slate-200 dark:border-slate-800/80 hover:border-emerald-500/30 transition-all duration-300">
             <div className="flex gap-3">
-              <FaCheckCircle className="text-emerald-400 text-3xl mb-4" />
-            <p className="text-slate-400 text-2xl">Claims Filed</p>
+              <FaCheckCircle className="text-emerald-600 dark:text-emerald-400 text-3xl mb-4" />
+              <p className="text-slate-500 dark:text-slate-400 text-2xl">Claims Filed</p>
             </div>
-            <h2 className="text-4xl font-bold text-blue-400 mt-2">
+            <h2 className="text-4xl font-bold text-blue-600 dark:text-blue-400 mt-2">
               {stats.claimsFiled}
             </h2>
           </div>
         </div>
 
         {/* Dynamic My Policies Section Component */}
-        <section className="bg-[#121e36]/40 rounded-[28px] p-2 border border-slate-800/40">
+        <section className="bg-slate-50/50 dark:bg-[#121e36]/40 rounded-[28px] p-2 border border-slate-200 dark:border-slate-800/40">
           <MyPolicies />
         </section>
 
         {/* --- PREMIUM REPLACED PRODUCT SECTION START --- */}
         <section className="space-y-6 pt-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-wide text-white">
+            <h2 className="text-xl font-bold tracking-wide text-slate-850 dark:text-white">
               Available Insurance Products
             </h2>
             <NavLink
               to="/customer/product"
-              className="text-sm font-semibold text-blue-400 hover:text-blue-300 hover:underline transition-all"
+              className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 hover:underline transition-all cursor-pointer"
             >
               View All
             </NavLink>
           </div>
 
-          {/* Cards Row grid panel with slide up fade entrance layout mapping */}
+          {/* Cards Row grid panel */}
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6"
             initial="hidden"
@@ -283,33 +283,33 @@ const CustomerDashboard = () => {
                   hidden: { opacity: 0, y: 25 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
                 }}
-                className="bg-[#111c30] border border-slate-800/90 rounded-2xl p-4 flex flex-col justify-between group hover:border-slate-700 hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] transition-all duration-300"
+                className="bg-slate-50 dark:bg-[#111c30] border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 flex flex-col justify-between group hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-[0_15px_30px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_15px_30px_rgba(0,0,0,0.3)] transition-all duration-300"
               >
                 {/* Image Section block wrapper */}
-                <div className="w-full h-40 rounded-xl overflow-hidden mb-4 relative bg-slate-900">
+                <div className="w-full h-40 rounded-xl overflow-hidden mb-4 relative bg-slate-200 dark:bg-slate-900">
                   <img
                     src={item.image}
                     alt={item.title}
                     className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#111c30] via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-100 to-transparent dark:from-[#111c30] opacity-60" />
                 </div>
 
                 {/* Content details meta section */}
                 <div className="space-y-1 mb-5 px-1">
-                  <h3 className="font-bold text-md text-white group-hover:text-blue-400 transition-colors">
+                  <h3 className="font-bold text-md text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-slate-400">
-                    Starting at <span className="text-slate-300 font-medium">{item.price}</span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Starting at <span className="text-slate-700 dark:text-slate-300 font-medium">{item.price}</span>
                   </p>
                 </div>
 
                 {/* Action button trigger container redirection */}
                 <NavLink
                   to={`/customer/product/${item.productType}`}
-                  className="w-full text-center py-2.5 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/20 font-semibold text-xs tracking-wide group-hover:bg-blue-600 group-hover:text-white transition-all duration-300"
+                  className="w-full text-center py-2.5 rounded-xl bg-blue-600/10 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-semibold text-xs tracking-wide group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 cursor-pointer"
                 >
                   View Products
                 </NavLink>

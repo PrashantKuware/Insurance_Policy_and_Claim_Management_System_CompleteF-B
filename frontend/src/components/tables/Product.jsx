@@ -269,14 +269,14 @@ const Product = () => {
                       <button
                         onClick={() => handleOpenEdit(ele)}
                         title="Edit Product"
-                        className="p-1 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950 text-slate-400 hover:text-blue-500 transition"
+                        className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 border border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/30 hover:border-transparent text-blue-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:scale-95 cursor-pointer"
                       >
                         <Edit size={13} />
                       </button>
                       <button
                         onClick={() => handleDelete(ele.productId)}
                         title="Delete Product"
-                        className="p-1 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950 text-slate-400 hover:text-rose-500 transition"
+                        className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:border-rose-900/30 hover:border-transparent text-rose-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rose-500/20 active:scale-95 cursor-pointer"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -302,7 +302,7 @@ const Product = () => {
                         <button
                           onClick={() => handleDeactivate(ele.productId)}
                           title="Deactivate Product"
-                          className="text-[10px] text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-0.5 font-bold animate-pulse"
+                          className="px-2.5 py-1 rounded-md text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-600 hover:text-white dark:text-amber-400 dark:bg-amber-950/30 dark:hover:bg-amber-600 dark:hover:text-white border border-amber-200 dark:border-amber-900/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-1"
                         >
                           <ShieldAlert size={12} />
                           Deactivate
@@ -311,7 +311,7 @@ const Product = () => {
                         <button
                           onClick={() => handleActivate(ele.productId)}
                           title="Activate Product"
-                          className="text-[10px] text-emerald-600 dark:text-emerald-450 hover:underline flex items-center gap-0.5 font-bold"
+                          className="px-2.5 py-1 rounded-md text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-600 hover:text-white dark:text-emerald-400 dark:bg-emerald-950/30 dark:hover:bg-emerald-600 dark:hover:text-white border border-emerald-200 dark:border-emerald-900/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-1"
                         >
                           <Plus size={12} />
                           Activate

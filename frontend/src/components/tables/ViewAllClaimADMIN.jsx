@@ -45,9 +45,14 @@ const ViewAllClaimADMIN = () => {
             const rawClaims = data?.content || [];
 
             // Fetch users to match Agent & Customer details
-            const users = await getAllUsers();
+            let users = [];
+            try {
+                users = await getAllUsers();
+            } catch (err) {
+                console.warn("Failed to fetch users list (likely unauthorized AGENT role)", err);
+            }
             setUsersList(users || []);
-            const agents = users.filter(u => u.role === "AGENT");
+            const agents = (users || []).filter(u => u.role === "AGENT");
 
             // Enhance each claim on the current page with status history and agent info
             const enhancedClaims = await Promise.all(
@@ -308,8 +313,13 @@ const ViewAllClaimADMIN = () => {
                                         {claim.agentInfo ? (
                                             <>
                                                 <p className="font-bold text-slate-800 dark:text-slate-200">{claim.agentInfo.name}</p>
-                                                <p className="text-[10px] text-slate-450 font-mono">ID: #{claim.agentInfo.id}</p>
-                                                <p className="text-[10px] text-slate-455 truncate max-w-[150px]">{claim.agentInfo.email}</p>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">ID: #{claim.agentInfo.id}</p>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[150px]">{claim.agentInfo.email}</p>
+                                                {claim.agentInfo.date && (
+                                                    <p className="text-[10px] text-slate-450 dark:text-slate-500 mt-1 font-semibold">
+                                                        Date: <span className="font-mono font-medium">{new Date(claim.agentInfo.date).toLocaleDateString()}</span>
+                                                    </p>
+                                                )}
                                             </>
                                         ) : (
                                             <p className="text-slate-400 italic">No agent recommendation</p>
@@ -342,7 +352,7 @@ const ViewAllClaimADMIN = () => {
                                         
                                         <button
                                             onClick={() => handleOpenDetails(claim)}
-                                            className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline"
+                                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white border border-blue-200 dark:border-blue-900/30 transition-all duration-200 cursor-pointer"
                                         >
                                             <Info size={12} />
                                             View Details

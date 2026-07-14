@@ -272,18 +272,19 @@ const CustomerSidebar = () => {
       top-0
       w-72
       h-screen
-      bg-[#0b1426]
+      bg-white dark:bg-[#0b1426]
       border-r
-      border-slate-800/80
-      shadow-[5px_0_30px_rgba(0,0,0,0.3)]
+      border-slate-200 dark:border-slate-800/80
+      shadow-[5px_0_30px_rgba(0,0,0,0.05)] dark:shadow-[5px_0_30px_rgba(0,0,0,0.3)]
       flex
       flex-col
       z-40
       hidden lg:flex
+      transition-colors duration-300
       "
     >
       {/* Brand Header Identity Logo */}
-      <div className="p-8 border-b border-slate-800/60 bg-slate-900/20">
+      <div className="p-8 border-b border-slate-200 dark:border-slate-800/60 bg-slate-50 dark:bg-slate-900/20">
         <h1
           className="
           text-3xl
@@ -291,8 +292,8 @@ const CustomerSidebar = () => {
           tracking-wider
           bg-gradient-to-r
           from-blue-400
-          via-blue-500
-          to-indigo-500
+          via-blue-505
+          to-indigo-505
           bg-clip-text
           text-transparent
           "
@@ -300,7 +301,7 @@ const CustomerSidebar = () => {
           INSUREX
         </h1>
 
-        <p className="text-slate-500 text-xs mt-1.5 font-semibold tracking-wide uppercase">
+        <p className="text-slate-400 dark:text-slate-500 text-xs mt-1.5 font-semibold tracking-wide uppercase">
           Customer Portal
         </p>
       </div>
@@ -324,6 +325,7 @@ const CustomerSidebar = () => {
               tracking-wide
               transition-all
               duration-300
+              cursor-pointer
               ${isActive
                 ? `
                   bg-gradient-to-r
@@ -334,9 +336,9 @@ const CustomerSidebar = () => {
                   shadow-blue-500/20
                   `
                 : `
-                  text-slate-400
-                  hover:bg-slate-800/50
-                  hover:text-white
+                  text-slate-500 dark:text-slate-400
+                  hover:bg-slate-100 dark:hover:bg-slate-800/50
+                  hover:text-slate-900 dark:hover:text-white
                   `
               }
             `
@@ -349,7 +351,7 @@ const CustomerSidebar = () => {
       </nav>
 
       {/* --- BOTTOM LOGOUT SYSTEM TRIGGER SECTION --- */}
-      <div className="p-5 border-t border-slate-800/60 bg-slate-900/20">
+      <div className="p-5 border-t border-slate-200 dark:border-slate-800/60 bg-slate-50 dark:bg-slate-900/20">
         <button
           onClick={handleLogout}
           className="
@@ -363,16 +365,17 @@ const CustomerSidebar = () => {
           font-semibold
           text-xs
           tracking-wide
-          text-rose-400
-          bg-rose-500/5
+          text-rose-650 dark:text-rose-400
+          bg-rose-505/5 dark:bg-rose-500/5
           border
           border-rose-500/10
-          hover:bg-rose-600
+          hover:bg-rose-650 dark:hover:bg-rose-600
           hover:text-white
           hover:border-transparent
           transition-all
           duration-300
           group
+          cursor-pointer
           "
         >
           <FaSignOutAlt className="text-base group-hover:-translate-x-0.5 transition-transform" />

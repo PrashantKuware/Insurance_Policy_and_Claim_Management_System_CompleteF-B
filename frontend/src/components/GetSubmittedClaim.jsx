@@ -13,16 +13,16 @@ const GetSubmittedClaim = ({
 
     if (loading) {
         return (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-xl">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xl">
 
-                <div className="w-[90%] max-w-6xl rounded-3xl bg-slate-900 border border-white/10 p-8">
+                <div className="w-[90%] max-w-6xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 p-8 shadow-2xl transition-colors duration-300">
 
                     <div className="space-y-4">
 
                         {Array.from({ length: 6 }).map((_, index) => (
                             <div
                                 key={index}
-                                className="h-16 rounded-xl bg-white/10 animate-pulse"
+                                className="h-16 rounded-xl bg-slate-100 dark:bg-white/10 animate-pulse"
                             />
                         ))}
 
@@ -36,8 +36,7 @@ const GetSubmittedClaim = ({
 
     return (
         <>
-            {/* <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-xl p-6"> */}
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-xl p-6">
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-xl p-6">
                 <div
                     className="
                         w-full
@@ -46,10 +45,12 @@ const GetSubmittedClaim = ({
                         overflow-hidden
                         rounded-[32px]
                         border
-                        border-white/10
-                        bg-slate-900/90
+                        border-slate-200 dark:border-white/10
+                        bg-white dark:bg-slate-900/90
                         backdrop-blur-3xl
                         shadow-2xl
+                        text-slate-800 dark:text-white
+                        transition-all duration-300
                     "
                 >
                     {/* HEADER */}
@@ -61,7 +62,7 @@ const GetSubmittedClaim = ({
                             justify-between
                             p-6
                             border-b
-                            border-white/10
+                            border-slate-200 dark:border-white/10
                         "
                     >
                         <div>
@@ -71,8 +72,7 @@ const GetSubmittedClaim = ({
                                     text-3xl
                                     font-bold
                                     bg-gradient-to-r
-                                    from-cyan-400
-                                    to-indigo-400
+                                    from-cyan-600 to-indigo-600 dark:from-cyan-400 dark:to-indigo-400
                                     bg-clip-text
                                     text-transparent
                                 "
@@ -80,7 +80,7 @@ const GetSubmittedClaim = ({
                                 Submitted Claims
                             </h2>
 
-                            <p className="text-slate-400 mt-1">
+                            <p className="text-slate-550 dark:text-slate-400 mt-1">
                                 Review all submitted insurance claims
                             </p>
 
@@ -98,8 +98,10 @@ const GetSubmittedClaim = ({
                                 text-white
                                 font-bold
                                 transition
-                                hover:scale-110
-                                hover:rotate-90
+                                hover:scale-105
+                                active:scale-95
+                                cursor-pointer
+                                flex items-center justify-center
                             "
                         >
                             ✕
@@ -114,31 +116,31 @@ const GetSubmittedClaim = ({
 
                             <table className="w-full">
 
-                                <thead className="sticky top-0 bg-slate-900 z-10">
+                                <thead className="sticky top-0 bg-slate-100 dark:bg-slate-900 z-10">
 
-                                    <tr className="border-b border-white/10">
+                                    <tr className="border-b border-slate-200 dark:border-white/10">
 
-                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                        <th className="p-4 text-slate-600 dark:text-slate-300 text-sm uppercase">
                                             Claim Number
                                         </th>
 
-                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                        <th className="p-4 text-slate-600 dark:text-slate-300 text-sm uppercase">
                                             Claim ID
                                         </th>
 
-                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                        <th className="p-4 text-slate-600 dark:text-slate-300 text-sm uppercase">
                                             Amount
                                         </th>
 
-                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                        <th className="p-4 text-slate-600 dark:text-slate-300 text-sm uppercase">
                                             Status
                                         </th>
 
-                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                        <th className="p-4 text-slate-600 dark:text-slate-300 text-sm uppercase">
                                             Reason
                                         </th>
 
-                                        <th className="p-4 text-slate-300 text-sm uppercase">
+                                        <th className="p-4 text-slate-600 dark:text-slate-300 text-sm uppercase">
                                             Action
                                         </th>
 
@@ -154,20 +156,20 @@ const GetSubmittedClaim = ({
                                             key={claim.claimId}
                                             className="
                                                 border-b
-                                                border-white/5
-                                                hover:bg-white/5
+                                                border-slate-150 dark:border-white/5
+                                                hover:bg-slate-50 dark:hover:bg-white/5
                                                 transition
                                             "
                                         >
-                                            <td className="p-4 text-center text-white">
+                                            <td className="p-4 text-center text-slate-805 dark:text-white">
                                                 {claim.claimNumber}
                                             </td>
 
-                                            <td className="p-4 text-center text-white">
+                                            <td className="p-4 text-center text-slate-805 dark:text-white">
                                                 {claim.claimId}
                                             </td>
 
-                                            <td className="p-4 text-center text-white">
+                                            <td className="p-4 text-center text-slate-850 dark:text-white">
                                                 ₹{claim.claimAmount}
                                             </td>
 
@@ -182,10 +184,10 @@ const GetSubmittedClaim = ({
                                                         font-semibold
 
                                                         ${claim.claimStatus === "SUBMITTED"
-                                                            ? "bg-yellow-500/20 text-yellow-400"
+                                                            ? "bg-yellow-500/10 text-yellow-605 dark:bg-yellow-500/20 dark:text-yellow-400"
                                                             : claim.claimStatus === "APPROVED"
-                                                                ? "bg-green-500/20 text-green-400"
-                                                                : "bg-red-500/20 text-red-400"
+                                                                ? "bg-green-500/10 text-green-650 dark:bg-green-500/20 dark:text-green-400"
+                                                                : "bg-red-500/10 text-red-650 dark:bg-red-500/20 dark:text-red-400"
                                                         }
                                                     `}
                                                 >
@@ -194,7 +196,7 @@ const GetSubmittedClaim = ({
 
                                             </td>
 
-                                            <td className="p-4 text-center text-slate-300">
+                                            <td className="p-4 text-center text-slate-600 dark:text-slate-300">
                                                 {claim.claimReason}
                                             </td>
 
@@ -207,17 +209,18 @@ const GetSubmittedClaim = ({
                                                         onClose();
                                                     }}
                                                     className="
-        px-4
-        py-2
-        rounded-xl
-        text-white
-        font-semibold
-        bg-gradient-to-r
-        from-cyan-500
-        to-blue-600
-        hover:scale-105
-        transition
-    "
+                                                        px-4
+                                                        py-2
+                                                        rounded-xl
+                                                        text-white
+                                                        font-semibold
+                                                        bg-gradient-to-r
+                                                        from-cyan-500
+                                                        to-blue-600
+                                                        hover:scale-105
+                                                        transition
+                                                        cursor-pointer
+                                                    "
                                                 >
                                                     Review Claim
                                                 </button>
@@ -234,11 +237,11 @@ const GetSubmittedClaim = ({
 
                             <div className="p-16 text-center">
 
-                                <h2 className="text-2xl text-white font-bold mb-3">
+                                <h2 className="text-2xl text-slate-800 dark:text-white font-bold mb-3">
                                     No Submitted Claims
                                 </h2>
 
-                                <p className="text-slate-400">
+                                <p className="text-slate-500 dark:text-slate-400">
                                     There are currently no submitted claims available.
                                 </p>
 

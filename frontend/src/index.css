@@ -19,3 +19,25 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #0891b2;
 }
+
+/* Global Interactive Element Pointer Styling */
+button,
+a,
+select,
+input[type="button"],
+input[type="submit"],
+.cursor-pointer,
+.interactive-icon,
+[role="button"] {
+  cursor: pointer !important;
+}
+
+/* Global Browser Autofill Background Override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 50000s ease-in-out 0s, color 50000s ease-in-out 0s;
+  -webkit-text-fill-color: inherit !important;
+}

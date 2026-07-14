@@ -384,7 +384,7 @@ const GetAllCustomer = () => {
                     {tab}
                   </button>
                 ))}
-              </div>
+              </div>,
 
               {/* DETAILS TABS CONTENT */}
               {activeTab === "profile" && (
@@ -393,7 +393,7 @@ const GetAllCustomer = () => {
                     <User className="text-slate-400" size={18} />
                     <div>
                       <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Customer ID</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-250">#{selectedCustomer.customerId}</span>
+                      <span className="font-semibold text-slate-800 dark:text-white">#{selectedCustomer.customerId}</span>
                     </div>
                   </div>
 
@@ -401,7 +401,7 @@ const GetAllCustomer = () => {
                     <Mail className="text-slate-400" size={18} />
                     <div className="min-w-0">
                       <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Email Address</span>
-                      <span className="font-semibold text-slate-850 dark:text-slate-250 truncate block">{selectedCustomer.email}</span>
+                      <span className="font-semibold text-slate-800 dark:text-white truncate block">{selectedCustomer.email}</span>
                     </div>
                   </div>
 
@@ -409,15 +409,7 @@ const GetAllCustomer = () => {
                     <Phone className="text-slate-400" size={18} />
                     <div>
                       <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Phone Number</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-250">{matchedUser?.mobileNumber || "N/A"}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-850">
-                    <Activity className="text-slate-400" size={18} />
-                    <div>
-                      <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Gender</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-250">N/A (Not Supported by Backend)</span>
+                      <span className="font-semibold text-slate-800 dark:text-white">{matchedUser?.mobileNumber || "N/A"}</span>
                     </div>
                   </div>
 
@@ -425,7 +417,7 @@ const GetAllCustomer = () => {
                     <Calendar className="text-slate-400" size={18} />
                     <div>
                       <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Date of Birth</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-250">{selectedCustomer.dateOfBirth || "N/A"}</span>
+                      <span className="font-semibold text-slate-800 dark:text-white">{selectedCustomer.dateOfBirth || "N/A"}</span>
                     </div>
                   </div>
 
@@ -433,7 +425,7 @@ const GetAllCustomer = () => {
                     <FileClock className="text-slate-400" size={18} />
                     <div>
                       <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Registration Date</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-250">
+                      <span className="font-semibold text-slate-800 dark:text-white">
                         {matchedUser?.createdDate ? new Date(matchedUser.createdDate).toLocaleDateString() : "N/A"}
                       </span>
                     </div>
@@ -453,8 +445,8 @@ const GetAllCustomer = () => {
                     <Shield className="text-slate-400" size={18} />
                     <div>
                       <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Nominee Details</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-250">
-                        {selectedCustomer.nomineeName || "N/A"} ({selectedCustomer.nomineeRelation || "Relation N/A"})
+                      <span className="font-semibold text-slate-800 dark:text-white">
+                        {selectedCustomer.nomineeName || "N/A"}{selectedCustomer.nomineeRelation ? ` (${selectedCustomer.nomineeRelation})` : ""}
                       </span>
                     </div>
                   </div>
@@ -463,7 +455,7 @@ const GetAllCustomer = () => {
                     <MapPin className="text-slate-400" size={18} />
                     <div>
                       <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-0.5">Full Address</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-250">
+                      <span className="font-semibold text-slate-800 dark:text-white">
                         {selectedCustomer.address || "N/A"}, {selectedCustomer.city}, {selectedCustomer.state} - {selectedCustomer.pinCode}
                       </span>
                     </div>
