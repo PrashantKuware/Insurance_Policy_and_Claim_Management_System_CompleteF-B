@@ -4,7 +4,7 @@ import {
     getAllClaims,
     adminApproveClaim,
     adminRejectClaim,
-    getClaimDocuments
+    getClaimDocument
 } from '../../services/claimService';
 import { getClaimHistoryByClaimId } from '../../services/claimHistoryService';
 import { getAllUsers } from '../../services/userService';
@@ -59,16 +59,16 @@ const ViewAllClaimADMIN = () => {
                 rawClaims.map(async (claim) => {
                     try {
                         const history = await getClaimHistoryByClaimId(claim.claimId);
-                        
+
                         // Find transition performed by agent
-                        const agentTransition = history.find(h => 
-                            h.newStatus === "RECOMMENDED_FOR_APPROVAL" || 
+                        const agentTransition = history.find(h =>
+                            h.newStatus === "RECOMMENDED_FOR_APPROVAL" ||
                             h.newStatus === "RECOMMENDED_FOR_REJECTION" ||
                             h.newStatus === "UNDER_REVIEW"
                         );
 
                         if (agentTransition && agentTransition.updatedBy !== "SYSTEM") {
-                            const matchedAgent = agents.find(a => 
+                            const matchedAgent = agents.find(a =>
                                 a.fullName?.toLowerCase() === agentTransition.updatedBy?.toLowerCase()
                             );
                             return {
@@ -120,7 +120,7 @@ const ViewAllClaimADMIN = () => {
             setActionLoading(claimId);
             await adminApproveClaim(claimId, remarks[claimId]);
             toast.success("Claim Approved Successfully ✅");
-            
+
             // Clear remark input
             setRemarks(prev => {
                 const updated = { ...prev };
@@ -153,7 +153,7 @@ const ViewAllClaimADMIN = () => {
             setActionLoading(claimId);
             await adminRejectClaim(claimId, remarks[claimId]);
             toast.success("Claim Rejected Successfully ❌");
-            
+
             // Clear remark input
             setRemarks(prev => {
                 const updated = { ...prev };
@@ -183,7 +183,7 @@ const ViewAllClaimADMIN = () => {
         try {
             setModalLoading(true);
             const [docs, policy] = await Promise.all([
-                getClaimDocuments(claim.claimId),
+                getClaimDocument(claim.claimId),
                 getPolicyByPolicyId(claim.policyId)
             ]);
             setModalDocs(docs || []);
@@ -204,12 +204,12 @@ const ViewAllClaimADMIN = () => {
     // Client-side search and status filter on top of the paginated chunk
     const filteredClaims = useMemo(() => {
         return claims.filter((claim) => {
-            const matchesSearch = 
+            const matchesSearch =
                 claim.claimNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 claim.claimReason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 String(claim.claimId).includes(searchQuery);
 
-            const matchesStatus = 
+            const matchesStatus =
                 selectedStatus === "all"
                     ? true
                     : claim.claimStatus === selectedStatus;
@@ -220,16 +220,16 @@ const ViewAllClaimADMIN = () => {
 
     if (loading && claims.length === 0) {
         return (
-          <div className="p-6 space-y-4">
-            <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded w-1/4 animate-pulse"></div>
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl animate-pulse space-y-4">
-                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
-                <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
-                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
+            <div className="p-6 space-y-4">
+                <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded w-1/4 animate-pulse"></div>
+                {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl animate-pulse space-y-4">
+                        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
+                        <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+                        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
+                    </div>
+                ))}
+            </div>
         );
     }
 
@@ -248,28 +248,28 @@ const ViewAllClaimADMIN = () => {
             {/* FILTER TOOLBAR */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="relative flex items-center">
-                  <Search size={18} className="absolute left-3.5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by claim number, ID, or reason..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  />
+                    <Search size={18} className="absolute left-3.5 text-slate-400" />
+                    <input
+                        type="text"
+                        placeholder="Search by claim number, ID, or reason..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    />
                 </div>
 
                 <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 >
-                  <option value="all">All Claims Status</option>
-                  <option value="SUBMITTED">SUBMITTED</option>
-                  <option value="UNDER_PROCESS">UNDER_PROCESS</option>
-                  <option value="RECOMMENDED_FOR_APPROVAL">RECOMMENDED_FOR_APPROVAL</option>
-                  <option value="RECOMMENDED_FOR_REJECTION">RECOMMENDED_FOR_REJECTION</option>
-                  <option value="APPROVED">APPROVED</option>
-                  <option value="REJECTED">REJECTED</option>
+                    <option value="all">All Claims Status</option>
+                    <option value="SUBMITTED">SUBMITTED</option>
+                    <option value="UNDER_PROCESS">UNDER_PROCESS</option>
+                    <option value="RECOMMENDED_FOR_APPROVAL">RECOMMENDED_FOR_APPROVAL</option>
+                    <option value="RECOMMENDED_FOR_REJECTION">RECOMMENDED_FOR_REJECTION</option>
+                    <option value="APPROVED">APPROVED</option>
+                    <option value="REJECTED">REJECTED</option>
                 </select>
             </div>
 
@@ -331,17 +331,16 @@ const ViewAllClaimADMIN = () => {
                                     <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase block mb-1">Current State</span>
                                     <div className="flex flex-col gap-2 items-start">
                                         <span
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${
-                                                claim.claimStatus === "APPROVED"
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${claim.claimStatus === "APPROVED"
                                                     ? "text-emerald-600 bg-emerald-50 dark:text-emerald-450 dark:bg-emerald-950/30"
                                                     : claim.claimStatus === "REJECTED"
-                                                    ? "text-rose-600 bg-rose-50 dark:text-rose-455 dark:bg-rose-950/30"
-                                                    : claim.claimStatus === "RECOMMENDED_FOR_APPROVAL"
-                                                    ? "text-blue-600 bg-blue-50 dark:text-blue-450 dark:bg-blue-950/30"
-                                                    : claim.claimStatus === "RECOMMENDED_FOR_REJECTION"
-                                                    ? "text-amber-600 bg-amber-50 dark:text-amber-450 dark:bg-amber-950/30"
-                                                    : "text-yellow-600 bg-yellow-50 dark:text-yellow-450 dark:bg-yellow-950/30"
-                                            }`}
+                                                        ? "text-rose-600 bg-rose-50 dark:text-rose-455 dark:bg-rose-950/30"
+                                                        : claim.claimStatus === "RECOMMENDED_FOR_APPROVAL"
+                                                            ? "text-blue-600 bg-blue-50 dark:text-blue-450 dark:bg-blue-950/30"
+                                                            : claim.claimStatus === "RECOMMENDED_FOR_REJECTION"
+                                                                ? "text-amber-600 bg-amber-50 dark:text-amber-450 dark:bg-amber-950/30"
+                                                                : "text-yellow-600 bg-yellow-50 dark:text-yellow-450 dark:bg-yellow-950/30"
+                                                }`}
                                         >
                                             {claim.claimStatus === "APPROVED" && <CheckCircle size={13} />}
                                             {claim.claimStatus === "REJECTED" && <XCircle size={13} />}
@@ -349,7 +348,7 @@ const ViewAllClaimADMIN = () => {
                                             {!["APPROVED", "REJECTED"].includes(claim.claimStatus) && !claim.claimStatus?.startsWith("RECOMMENDED") && <Clock size={13} />}
                                             {claim.claimStatus}
                                         </span>
-                                        
+
                                         <button
                                             onClick={() => handleOpenDetails(claim)}
                                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white border border-blue-200 dark:border-blue-900/30 transition-all duration-200 cursor-pointer"
@@ -402,18 +401,49 @@ const ViewAllClaimADMIN = () => {
             {/* CLAIM DETAILS MODAL */}
             <AnimatePresence>
                 {selectedClaim && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm overflow-y-auto">
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                          transition={{ duration: 0.2 }}
-                          className="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 text-slate-800 dark:text-white my-8"
+                    <div className="
+fixed
+inset-0
+z-50
+flex
+items-start
+md:items-center
+justify-center
+p-4
+bg-slate-950/50
+backdrop-blur-sm
+overflow-y-auto
+">                       <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                            transition={{ duration: 0.2 }}
+                            className="
+    relative
+    w-full
+    max-w-4xl
+    max-h-[90vh]
+    overflow-y-auto
+    bg-white
+    dark:bg-slate-900
+    border
+    border-slate-200
+    dark:border-slate-800
+    rounded-3xl
+    p-6
+    md:p-8
+    shadow-2xl
+    space-y-6
+    text-slate-800
+    dark:text-white
+    my-8
+    "
                         >
+
                             {/* Modal Close Button */}
                             <button
-                              onClick={() => setSelectedClaim(null)}
-                              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition"
+                                onClick={() => setSelectedClaim(null)}
+                                className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition"
                             >
                                 <X size={18} />
                             </button>
@@ -431,7 +461,7 @@ const ViewAllClaimADMIN = () => {
                                 <div className="text-center py-12 animate-pulse text-sm text-slate-400">Loading audit details...</div>
                             ) : (
                                 <div className="space-y-6 text-sm">
-                                    
+
                                     {/* SECTION 1: CLAIM SPECIFICS */}
                                     <div className="border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl p-5 space-y-4">
                                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Claim Information</h3>
@@ -442,18 +472,17 @@ const ViewAllClaimADMIN = () => {
                                             </div>
                                             <div>
                                                 <span className="text-[10px] text-slate-400 block mb-0.5">Status</span>
-                                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                                    selectedClaim.claimStatus === "APPROVED" ? "bg-emerald-500/10 text-emerald-500" :
-                                                    selectedClaim.claimStatus === "REJECTED" ? "bg-rose-500/10 text-rose-500" :
-                                                    "bg-yellow-500/10 text-yellow-550 dark:text-yellow-400"
-                                                }`}>
+                                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${selectedClaim.claimStatus === "APPROVED" ? "bg-emerald-500/10 text-emerald-500" :
+                                                        selectedClaim.claimStatus === "REJECTED" ? "bg-rose-500/10 text-rose-500" :
+                                                            "bg-yellow-500/10 text-yellow-550 dark:text-yellow-400"
+                                                    }`}>
                                                     {selectedClaim.claimStatus}
                                                 </span>
                                             </div>
                                             <div>
                                                 <span className="text-[10px] text-slate-400 block mb-0.5">Submission Date</span>
                                                 <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                                    {selectedClaim.claimHistory?.[0]?.updatedDate 
+                                                    {selectedClaim.claimHistory?.[0]?.updatedDate
                                                         ? new Date(selectedClaim.claimHistory[0].updatedDate).toLocaleDateString()
                                                         : "N/A"
                                                     }
@@ -461,14 +490,14 @@ const ViewAllClaimADMIN = () => {
                                             </div>
                                             <div className="md:col-span-3">
                                                 <span className="text-[10px] text-slate-400 block mb-0.5">Claim Reason & Description</span>
-                                                <span className="font-semibold text-slate-700 dark:text-slate-350">{selectedClaim.claimReason}</span>
+                                                <span className="font-semibold text-slate-700 dark:text-slate-200">{selectedClaim.claimReason}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* SECTION 2: CLIENT & AGENT METADATA */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        
+
                                         {/* CUSTOMER CARD */}
                                         <div className="border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 rounded-2xl p-5 space-y-3">
                                             <div className="flex items-center gap-2 text-slate-400">
@@ -546,15 +575,14 @@ const ViewAllClaimADMIN = () => {
                                             </div>
                                             <div className="col-span-2">
                                                 <span className="text-[10px] text-slate-400 block mb-0.5">Policy Coverage Period</span>
-                                                <span className="font-semibold text-slate-700 dark:text-slate-350">
+                                                <span className="font-semibold text-slate-700 dark:text-slate-200">
                                                     {selectedClaim.policyStartDate ? new Date(selectedClaim.policyStartDate).toLocaleDateString() : "N/A"} to {selectedClaim.policyEndDate ? new Date(selectedClaim.policyEndDate).toLocaleDateString() : "N/A"}
                                                 </span>
                                             </div>
                                             <div>
                                                 <span className="text-[10px] text-slate-400 block mb-0.5">Policy Status</span>
-                                                <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                                                    modalPolicy?.policyStatus === "ACTIVE" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
-                                                }`}>
+                                                <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase ${modalPolicy?.policyStatus === "ACTIVE" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"
+                                                    }`}>
                                                     {modalPolicy?.policyStatus || "PENDING"}
                                                 </span>
                                             </div>
@@ -567,9 +595,9 @@ const ViewAllClaimADMIN = () => {
                                         {modalDocs.length > 0 ? (
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 {modalDocs.map((doc) => (
-                                                    <div 
-                                                      key={doc.documentId} 
-                                                      className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
+                                                    <div
+                                                        key={doc.documentId}
+                                                        className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl"
                                                     >
                                                         <div className="flex items-center gap-2 min-w-0">
                                                             <FileText size={16} className="text-blue-500 shrink-0" />
@@ -577,11 +605,11 @@ const ViewAllClaimADMIN = () => {
                                                                 {doc.originalFileName}
                                                             </span>
                                                         </div>
-                                                        <a 
-                                                          href={doc.cloudinaryUrl} 
-                                                          target="_blank" 
-                                                          rel="noreferrer"
-                                                          className="p-1 rounded bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 text-blue-600 dark:text-blue-400 transition"
+                                                        <a
+                                                            href={doc.cloudinaryUrl}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="p-1 rounded bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 text-blue-600 dark:text-blue-400 transition"
                                                         >
                                                             <Download size={14} />
                                                         </a>
@@ -593,6 +621,138 @@ const ViewAllClaimADMIN = () => {
                                                 No supporting documents uploaded for this claim.
                                             </div>
                                         )}
+                                    </div>
+
+                                    {/* CLAIM HISTORY */}
+
+                                    <div className="
+border border-slate-100
+dark:border-slate-800
+bg-slate-50/50
+dark:bg-slate-950/40
+rounded-2xl
+p-5
+space-y-3
+">
+
+                                        <h3 className="
+text-xs
+font-bold
+text-slate-400
+uppercase
+tracking-wider
+flex
+items-center
+gap-2
+">
+
+                                            <Clock size={15} />
+
+                                            Claim History
+
+                                        </h3>
+
+
+                                        {
+                                            selectedClaim.claimHistory?.length > 0
+                                                ?
+
+                                                <div className="space-y-3 mt-4">
+
+                                                    {
+                                                        selectedClaim.claimHistory.map(
+                                                            (history, index) => (
+
+                                                                <div
+                                                                    key={index}
+                                                                    className="
+border-l-4
+border-blue-500
+pl-4
+"
+                                                                >
+
+                                                                    <p className="
+font-bold
+text-sm
+text-slate-800
+dark:text-white
+">
+
+                                                                        {history.newStatus}
+
+                                                                    </p>
+
+
+                                                                    <p className="
+text-xs
+text-slate-500
+">
+
+                                                                        Updated By :
+                                                                        {" "}
+                                                                        {history.updatedBy || "SYSTEM"}
+
+                                                                    </p>
+
+
+                                                                    <p className="
+text-xs
+text-slate-400
+">
+
+                                                                        {
+                                                                            history.updatedDate
+                                                                                ?
+                                                                                new Date(history.updatedDate)
+                                                                                    .toLocaleString()
+                                                                                :
+                                                                                "N/A"
+                                                                        }
+
+                                                                    </p>
+
+
+                                                                    {
+                                                                        history.remarks &&
+                                                                        <p className="
+text-xs
+text-slate-500
+mt-1
+">
+
+                                                                            Remark :
+                                                                            {history.remarks}
+
+                                                                        </p>
+                                                                    }
+
+
+                                                                </div>
+
+                                                            )
+
+                                                        )
+
+                                                    }
+
+                                                </div>
+
+                                                :
+
+                                                <p className="
+text-sm
+text-slate-500
+mt-3
+">
+
+                                                    No history found
+
+                                                </p>
+
+                                        }
+
+
                                     </div>
 
                                     {/* AUDIT FORM IN MODAL */}
@@ -614,7 +774,7 @@ const ViewAllClaimADMIN = () => {
                                                 />
                                             </div>
 
-                                            <div className="flex gap-3 justify-end">
+                                            {/* <div className="flex gap-3 justify-end">
                                                 {selectedClaim.claimStatus === "RECOMMENDED_FOR_APPROVAL" && (
                                                     <button
                                                         disabled={actionLoading === selectedClaim.claimId}
@@ -634,6 +794,70 @@ const ViewAllClaimADMIN = () => {
                                                         {actionLoading === selectedClaim.claimId ? "Processing..." : "Confirm Rejection"}
                                                     </button>
                                                 )}
+                                            </div> */}
+                                            <div className="flex gap-3 justify-end">
+
+                                                {/* APPROVE BUTTON */}
+                                                <button
+                                                    disabled={actionLoading === selectedClaim.claimId}
+                                                    onClick={() => handleApprove(selectedClaim.claimId)}
+                                                    className="
+        inline-flex items-center gap-2
+        px-5 py-2.5
+        rounded-xl
+        bg-emerald-600
+        hover:bg-emerald-700
+        text-white
+        font-semibold
+        text-xs
+        transition
+        disabled:opacity-50
+        "
+                                                >
+
+                                                    <CheckCircle size={15} />
+
+                                                    {
+                                                        actionLoading === selectedClaim.claimId
+                                                            ?
+                                                            "Processing..."
+                                                            :
+                                                            "Approve Claim"
+                                                    }
+
+                                                </button>
+
+
+                                                {/* REJECT BUTTON */}
+                                                <button
+                                                    disabled={actionLoading === selectedClaim.claimId}
+                                                    onClick={() => handleReject(selectedClaim.claimId)}
+                                                    className="
+        inline-flex items-center gap-2
+        px-5 py-2.5
+        rounded-xl
+        bg-rose-600
+        hover:bg-rose-700
+        text-white
+        font-semibold
+        text-xs
+        transition
+        disabled:opacity-50
+        "
+                                                >
+
+                                                    <XCircle size={15} />
+
+                                                    {
+                                                        actionLoading === selectedClaim.claimId
+                                                            ?
+                                                            "Processing..."
+                                                            :
+                                                            "Reject Claim"
+                                                    }
+
+                                                </button>
+
                                             </div>
                                         </div>
                                     )}
@@ -642,8 +866,8 @@ const ViewAllClaimADMIN = () => {
 
                             <div className="flex justify-end pt-2">
                                 <button
-                                  onClick={() => setSelectedClaim(null)}
-                                  className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-97"
+                                    onClick={() => setSelectedClaim(null)}
+                                    className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 text-xs font-bold transition active:scale-97"
                                 >
                                     Close Details
                                 </button>
