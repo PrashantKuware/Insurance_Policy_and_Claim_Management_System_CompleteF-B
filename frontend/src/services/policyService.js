@@ -1,3 +1,43 @@
+// import policyApi from "../api/policyApi";
+
+// const handleError = (error) => {
+//   console.log("Policy API Error:", error?.response?.data || error.message);
+//   throw error;
+// };
+
+
+// export const getAllPoliciesByCustomer = async () => {
+//   try {
+//     const res = await policyApi.get("/my-policies");
+//     return res.data;
+//   } catch (error) {
+//     handleError(error);
+//   }
+// };
+
+
+// export const purchasePolicy = async (planId) => {
+//   try {
+//     const res = await policyApi.post("/purchase", {
+//       planId,
+//     });
+
+//     return res.data;
+//   } catch (error) {
+//     handleError(error);
+//   }
+// };
+
+
+// export const getPolicyByPolicyId = async (policyId) => {
+//   try {
+//     const res = await policyApi.get(`/${policyId}`);
+//     return res.data;
+//   } catch (error) {
+//     handleError(error);
+//   }
+// };
+
 import policyApi from "../api/policyApi";
 
 const handleError = (error) => {
@@ -9,6 +49,7 @@ const handleError = (error) => {
 export const getAllPoliciesByCustomer = async () => {
   try {
     const res = await policyApi.get("/my-policies");
+    console.log(res.data)
     return res.data;
   } catch (error) {
     handleError(error);
@@ -22,6 +63,7 @@ export const purchasePolicy = async (planId) => {
       planId,
     });
 
+
     return res.data;
   } catch (error) {
     handleError(error);
@@ -32,6 +74,20 @@ export const purchasePolicy = async (planId) => {
 export const getPolicyByPolicyId = async (policyId) => {
   try {
     const res = await policyApi.get(`/${policyId}`);
+    console.log(res.data)
+    return res.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+
+export const getAllPolicies = async (page = 0, size = 1000) => {
+  try {
+    const res = await policyApi.get("", {
+      params: { pageNo: page, pageSize: size },
+    });
+    console.log(res.data)
     return res.data;
   } catch (error) {
     handleError(error);

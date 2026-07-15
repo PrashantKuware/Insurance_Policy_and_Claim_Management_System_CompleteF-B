@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Product from "../components/tables/Product";
 import GetAllUser from "../components/tables/GetAllUser";
-import GetAllCustomer from "../components/GetAllCustomer";
+import GetAllCustomer from "../components/tables/GetAllCustomer";
 import { getAllCustomers } from "../services/CustomerService";
 import { getAllUsers } from "../services/userService";
 import { getAllProduct } from "../services/ProductService";
