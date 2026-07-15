@@ -402,18 +402,19 @@ const ViewAllClaimADMIN = () => {
             <AnimatePresence>
                 {selectedClaim && (
                     <div className="
-fixed
-inset-0
-z-50
-flex
-items-start
-md:items-center
-justify-center
-p-4
-bg-slate-950/50
-backdrop-blur-sm
-overflow-y-auto
-">                       <motion.div
+                                    fixed
+                                    inset-0
+                                    z-50
+                                    flex
+                                    items-start
+                                    md:items-center
+                                    justify-center
+                                    p-4
+                                    bg-slate-950/50
+                                    backdrop-blur-sm
+                                    overflow-y-auto
+                                    ">                       
+                            <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 15 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 15 }}
